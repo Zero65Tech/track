@@ -1,0 +1,1484 @@
+{
+	"info": {
+		"_postman_id": "4291336-de54ac95-c713-4e99-9c70-d94d6e71c044",
+		"name": "track",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "profiles",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-f22c2450-274a-4bc2-b1da-3ca0688b14c3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"id": "4291336-d3184beb-9f64-48d4-bf85-7ba30eac24c1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Demo's first Profile\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-9b350f7f-7ef0-4e04-9a89-d80f0f9b95c2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Prashant\",\n    \"state\": \"active\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/68aac5697a43917f32702447",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"68aac5697a43917f32702447"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getSystemTemplates",
+					"id": "4291336-3db81f18-4dc2-445c-9fcb-3c74ccf4a479",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/templates/system",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"templates",
+								"system"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-93bcbb3d-ae70-4419-b60c-18fa7f9ad038"
+		},
+		{
+			"name": "books",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-c11952f2-3cce-485c-8a40-13c200f6a952",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/books",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3a8dfb3c-5d21-45cf-bd34-748cc6681823",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "4291336-b84b077b-a394-49b4-aadb-9d34b490ff01",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Personal\",\r\n  \"icon\": \"md-123\",\r\n  \"color\": \"#9E9E9E\",\r\n  \"sortOrder\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/books",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"books"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-1a7d3351-8e39-4178-a434-fea5754348f9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Business\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/books/68aac3d017999e3e78a06021",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"books",
+								"68aac3d017999e3e78a06021"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-2036819c-e0eb-4cec-a6bf-0201578845cd",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/books/68a5bddcf7424cf50a5a2e97",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"books",
+								"68a5bddcf7424cf50a5a2e97"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-63bf98ad-f6d8-4d89-af8d-22f4e9461e6b"
+		},
+		{
+			"name": "heads",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-a86141e3-e073-4446-931b-53b55313785e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/heads",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"heads"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"id": "4291336-a34bde4c-698b-4163-886a-612c65911e5f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profileId\":\"1\",\r\n    \"name\":\"(default)\",\r\n    \"icon\": \"md-123\",\r\n    \"color\": \"#9E9E9E\",\r\n    \"sortOrder\": 1722161365000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/heads",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"heads"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-4bb552fc-334b-4a43-9bf1-edcb557eab50",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Shopping\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/head/{{profileId}}/68b9ad1a0fdd6c6bdcbd4fa9",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"head",
+								"{{profileId}}",
+								"68b9ad1a0fdd6c6bdcbd4fa9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-bulk-sortOrder",
+					"id": "4291336-3a917f0d-c451-4881-97ce-e7f379af8e07",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\":[\r\n  \"688b3c7b38aa790cdc1e88a5\",\r\n  \"688b38ad69fe5c9502441baa\",\r\n  \"688f59d5256e7a51c03a71f5\",\r\n  \"688f6036256e7a51c03a7200\",\r\n  \"688f925d3eb08fef856edad4\",\r\n  \"688f99113eb08fef856edb1c\",\r\n  \"688f9fb53eb08fef856edbce\",\r\n  \"688fa0be3eb08fef856edbd8\",\r\n  \"6890611692b4e386a0f42e12\",\r\n  \"68909d8fb503012f658c9453\",\r\n  \"6890d92be3e6c90d8019b7aa\",\r\n  \"68915807d90f0cb484ed9a81\",\r\n  \"6892e522b6b57a2ae1132d7c\",\r\n  \"6892f3d2b6b57a2ae1132ddf\",\r\n  \"68930813e1e67b2bd384b7bc\",\r\n  \"689316657027434db59397eb\",\r\n  \"68931f7fb512c56808b6e752\",\r\n  \"68935533c17371d6ce24c75f\",\r\n  \"689363fdc17371d6ce24c78c\",\r\n  \"689599c7063009193d9d4c98\",\r\n  \"689908c8e9cff6c95c127eac\",\r\n  \"689908ece9cff6c95c127eb1\"\r\n]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/heads/sortOrder",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"heads",
+								"sortOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-02f88f18-aa54-4872-8239-c35ff555d78a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/heads/689599c7063009193d9d4c98",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"heads",
+								"689599c7063009193d9d4c98"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-f5ec3a8c-a66f-4585-85aa-608a46489792"
+		},
+		{
+			"name": "tags",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-f76126bd-f1df-452d-bb92-81cb4bd5a7ff",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/tags",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"id": "4291336-95119569-0f81-453d-9a34-7712b171f50b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profileId\": \"1\",\r\n    \"name\": \"(default)\",\r\n    \"description\": \"Shopping list\",\r\n    \"icon\": \"mdiCart\",\r\n    \"color\": \"#F67280\",\r\n    \"group\": \"Chores\",\r\n    \"sortOrder\": 6,\r\n    \"state\": \"disabled\"\r\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/tags",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-26138d02-6ddf-441a-adfd-d247c04ff3f0",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\": \"disabled\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/tags/68c553505d32a151b331d165",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"tags",
+								"68c553505d32a151b331d165"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update-bulk-sortOrder",
+					"id": "4291336-345d619c-4086-4332-aec4-53c61a9e24b8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ids\":[\r\n        \"6891a44e85441671e9eee656\",\r\n        \"6890e12be3e6c90d8019b7d8\",\r\n        \"6890db87e3e6c90d8019b7b2\",\r\n        \"6890e5c0e3e6c90d8019b820\",\r\n        \"6891594cd90f0cb484ed9a90\",\r\n        \"68915eb5d90f0cb484ed9aca\",\r\n        \"689170330b8051744cad3b7f\",\r\n        \"6891a44e85441671e9eee654\",\r\n        \"6891a6a385441671e9eee68e\",\r\n        \"6891aa3a85441671e9eee709\",\r\n        \"6891b28f85441671e9eee73a\",\r\n        \"6891d110d060d8aafbce4d05\",\r\n        \"6891f3226cf13339c4f6e4b5\",\r\n        \"6891f5876cf13339c4f6e4ca\",\r\n        \"6891f9a56cf13339c4f6e4e9\",\r\n        \"689220884d5b8ec617bee501\",\r\n        \"689489271f6124cdd8b77daf\",\r\n        \"68948b621f6124cdd8b77dbd\",\r\n        \"6894d1f1c031c01044ed687d\",\r\n        \"6895a7ad063009193d9d4cf9\",\r\n        \"6895a872063009193d9d4d1e\",\r\n        \"6895a889063009193d9d4d26\",\r\n        \"6895a99b063009193d9d4d49\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/tags/sortOrder",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"tags",
+								"sortOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-8800b3a8-7351-4ae3-8618-b2b8063829d4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Aise hi\"\r\n}"
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/tags/68c553505d32a151b331d165",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"tags",
+								"68c553505d32a151b331d165"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-d552601d-a448-4f74-b0c0-70fa0c764957"
+		},
+		{
+			"name": "sources",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-3be5f95d-6ad3-4d30-808c-09d810f96bfd",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/sources",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"sources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3a8dfb3c-5d21-45cf-bd34-748cc6681823",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "4291336-5d8a5495-ceae-4457-a05b-eab249ba1892",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Business\",\r\n  \"icon\": \"md-123\",\r\n  \"color\": \"#9E9E9E\",\r\n  \"sortOrder\": 99\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/sources",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"sources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-f68de027-d3a1-481c-bee3-155846e34b95",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"disabled\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/sources/68a48fe4faff67054bd38d70",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"sources",
+								"68a48fe4faff67054bd38d70"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-d4c38c50-a2e4-4505-a411-6f033a1dded7",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/sources/68a48fe4faff67054bd38d70",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"sources",
+								"68a48fe4faff67054bd38d70"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-293d0514-17f3-44a6-bd47-3d64f2e39e01"
+		},
+		{
+			"name": "folders",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-4c7001f0-3182-4279-93bb-ee79d47c0af1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/folders",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"folders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3a8dfb3c-5d21-45cf-bd34-748cc6681823",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "4291336-feeb4018-3ac8-4044-915e-0d4674254fa4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"parentId\": \"6901088563fe73bdcf65486c\",\r\n  \"name\": \"Personal\",\r\n  \"sortOrder\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/folders",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"folders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-c533c8cc-03a6-419a-83fd-5eff4cff27dd",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"sortOrder\": 99\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/folders/6901088563fe73bdcf65486c",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"folders",
+								"6901088563fe73bdcf65486c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-0551e26c-a484-4278-be39-d4b771b07171",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/folders/6901088563fe73bdcf65486c",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"folders",
+								"6901088563fe73bdcf65486c"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-482a9e66-bea9-4857-a00c-1210e33b27ab"
+		},
+		{
+			"name": "groups",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-a5905089-203e-438c-911e-cfeaffe9bb7c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/groups",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3a8dfb3c-5d21-45cf-bd34-748cc6681823",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "4291336-1ba9879a-8da7-4ebc-a7d9-ce024082df5f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"folderIds\": [\"6901088563fe73bdcf65486c\"],\r\n  \"name\": \"Personal\",\r\n  \"sortOrder\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/groups",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-dbb8c69d-0a89-48b6-b2b7-17e140046c3a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Dubba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/groups/69010ca149db90a655ea147b",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"groups",
+								"69010ca149db90a655ea147b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-b9858853-631d-4966-a9b5-5de166c20dbe",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/groups/69010ca149db90a655ea147b",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"groups",
+								"69010ca149db90a655ea147b"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-27a4e04f-b8ff-4a0a-872a-cf8d8334915d"
+		},
+		{
+			"name": "entries",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-9107a1b7-c800-4aa2-8784-33e04a3b92f1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/entries",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"entries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "3a8dfb3c-5d21-45cf-bd34-748cc6681823",
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"id": "4291336-8f743673-d24c-4926-9ced-3d99da5b3ffe",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-04-06\",\r\n  \"type\": \"expense\",\r\n  \"amount\": 99,\r\n  \"note\": \"Dummy Note\",\r\n  \"sortOrder\": 98,\r\n  \"bookId\": \"{{bookId}}\",\r\n  \"headId\": \"{{headId}}\",\r\n  \"tagId\": \"{{tagId}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/entries",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"entries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"id": "4291336-827f3d2b-4c41-4304-a89a-0c7cd8d93a4a",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"disabled\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/entries/68a48fe4faff67054bd38d70",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"entries",
+								"68a48fe4faff67054bd38d70"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"id": "4291336-79360425-1fff-49fc-9442-6b54b1070e6c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/entries/68fe4c7c1928cbd33b1297d0",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"entries",
+								"68fe4c7c1928cbd33b1297d0"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-953526cc-36a0-4f2b-bab8-610e6d1d037f"
+		},
+		{
+			"name": "audit_logs",
+			"item": [
+				{
+					"name": "getAll",
+					"id": "4291336-b1d5dace-acf7-409a-ba31-716844e86d69",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/audit-logs",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"audit-logs"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-7c4262bb-e985-42ad-8dfa-e7e5f68ddf36"
+		},
+		{
+			"name": "automations",
+			"item": [],
+			"id": "4291336-f326fc8b-4ad4-4658-ae16-3da0d92332de"
+		},
+		{
+			"name": "triggers",
+			"item": [
+				{
+					"name": "create",
+					"id": "4291336-db766ab9-304a-4dd1-8711-0ada5b09042f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"data_aggregation\",\n    \"params\": {\n        \"name\": \"head-tag\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/{{profileId}}/triggers",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								"{{profileId}}",
+								"triggers"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-58e94a9d-a4d7-4d21-b10d-131cc8c8bb4b"
+		},
+		{
+			"name": "aggregations",
+			"item": [
+				{
+					"name": "getResult",
+					"id": "4291336-ff2e5a76-f0d1-4cd7-9579-9972f6c1826b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{track}}/profiles/{{profileId}}/aggregations/named/head-tag/result",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"profiles",
+								"{{profileId}}",
+								"aggregations",
+								"named",
+								"head-tag",
+								"result"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-0988a152-eeff-4fc2-86ba-426073ecaf57"
+		},
+		{
+			"name": "coins",
+			"item": [
+				{
+					"name": "create-coinLedger",
+					"id": "4291336-e5ee9c3b-b398-46c1-ad94-db9db6cfbb23",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"profileId\":\"1\",\r\n    \"ref\":{\r\n        \"type\":\"trigger\",\r\n        \"id\":\"689c53768e5832bfb3aa3647\"\r\n    },\r\n    \"type\":\"daily_streak\",\r\n    \"pulse\": 1000,\r\n    \"nova\":0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/coin",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"coin"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"id": "4291336-1df872ee-518e-4382-b33f-bab289dd4532"
+		},
+		{
+			"name": "loginTest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9606d700-0f3c-4089-8442-60d4f937694e",
+						"exec": [
+							"const response = pm.response.json();",
+							"if(response.idToken)",
+							"    pm.vault.set(\"track_test_idtoken\", response.idToken);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "5038fd7d-9a12-435d-be83-e05692277030",
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"id": "4291336-54b2625c-dfd2-4b2d-a3ee-07c2f9bba7d2",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{vault:track_test_email}}\",\n  \"password\": \"{{vault:track_test_password}}\",\n  \"returnSecureToken\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{firebase-api-key}}",
+					"protocol": "https",
+					"host": [
+						"identitytoolkit",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"v1",
+						"accounts:signInWithPassword"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{firebase-api-key}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cron",
+			"id": "4291336-7a3db7fd-a3fe-49c9-919a-77721d6d2892",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{track}}/cron",
+					"host": [
+						"{{track}}"
+					],
+					"path": [
+						"cron"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{vault:track_test_idtoken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "03098c3f-1f5b-4ccf-a505-a68a7973f7f2",
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"/*\r",
+					"const refreshToken = pm.environment.get('firebase_refresh_token');\r",
+					"const apiKey = pm.environment.get('firebase_apiKey');\r",
+					"\r",
+					"if (!refreshToken) {\r",
+					"    console.error(\"❌ No refresh token found in environment.\");\r",
+					"    return;\r",
+					"}\r",
+					"\r",
+					"console.log(\"🔄 Refreshing Firebase access token...\");\r",
+					"\r",
+					"pm.sendRequest({\r",
+					"    url: `https://securetoken.googleapis.com/v1/token?key=${apiKey}`,\r",
+					"    method: 'POST',\r",
+					"    header: {\r",
+					"        'Content-Type': 'application/x-www-form-urlencoded'\r",
+					"    },\r",
+					"    body: {\r",
+					"        mode: 'urlencoded',\r",
+					"        urlencoded: [\r",
+					"            { key: 'grant_type', value: 'refresh_token' },\r",
+					"            { key: 'refresh_token', value: refreshToken }\r",
+					"        ]\r",
+					"    }\r",
+					"}, (err, res) => {\r",
+					"    if (err) {\r",
+					"        console.error(\"❌ Refresh request failed:\", err);\r",
+					"    } else {\r",
+					"        try {\r",
+					"            const response = res.json();\r",
+					"            console.log(\"Firebase refresh response:\", response);\r",
+					"\r",
+					"            if (!response.id_token)\r",
+					"                throw new Error(\"No id_token returned\");\r",
+					"\r",
+					"            pm.environment.set('firebase_token', response.id_token);\r",
+					"\r",
+					"            // Update refresh token if changed\r",
+					"            if (response.refresh_token)\r",
+					"                pm.environment.set('firebase_refresh_token', response.refresh_token);\r",
+					"\r",
+					"            // Set token expiry\r",
+					"            const expiresIn = parseInt(response.expires_in || \"3600\");\r",
+					"            const expiryDate = new Date();\r",
+					"            expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);\r",
+					"            pm.environment.set('token_expiry', expiryDate.toISOString());\r",
+					"\r",
+					"            console.log(\"✅ Token refreshed. Expires at:\", expiryDate.toISOString());\r",
+					"\r",
+					"        } catch (e) {\r",
+					"            console.error(\"❌ Error processing Firebase response:\", e);\r",
+					"        }\r",
+					"    }\r",
+					"});\r",
+					"*/"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "38626dfa-86c4-4dc0-b7ea-239b795b2a94",
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "profileId",
+			"value": ""
+		},
+		{
+			"key": "bookId",
+			"value": ""
+		},
+		{
+			"key": "headId",
+			"value": ""
+		},
+		{
+			"key": "tagId",
+			"value": ""
+		}
+	]
+}

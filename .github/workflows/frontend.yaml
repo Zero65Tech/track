@@ -1,0 +1,29 @@
+name: frontend
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "frontend/**"
+      - "eslint.config.js"
+      - "package.json"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "eslint.config.js"
+      - "package.json"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run ESLint on frontend
+        run: npm run lint --workspace=frontend

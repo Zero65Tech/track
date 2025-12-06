@@ -1,0 +1,20 @@
+{
+  "dockerFile": "Dockerfile",
+  "postCreateCommand": "npm update",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "github.copilot-chat",
+        "google.geminicodeassist",
+        "gruntfuggly.todo-tree",
+        "mermaidchart.vscode-mermaid-chart",
+        "vue.volar",
+        "EditorConfig.EditorConfig",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "hashicorp.terraform"
+      ]
+    }
+  }
+}

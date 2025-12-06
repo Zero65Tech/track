@@ -1,0 +1,37 @@
+name: backend
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "backend/**"
+      - "eslint.config.js"
+      - "package.json"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "eslint.config.js"
+      - "package.json"
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run ESLint on backend
+        run: npm run lint --workspace=backend
+
+      - name: Run Tests on backend
+        run: npm run test --workspace=backend

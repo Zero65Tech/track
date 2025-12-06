@@ -1,0 +1,25 @@
+{
+  "author": "Prashant Gupta @ Zero65 Technologies Pvt. Ltd.",
+  "name": "track",
+  "description": "Track Mono",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend",
+    "shared",
+    "backend"
+  ],
+  "scripts": {
+    "frontend": "npm run dev --workspace=frontend",
+    "backend": "npm run dev --workspace=backend"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@eslint/json": "^0.13.2",
+    "@eslint/markdown": "^7.4.0",
+    "eslint": "^9.37.0",
+    "eslint-plugin-vue": "^10.5.0",
+    "globals": "^16.4.0",
+    "prettier": "^3.6.2"
+  }
+}

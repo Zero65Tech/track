@@ -1,0 +1,66 @@
+{
+  "folders": [
+    {
+      "name": "🌐 frontend",
+      "path": "frontend",
+    },
+    {
+      "name": "🔗 shared",
+      "path": "shared",
+    },
+    {
+      "name": "⚙️ backend",
+      "path": "backend",
+    },
+    {
+      "name": "🛠️ infrastructure",
+      "path": "infrastructure",
+    },
+    {
+      "name": "✨ root",
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules/": true,
+      "**/dist/": true,
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "README.md": "PULL_REQUEST_TEMPLATE.md",
+      "package.json": "package-lock.json, eslint*, prettier*",
+      "firebase.json": ".firebaserc",
+      "Dockerfile": ".dockerignore",
+    },
+    "editor.formatOnType": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "todo-tree.filtering.excludeGlobs": ["**/node_modules/*/**", "**/*.md"],
+    "todo-tree.general.tags": [
+      "DEPRECATE",
+      "BUG",
+      "HACK",
+      "FIXME",
+      "TODO",
+      "[ ]",
+      "[x]",
+    ],
+  },
+  "extensions": {
+    "recommendations": [
+      "github.copilot",
+      "github.copilot-chat",
+      "google.geminicodeassist",
+      "gruntfuggly.todo-tree",
+      "mermaidchart.vscode-mermaid-chart",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "vue.volar",
+      "hashicorp.terraform",
+    ],
+  },
+}
