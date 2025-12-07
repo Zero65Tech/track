@@ -11,10 +11,13 @@ const layoutConfig = reactive({
 const layoutState = reactive({
     activeMenuItem: null,
     menuHoverActive: false, // Use ?
+
     overlayMenuActive: false,
     staticMenuMobileActive: false,
     staticMenuDesktopInactive: false,
+
     accountSidebarActive: false,
+
     profileSidebarVisible: false, // Not in use
     configSidebarVisible: false // Not in use
 });

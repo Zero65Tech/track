@@ -1,10 +1,15 @@
 <script setup>
+import { computed } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/auth.store';
 import AppConfigurator from './AppConfigurator.vue';
 
 const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLayout();
 const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const userName = computed(() => authStore.userName);
+const userPhotoURL = computed(() => authStore.user?.photoURL);
 </script>
 
 <template>
@@ -71,7 +76,7 @@ const authStore = useAuthStore();
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
-                        <img v-if="authStore.user?.photoURL" :src="authStore.user?.photoURL" :alt="authStore.userName" class="avatar" />
+                        <img v-if="isAuthenticated && userPhotoURL" :src="userPhotoURL" :alt="userName" class="avatar" />
                         <i v-else class="pi pi-user"></i>
                         <span>Account</span>
                     </button>
