@@ -116,7 +116,6 @@
             .layout-sidebar {
                 transform: translateX(0);
             }
-
             .layout-mask {
                 display: block;
             }
@@ -137,6 +136,9 @@
         &.layout-account-sidebar-active {
             .layout-account-sidebar {
                 transform: translateX(0);
+            }
+            .layout-mask {
+                display: block;
             }
         }
 
