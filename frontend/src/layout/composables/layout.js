@@ -11,9 +11,13 @@ const layoutConfig = reactive({
 const layoutState = reactive({
     activeMenuItem: null,
     menuHoverActive: false, // Use ?
+
     overlayMenuActive: false,
     staticMenuMobileActive: false,
     staticMenuDesktopInactive: false,
+
+    accountSidebarActive: false,
+
     profileSidebarVisible: false, // Not in use
     configSidebarVisible: false // Not in use
 });
@@ -26,11 +30,9 @@ export function useLayout() {
     const toggleDarkMode = () => {
         if (!document.startViewTransition) {
             executeDarkModeToggle();
-
             return;
         }
-
-        document.startViewTransition(() => executeDarkModeToggle(event));
+        document.startViewTransition(() => executeDarkModeToggle());
     };
 
     const executeDarkModeToggle = () => {
@@ -58,15 +60,27 @@ export function useLayout() {
 
     const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
+    const toggleAccountSidebar = () => {
+        layoutState.accountSidebarActive = !layoutState.accountSidebarActive;
+    };
+
+    const isAccountSidebarActive = computed(() => layoutState.accountSidebarActive);
+
     return {
         layoutConfig,
         layoutState,
+
         getPrimary,
         getSurface,
+
         toggleDarkMode,
         isDarkTheme,
+
         setActiveMenuItem,
         toggleMenu,
-        isSidebarActive
+        isSidebarActive,
+
+        toggleAccountSidebar,
+        isAccountSidebarActive
     };
 }

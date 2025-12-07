@@ -1,8 +1,15 @@
 <script setup>
+import { computed } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
+import { useAuthStore } from '@/stores/auth.store';
 import AppConfigurator from './AppConfigurator.vue';
 
-const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLayout();
+const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const userName = computed(() => authStore.userName);
+const userPhotoURL = computed(() => authStore.user?.photoURL);
 </script>
 
 <template>
@@ -49,6 +56,10 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                     </button>
                     <AppConfigurator />
                 </div>
+                <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
+                    <img v-if="isAuthenticated && userPhotoURL" :src="userPhotoURL" :alt="userName" class="avatar" />
+                    <i v-else class="pi pi-user"></i>
+                </button>
             </div>
 
             <button
@@ -67,10 +78,6 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
                     </button>
                 </div>
             </div>
