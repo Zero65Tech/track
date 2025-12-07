@@ -33,13 +33,20 @@ resource "google_project_iam_member" "cloudbuild_logs_writer" {
   member  = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
+resource "google_cloudbuildv2_repository" "github_repo" {
+  location    = var.region
+  name        = "${var.github.org}-${var.name}"
+  parent_connection = "projects/${var.project_id}/locations/${var.region}/connections/${var.github.org}"
+  remote_uri  = "https://github.com/${var.github.org}/${var.github.repo}.git"
+}
+
 // Cloud Build Triggers
 
 resource "google_cloudbuild_trigger" "frontend" {
   name     = "${var.name}-frontend"
   location = var.region
   repository_event_config {
-    repository = "projects/${var.project_id}/locations/${var.region}/connections/Zero65Tech/repositories/Zero65Tech-track"
+    repository = google_cloudbuildv2_repository.github_repo.id
     push {
       branch = var.stage == "prod" ? "^master$" : ".*"
     }
@@ -77,7 +84,7 @@ resource "google_cloudbuild_trigger" "backend" {
   name     = "${var.name}-backend"
   location = var.region
   repository_event_config {
-    repository = "projects/${var.project_id}/locations/${var.region}/connections/Zero65Tech/repositories/Zero65Tech-track"
+    repository = google_cloudbuildv2_repository.github_repo.id
     push {
       branch = var.stage == "prod" ? "^master$" : ".*"
     }
