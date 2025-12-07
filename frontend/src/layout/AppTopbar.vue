@@ -68,7 +68,7 @@ const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLay
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action" @click="toggleAccountSidebar">
+                    <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
                         <i class="pi pi-user"></i>
                         <span>Account</span>
                     </button>

@@ -24,7 +24,8 @@ const containerClass = computed(() => {
         'layout-static': layoutConfig.menuMode === 'static',
         'layout-static-inactive': layoutState.staticMenuDesktopInactive && layoutConfig.menuMode === 'static',
         'layout-overlay-active': layoutState.overlayMenuActive,
-        'layout-mobile-active': layoutState.staticMenuMobileActive
+        'layout-mobile-active': layoutState.staticMenuMobileActive,
+        'layout-account-sidebar-active': layoutState.accountSidebarActive
     };
 });
 
@@ -51,9 +52,16 @@ function unbindOutsideClickListener() {
 
 function isOutsideClicked(event) {
     const sidebarEl = document.querySelector('.layout-sidebar');
-    const topbarEl = document.querySelector('.layout-menu-button');
+    const accountSidebarEl = document.querySelector('.layout-account-sidebar');
+    const topbarMenuButtonEl = document.querySelector('.layout-menu-button');
+    const topbarAccountButtonEl = document.querySelector('.layout-account-button');
 
-    return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
+    return !(
+        (sidebarEl && (sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target))) ||
+        (topbarMenuButtonEl && (topbarMenuButtonEl.isSameNode(event.target) || topbarMenuButtonEl.contains(event.target))) ||
+        (accountSidebarEl && (accountSidebarEl.isSameNode(event.target) || accountSidebarEl.contains(event.target))) ||
+        (topbarAccountButtonEl && (topbarAccountButtonEl.isSameNode(event.target) || topbarAccountButtonEl.contains(event.target)))
+    );
 }
 </script>
 
@@ -61,6 +69,7 @@ function isOutsideClicked(event) {
     <div class="layout-wrapper" :class="containerClass">
         <app-topbar></app-topbar>
         <app-sidebar></app-sidebar>
+        <app-account-sidebar></app-account-sidebar>
         <div class="layout-main-container">
             <div class="layout-main">
                 <router-view></router-view>
