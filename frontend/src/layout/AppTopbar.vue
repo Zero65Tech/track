@@ -56,6 +56,10 @@ const userPhotoURL = computed(() => authStore.user?.photoURL);
                     </button>
                     <AppConfigurator />
                 </div>
+                <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
+                    <img v-if="isAuthenticated && userPhotoURL" :src="userPhotoURL" :alt="userName" class="avatar" />
+                    <i v-else class="pi pi-user"></i>
+                </button>
             </div>
 
             <button
@@ -74,11 +78,6 @@ const userPhotoURL = computed(() => authStore.user?.photoURL);
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
-                        <img v-if="isAuthenticated && userPhotoURL" :src="userPhotoURL" :alt="userName" class="avatar" />
-                        <i v-else class="pi pi-user"></i>
-                        <span>Account</span>
                     </button>
                 </div>
             </div>

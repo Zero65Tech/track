@@ -30,11 +30,9 @@ export function useLayout() {
     const toggleDarkMode = () => {
         if (!document.startViewTransition) {
             executeDarkModeToggle();
-
             return;
         }
-
-        document.startViewTransition(() => executeDarkModeToggle(event));
+        document.startViewTransition(() => executeDarkModeToggle());
     };
 
     const executeDarkModeToggle = () => {
@@ -71,13 +69,17 @@ export function useLayout() {
     return {
         layoutConfig,
         layoutState,
+
         getPrimary,
         getSurface,
+
         toggleDarkMode,
         isDarkTheme,
+
         setActiveMenuItem,
         toggleMenu,
         isSidebarActive,
+
         toggleAccountSidebar,
         isAccountSidebarActive
     };
