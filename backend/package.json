@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "4.4.0",
+  "version": "5.5.0",
   "description": "Track Service",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "lint": "npx eslint src test"
   },
   "dependencies": {
-    "@zero65/track": "^4.0.0",
+    "@zero65/track": "^5.0.0",
     "cors": "^2.8.0",
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",

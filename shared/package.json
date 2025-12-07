@@ -1,6 +1,6 @@
 {
   "name": "@zero65/track",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "Track Shared Toolkit",
   "private": true,
   "type": "module",
