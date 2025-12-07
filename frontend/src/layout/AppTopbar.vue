@@ -1,8 +1,10 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
+import { useAuthStore } from '@/stores/auth.store';
 import AppConfigurator from './AppConfigurator.vue';
 
 const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLayout();
+const authStore = useAuthStore();
 </script>
 
 <template>
@@ -69,7 +71,8 @@ const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLay
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
-                        <i class="pi pi-user"></i>
+                        <img v-if="authStore.user?.photoURL" :src="authStore.user?.photoURL" :alt="authStore.userName" class="profile-picture" />
+                        <i v-else class="pi pi-user"></i>
                         <span>Account</span>
                     </button>
                 </div>
