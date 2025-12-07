@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.2",
+    "axios": "^1.13.2",
     "chart.js": "3.3.2",
     "firebase": "^12.6.0",
     "pinia": "^3.0.4",

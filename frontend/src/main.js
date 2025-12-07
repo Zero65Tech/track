@@ -12,10 +12,14 @@ import ToastService from 'primevue/toastservice'
 import '@/assets/tailwind.css'
 import '@/assets/styles.scss'
 
-const app = createApp(App)
+import { useAuthStore } from '@/stores/auth.store'
 
+const app = createApp(App)
 app.use(router)
-app.use(createPinia())
+
+const pinia = createPinia()
+app.use(pinia)
+
 app.use(PrimeVue, {
   theme: {
     preset: Aura,
@@ -24,7 +28,11 @@ app.use(PrimeVue, {
     },
   },
 })
-app.use(ToastService)
 app.use(ConfirmationService)
+app.use(ToastService)
+
+// Initialize auth store after Pinia is set up
+const authStore = useAuthStore()
+authStore.initializeAuth()
 
 app.mount('#app')
