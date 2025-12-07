@@ -71,7 +71,7 @@ const authStore = useAuthStore();
                         <span>Messages</span>
                     </button>
                     <button type="button" class="layout-topbar-action layout-account-button" @click="toggleAccountSidebar">
-                        <img v-if="authStore.user?.photoURL" :src="authStore.user?.photoURL" :alt="authStore.userName" class="profile-picture" />
+                        <img v-if="authStore.user?.photoURL" :src="authStore.user?.photoURL" :alt="authStore.userName" class="avatar" />
                         <i v-else class="pi pi-user"></i>
                         <span>Account</span>
                     </button>
