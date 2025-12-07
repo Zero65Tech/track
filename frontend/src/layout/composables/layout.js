@@ -9,19 +9,19 @@ const layoutConfig = reactive({
 });
 
 const layoutState = reactive({
-    staticMenuDesktopInactive: false,
+    activeMenuItem: null,
+    menuHoverActive: false, // Use ?
     overlayMenuActive: false,
-    profileSidebarVisible: false,
-    configSidebarVisible: false,
     staticMenuMobileActive: false,
-    menuHoverActive: false,
-    activeMenuItem: null
+    staticMenuDesktopInactive: false,
+    profileSidebarVisible: false, // Not in use
+    configSidebarVisible: false // Not in use
 });
 
 export function useLayout() {
-    const setActiveMenuItem = (item) => {
-        layoutState.activeMenuItem = item.value || item;
-    };
+    const getPrimary = computed(() => layoutConfig.primary);
+
+    const getSurface = computed(() => layoutConfig.surface);
 
     const toggleDarkMode = () => {
         if (!document.startViewTransition) {
@@ -38,35 +38,35 @@ export function useLayout() {
         document.documentElement.classList.toggle('app-dark');
     };
 
+    const isDarkTheme = computed(() => layoutConfig.darkTheme);
+
+    const setActiveMenuItem = (item) => {
+        layoutState.activeMenuItem = item.value || item;
+    };
+
     const toggleMenu = () => {
         if (layoutConfig.menuMode === 'overlay') {
             layoutState.overlayMenuActive = !layoutState.overlayMenuActive;
         }
 
-        if (window.innerWidth > 991) {
-            layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
-        } else {
+        if (window.innerWidth <= 991) {
             layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
+        } else {
+            layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
         }
     };
 
     const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
-    const isDarkTheme = computed(() => layoutConfig.darkTheme);
-
-    const getPrimary = computed(() => layoutConfig.primary);
-
-    const getSurface = computed(() => layoutConfig.surface);
-
     return {
         layoutConfig,
         layoutState,
-        toggleMenu,
-        isSidebarActive,
-        isDarkTheme,
         getPrimary,
         getSurface,
+        toggleDarkMode,
+        isDarkTheme,
         setActiveMenuItem,
-        toggleDarkMode
+        toggleMenu,
+        isSidebarActive
     };
 }
