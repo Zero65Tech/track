@@ -3,14 +3,15 @@ import { useLayout } from '@/layout/composables/layout';
 import { computed, ref, watch } from 'vue';
 import AppFooter from './AppFooter.vue';
 import AppSidebar from './AppSidebar.vue';
+import AppAccountSidebar from './AppAccountSidebar.vue';
 import AppTopbar from './AppTopbar.vue';
 
-const { layoutConfig, layoutState, isSidebarActive } = useLayout();
+const { layoutConfig, layoutState, isSidebarActive, isAccountSidebarActive } = useLayout();
 
 const outsideClickListener = ref(null);
 
-watch(isSidebarActive, (newVal) => {
-    if (newVal) {
+watch([isSidebarActive, isAccountSidebarActive], ([sidebarActive, accountSidebarActive]) => {
+    if (sidebarActive || accountSidebarActive) {
         bindOutsideClickListener();
     } else {
         unbindOutsideClickListener();
@@ -31,9 +32,10 @@ function bindOutsideClickListener() {
     if (!outsideClickListener.value) {
         outsideClickListener.value = (event) => {
             if (isOutsideClicked(event)) {
+                layoutState.menuHoverActive = false;
                 layoutState.overlayMenuActive = false;
                 layoutState.staticMenuMobileActive = false;
-                layoutState.menuHoverActive = false;
+                layoutState.accountSidebarActive = false;
             }
         };
         document.addEventListener('click', outsideClickListener.value);
@@ -42,7 +44,7 @@ function bindOutsideClickListener() {
 
 function unbindOutsideClickListener() {
     if (outsideClickListener.value) {
-        document.removeEventListener('click', outsideClickListener);
+        document.removeEventListener('click', outsideClickListener.value);
         outsideClickListener.value = null;
     }
 }

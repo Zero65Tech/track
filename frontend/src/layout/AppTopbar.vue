@@ -2,7 +2,7 @@
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
 
-const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLayout();
 </script>
 
 <template>
@@ -68,9 +68,9 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action" @click="toggleAccountSidebar">
                         <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                        <span>Account</span>
                     </button>
                 </div>
             </div>

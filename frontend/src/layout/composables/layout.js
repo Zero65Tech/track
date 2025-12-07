@@ -14,6 +14,7 @@ const layoutState = reactive({
     overlayMenuActive: false,
     staticMenuMobileActive: false,
     staticMenuDesktopInactive: false,
+    accountSidebarActive: false,
     profileSidebarVisible: false, // Not in use
     configSidebarVisible: false // Not in use
 });
@@ -58,6 +59,12 @@ export function useLayout() {
 
     const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
+    const toggleAccountSidebar = () => {
+        layoutState.accountSidebarActive = !layoutState.accountSidebarActive;
+    };
+
+    const isAccountSidebarActive = computed(() => layoutState.accountSidebarActive);
+
     return {
         layoutConfig,
         layoutState,
@@ -67,6 +74,8 @@ export function useLayout() {
         isDarkTheme,
         setActiveMenuItem,
         toggleMenu,
-        isSidebarActive
+        isSidebarActive,
+        toggleAccountSidebar,
+        isAccountSidebarActive
     };
 }
