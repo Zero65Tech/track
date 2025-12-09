@@ -1,5 +1,4 @@
 <script setup>
-import { ProfileState, ProfileAccess } from '@zero65/track';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfileStore } from '@/stores/profile.store';
 
@@ -14,10 +13,6 @@ const handleLoginClick = async () => {
     }
 };
 
-const handleProfileClick = (profile) => {
-    profileStore.setActive(profile);
-};
-
 const handleLogoutClick = async () => {
     try {
         await authStore.logout();
@@ -26,36 +21,8 @@ const handleLogoutClick = async () => {
     }
 };
 
-const getAccessBadgeClass = (access) => {
-    if (access === 'owner') return 'pi-crown';
-    if (access === 'editor') return 'pi-pencil';
-    if (access === 'viewer') return 'pi-eye';
-    return 'pi-question';
-};
-
-const getAccessTitle = (access) => {
-    const accessObj = Object.values(ProfileAccess).find((a) => a.id === access);
-    if (accessObj) {
-        return `${accessObj.name}: ${accessObj.description}`;
-    }
-    return access;
-};
-
-const getProfileStateIcon = (state) => {
-    if (state === ProfileState.ACTIVE.id) return 'pi-check-circle';
-    if (state === ProfileState.TEMPLATE.id) return 'pi-star';
-    if (state === ProfileState.DISABLED.id) return 'pi-lock';
-    if (state === ProfileState.DELETED.id) return 'pi-trash';
-    if (state === ProfileState.INACTIVE.id) return 'pi-spinner';
-    return null;
-};
-
-const getStateDescription = (state) => {
-    const stateObj = Object.values(ProfileState).find((s) => s.id === state);
-    if (stateObj) {
-        return `${stateObj.name}: ${stateObj.description}`;
-    }
-    return state;
+const handleProfileClick = (profile) => {
+    profileStore.setActive(profile);
 };
 </script>
 
@@ -129,9 +96,9 @@ const getStateDescription = (state) => {
                         <button :class="['profile-button', profileStore.active?.id === profile.id && 'profile-button-active']" @click="handleProfileClick(profile)">
                             <div class="profile-content">
                                 <div class="profile-name-section">
-                                    <i :class="['pi', getAccessBadgeClass(profile.access), 'access-icon']" :title="getAccessTitle(profile.access)"></i>
+                                    <i :class="['pi', profile.access.icon, 'access-icon']" :title="`${profile.access.name}: ${profile.access.description}`"></i>
                                     <span class="profile-name">{{ profile.name }}</span>
-                                    <i v-if="getProfileStateIcon(profile.state)" :class="['pi', getProfileStateIcon(profile.state), 'state-icon']" :title="getStateDescription(profile.state)"></i>
+                                    <i :class="['pi', profile.state.icon, 'state-icon']" :title="`${profile.state.name}: ${profile.state.description}`"></i>
                                 </div>
                             </div>
                         </button>
@@ -167,9 +134,9 @@ const getStateDescription = (state) => {
                         <button :class="['profile-button', profileStore.active?.id === profile.id && 'profile-button-active']" @click="handleProfileClick(profile)">
                             <div class="profile-content">
                                 <div class="profile-name-section">
-                                    <i :class="['pi', getAccessBadgeClass(profile.access), 'access-icon']" :title="getAccessTitle(profile.access)"></i>
+                                    <i :class="['pi', profile.access.icon, 'access-icon']" :title="`${profile.access.name}: ${profile.access.description}`"></i>
                                     <span class="profile-name">{{ profile.name }}</span>
-                                    <i v-if="getProfileStateIcon(profile.state)" :class="['pi', getProfileStateIcon(profile.state), 'state-icon']" :title="getStateDescription(profile.state)"></i>
+                                    <i :class="['pi', profile.state.icon, 'state-icon']" :title="`${profile.state.name}: ${profile.state.description}`"></i>
                                 </div>
                             </div>
                         </button>

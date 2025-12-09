@@ -62,6 +62,11 @@ export const useProfileStore = defineStore('profile', () => {
                 return stateIds.indexOf(a.state) - stateIds.indexOf(b.state) || accessIds.indexOf(a.access) - accessIds.indexOf(b.access);
             });
 
+            for (let profile of profiles) {
+                profile.access = Object.values(ProfileAccess).find((access) => access.id === profile.access);
+                profile.state = Object.values(ProfileState).find((state) => state.id === profile.state);
+            }
+
             accessible.profiles.value = profiles;
             autoSelectActive();
         } catch (err) {
@@ -78,6 +83,12 @@ export const useProfileStore = defineStore('profile', () => {
 
         try {
             const profiles = await profileService.getTemplatesBySystem();
+
+            for (let profile of profiles) {
+                profile.access = Object.values(ProfileAccess).find((access) => access.id === profile.access);
+                profile.state = Object.values(ProfileState).find((state) => state.id === profile.state);
+            }
+
             template.profiles.value = profiles;
             autoSelectActive();
         } catch (err) {
