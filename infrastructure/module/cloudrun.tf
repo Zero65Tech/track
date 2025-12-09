@@ -43,6 +43,10 @@ resource "google_cloud_run_v2_service" "backend" {
         timeout_seconds = 5
       }
       env {
+        name  = "STAGE"
+        value = var.stage
+      }
+      env {
         name  = "GOOGLE_CLOUD_PROJECT"
         value = var.project_id
       }
@@ -54,14 +58,6 @@ resource "google_cloud_run_v2_service" "backend" {
             version = "latest"
           }
         }
-      }
-      env {
-        name  = "NODE_ENV"
-        value = "production"
-      }
-      env {
-        name  = "STAGE"
-        value = var.stage
       }
     }
     timeout = "5s"

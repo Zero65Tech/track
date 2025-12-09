@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config({ path: ".env" });
+dotenv.config({ path: `.env.${process.env.STAGE}` });
+
 import db from "./config/db.js";
 import app from "./app.js";
 
