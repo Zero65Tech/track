@@ -7,7 +7,7 @@ import { profileService } from '@/service/profileService';
 export const useProfileStore = defineStore('profile', () => {
     const authStore = useAuthStore();
 
-    const localStorageKey = computed(() => `profile.active.${authStore.user.uid || 'guest'}`);
+    const localStorageKey = computed(() => `profile.active.${authStore.user?.uid || 'guest'}`);
 
     // States
     const accessible = {
@@ -72,9 +72,11 @@ export const useProfileStore = defineStore('profile', () => {
     }
 
     return {
+        // States
         accessible,
         template,
 
+        // Actions
         fetchAccessibles,
         fetchTemplates,
         setActive

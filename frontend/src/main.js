@@ -1,42 +1,43 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
 
-import { createPinia } from 'pinia'
+import { createPinia } from 'pinia';
 
-import Aura from '@primeuix/themes/aura'
-import PrimeVue from 'primevue/config'
-import ConfirmationService from 'primevue/confirmationservice'
-import ToastService from 'primevue/toastservice'
+import Aura from '@primeuix/themes/aura';
+import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 
-import '@/assets/tailwind.css'
-import '@/assets/styles.scss'
+import '@/assets/tailwind.css';
+import '@/assets/styles.scss';
 
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuthStore } from '@/stores/auth.store';
 import { useProfileStore } from '@/stores/profile.store';
 
-const app = createApp(App)
-app.use(router)
+const app = createApp(App);
+app.use(router);
 
-const pinia = createPinia()
-app.use(pinia)
+const pinia = createPinia();
+app.use(pinia);
 
 app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-    options: {
-      darkModeSelector: '.app-dark',
-    },
-  },
-})
-app.use(ConfirmationService)
-app.use(ToastService)
+    theme: {
+        preset: Aura,
+        options: {
+            darkModeSelector: '.app-dark'
+        }
+    }
+});
+app.use(ConfirmationService);
+app.use(ToastService);
 
 // Initialize auth store after Pinia is set up
-const authStore = useAuthStore()
-authStore.initializeAuth()
+const authStore = useAuthStore();
+authStore.initialize();
 
 const profileStore = useProfileStore();
-profileStore.fetchProfiles();
+profileStore.fetchAccessibles();
+profileStore.fetchTemplates();
 
-app.mount('#app')
+app.mount('#app');
