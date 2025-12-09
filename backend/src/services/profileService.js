@@ -1,7 +1,6 @@
 import { LRUCache } from "lru-cache";
 import { ProfileAccess, ProfileState } from "@zero65/track";
 
-import idMappings from "../config/idMappings.js";
 import transaction from "../utils/transaction.js";
 
 import ProfileModel from "../models/Profile.js";
@@ -24,9 +23,21 @@ async function _getCached(id) {
   return data;
 }
 
-async function getAll(userId) {
+async function getAllAccessible(userId) {
   const dataArr = await ProfileModel.find({
-    $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
+    $and: [
+      {
+        $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
+      },
+      {
+        $or: [
+          {
+            owner: { $ne: process.env.SYSTEM_USER_ID },
+            state: { $ne: ProfileState.TEMPLATE.id },
+          },
+        ],
+      },
+    ],
   })
     .sort({ createdAt: 1 })
     .lean();
@@ -34,7 +45,6 @@ async function getAll(userId) {
   for (let i = 0; i < dataArr.length; i++) {
     cache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
-      _id: dataArr[i]._id, // DEPRECATE: _id in response
       id: dataArr[i]._id.toString(),
       name: dataArr[i].name,
       access:
@@ -50,16 +60,15 @@ async function getAll(userId) {
   return dataArr;
 }
 
-async function getSystemTemplates() {
+async function getTemplatesBySystem() {
   const dataArr = await ProfileModel.find({
-    owner: idMappings.user.system,
+    owner: process.env.SYSTEM_USER_ID,
     state: ProfileState.TEMPLATE.id,
   }).lean();
 
   for (let i = 0; i < dataArr.length; i++) {
     cache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
-      _id: dataArr[i]._id, // DEPRECATE: _id in response
       id: dataArr[i]._id.toString(),
       name: dataArr[i].name,
     };
@@ -90,7 +99,6 @@ async function create(name, userId) {
   cache.set(data._id.toString(), data);
 
   return {
-    _id: data._id, // DEPRECATE: _id in response
     id: data._id.toString(),
     name: data.name,
     access: ProfileAccess.OWNER.id,
@@ -124,7 +132,6 @@ async function update(id, updates, userId) {
   cache.set(data._id.toString(), data);
 
   return {
-    _id: data._id, // DEPRECATE: _id in response
     id: data._id.toString(),
     name: data.name,
     access: ProfileAccess.OWNER.id,
@@ -143,8 +150,8 @@ async function _update({ id, updates }, session) {
 
 export default {
   _getCached,
-  getAll,
-  getSystemTemplates,
+  getAllAccessible,
+  getTemplatesBySystem,
   create,
   update,
   _update,

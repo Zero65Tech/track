@@ -28,7 +28,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'https://zero65-test.web.app',
+      '/api': 'http://localhost:8080',
     },
   },
 })

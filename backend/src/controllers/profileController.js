@@ -1,13 +1,13 @@
 import { sendData } from "../utils/response.js";
 import profileService from "../services/profileService.js";
 
-async function getAll(req, res) {
-  const profiles = await profileService.getAll(req.user.uid);
+async function getAllAccessible(req, res) {
+  const profiles = await profileService.getAllAccessible(req.user.uid);
   sendData(res, { profiles });
 }
 
-async function getSystemTemplates(req, res) {
-  const profiles = await profileService.getSystemTemplates();
+async function getTemplatesBySystem(req, res) {
+  const profiles = await profileService.getTemplatesBySystem();
   sendData(res, { profiles });
 }
 
@@ -25,4 +25,4 @@ async function update(req, res) {
   sendData(res, { profile }, "Profile updated successfully.");
 }
 
-export default { getAll, getSystemTemplates, create, update };
+export default { getAllAccessible, getTemplatesBySystem, create, update };

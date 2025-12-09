@@ -53,14 +53,14 @@ app.use((req, res, next) => {
 
 let API_PREFIX = "/api";
 
-app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getSystemTemplates); // prettier-ignore
+app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplatesBySystem); // prettier-ignore
 app.get(`${API_PREFIX}/cron`, cronController);
 
 // NOTE: User must be loggedin for following routes
 
 app.use(authMiddleware);
 
-app.get(`${API_PREFIX}/profiles`, profileController.getAll);
+app.get(`${API_PREFIX}/profiles`, profileController.getAllAccessible);
 app.post(`${API_PREFIX}/profiles`, profileController.create);
 app.patch(`${API_PREFIX}/profiles/:id`, profileController.update);
 
