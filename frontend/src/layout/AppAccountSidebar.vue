@@ -7,6 +7,13 @@ import { useProfileStore } from '@/stores/profile.store';
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
 
+onMounted(() => {
+    if (authStore.isAuthenticated) {
+        profileStore.fetchAccessibles();
+    }
+    profileStore.fetchTemplates();
+});
+
 const handleLoginClick = async () => {
     try {
         await authStore.loginWithGoogle();
@@ -16,16 +23,16 @@ const handleLoginClick = async () => {
     }
 };
 
+const handleProfileClick = (profile) => {
+    profileStore.setActive(profile);
+};
+
 const handleLogoutClick = async () => {
     try {
         await authStore.logout();
     } catch (err) {
         console.error('Logout error:', err);
     }
-};
-
-const handleProfileClick = (profile) => {
-    profileStore.setActive(profile);
 };
 
 const getAccessBadgeClass = (access) => {
@@ -59,13 +66,6 @@ const getStateDescription = (state) => {
     }
     return state;
 };
-
-onMounted(() => {
-    if (authStore.isAuthenticated) {
-        profileStore.fetchAccessibles();
-    }
-    profileStore.fetchTemplates();
-});
 </script>
 
 <template>

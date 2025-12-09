@@ -27,10 +27,15 @@ export const useProfileStore = defineStore('profile', () => {
     // Actions
     async function fetchAccessibles() {
         accessible.isLoading.value = true;
+        accessible.profiles.value = [];
         accessible.error.value = null;
 
         try {
-            accessible.profiles.value = await profileService.getAllAccessible();
+            const profiles = await profileService.getAllAccessible();
+            profiles.forEach(async (profile, index) => {
+                await new Promise((resolve) => setTimeout(resolve, index * 100));
+                accessible.profiles.value.push(profile);
+            });
 
             // Sort
             const accessIds = Object.values(ProfileAccess).map((access) => access.id);
@@ -54,10 +59,15 @@ export const useProfileStore = defineStore('profile', () => {
 
     async function fetchTemplates() {
         template.isLoading.value = true;
+        template.profiles.value = [];
         template.error.value = null;
 
         try {
-            template.profiles.value = await profileService.getTemplatesBySystem();
+            const profiles = await profileService.getTemplatesBySystem();
+            profiles.forEach(async (profile, index) => {
+                await new Promise((resolve) => setTimeout(resolve, index * 100));
+                template.profiles.value.push(profile);
+            });
         } catch (err) {
             template.error.value = err.message;
             throw err;
@@ -75,6 +85,7 @@ export const useProfileStore = defineStore('profile', () => {
         // States
         accessible,
         template,
+        active,
 
         // Actions
         fetchAccessibles,
