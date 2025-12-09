@@ -13,7 +13,6 @@ import '@/assets/tailwind.css';
 import '@/assets/styles.scss';
 
 import { useAuthStore } from '@/stores/auth.store';
-import { useProfileStore } from '@/stores/profile.store';
 
 const app = createApp(App);
 app.use(router);
@@ -35,9 +34,5 @@ app.use(ToastService);
 // Initialize auth store after Pinia is set up
 const authStore = useAuthStore();
 authStore.initialize();
-
-const profileStore = useProfileStore();
-profileStore.fetchAccessibles();
-profileStore.fetchTemplates();
 
 app.mount('#app');

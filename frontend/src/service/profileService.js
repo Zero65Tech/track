@@ -5,7 +5,7 @@ export const profileService = {
         return (await apiClient.get('/profiles')).data.data.profiles;
     },
 
-    async getSystemTemplates() {
+    async getTemplatesBySystem() {
         return (await apiClient.get('/profiles/templates/system')).data.data.profiles;
     }
 };

@@ -25,19 +25,7 @@ async function _getCached(id) {
 
 async function getAllAccessible(userId) {
   const dataArr = await ProfileModel.find({
-    $and: [
-      {
-        $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
-      },
-      {
-        $or: [
-          {
-            owner: { $ne: process.env.SYSTEM_USER_ID },
-            state: { $ne: ProfileState.TEMPLATE.id },
-          },
-        ],
-      },
-    ],
+    $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
   })
     .sort({ createdAt: 1 })
     .lean();
@@ -70,6 +58,8 @@ async function getTemplatesBySystem() {
     cache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
       id: dataArr[i]._id.toString(),
+      access: ProfileAccess.VIEWER.id,
+      state: ProfileState.TEMPLATE.id,
       name: dataArr[i].name,
     };
   }
