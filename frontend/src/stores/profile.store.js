@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { ProfileAccess, ProfileState } from '@zero65/track';
 import { useAuthStore } from '@/stores/auth.store';
@@ -22,9 +22,31 @@ export const useProfileStore = defineStore('profile', () => {
         error: ref(null)
     };
 
-    const active = ref(JSON.parse(localStorage.getItem(localStorageKey.value)) || null);
+    const active = ref(null);
 
     // Actions
+    async function initialize() {
+        active.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
+        fetchTemplates();
+        if (authStore.isAuthenticated) {
+            fetchAccessibles();
+        }
+    }
+
+    watch(
+        () => authStore.isAuthenticated,
+        (isAuthenticated) => {
+            active.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
+            if (isAuthenticated) {
+                fetchAccessibles();
+            } else {
+                accessible.profiles.value = [];
+                accessible.error.value = null;
+                autoSelectActive();
+            }
+        }
+    );
+
     async function fetchAccessibles() {
         accessible.isLoading.value = true;
         accessible.profiles.value = [];
@@ -32,23 +54,16 @@ export const useProfileStore = defineStore('profile', () => {
 
         try {
             const profiles = await profileService.getAllAccessible();
-            profiles.forEach(async (profile, index) => {
-                await new Promise((resolve) => setTimeout(resolve, index * 100));
-                accessible.profiles.value.push(profile);
-            });
 
             // Sort
             const accessIds = Object.values(ProfileAccess).map((access) => access.id);
             const stateIds = Object.values(ProfileState).map((state) => state.id);
-            accessible.profiles.value.sort((a, b) => {
+            profiles.sort((a, b) => {
                 return stateIds.indexOf(a.state) - stateIds.indexOf(b.state) || accessIds.indexOf(a.access) - accessIds.indexOf(b.access);
             });
-            if (active.value && !accessible.profiles.value.find((p) => p.id === active.value.id)) {
-                setActive(null);
-            }
-            if (!active.value && accessible.profiles.value.length > 0) {
-                setActive(accessible.profiles.value[0]);
-            }
+
+            accessible.profiles.value = profiles;
+            autoSelectActive();
         } catch (err) {
             accessible.error.value = err.message;
             throw err;
@@ -59,21 +74,26 @@ export const useProfileStore = defineStore('profile', () => {
 
     async function fetchTemplates() {
         template.isLoading.value = true;
-        template.profiles.value = [];
         template.error.value = null;
 
         try {
             const profiles = await profileService.getTemplatesBySystem();
-            profiles.forEach(async (profile, index) => {
-                await new Promise((resolve) => setTimeout(resolve, index * 100));
-                template.profiles.value.push(profile);
-            });
+            template.profiles.value = profiles;
+            autoSelectActive();
         } catch (err) {
             template.error.value = err.message;
             throw err;
         } finally {
             template.isLoading.value = false;
         }
+    }
+
+    function autoSelectActive() {
+        if (accessible.isLoading.value || template.isLoading.value) {
+            return;
+        }
+        const profiles = [...accessible.profiles.value, ...template.profiles.value];
+        setActive(profiles.find((p) => p.id === active.value.id) || profiles[0]);
     }
 
     function setActive(profile) {
@@ -88,8 +108,7 @@ export const useProfileStore = defineStore('profile', () => {
         active,
 
         // Actions
-        fetchAccessibles,
-        fetchTemplates,
+        initialize,
         setActive
     };
 });

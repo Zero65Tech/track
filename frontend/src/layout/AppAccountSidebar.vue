@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
 import { ProfileState, ProfileAccess } from '@zero65/track';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfileStore } from '@/stores/profile.store';
@@ -7,17 +6,9 @@ import { useProfileStore } from '@/stores/profile.store';
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
 
-onMounted(() => {
-    if (authStore.isAuthenticated) {
-        profileStore.fetchAccessibles();
-    }
-    profileStore.fetchTemplates();
-});
-
 const handleLoginClick = async () => {
     try {
         await authStore.loginWithGoogle();
-        await profileStore.fetchAccessibles();
     } catch (err) {
         console.error('Login error:', err);
     }
