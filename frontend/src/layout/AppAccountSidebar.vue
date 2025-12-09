@@ -311,15 +311,6 @@ const handleProfileClick = (profile) => {
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
                 }
-
-                .profiles-subtitle {
-                    margin: 0.25rem 0 0;
-                    font-size: 0.75rem;
-                    color: var(--text-color-secondary);
-                    font-weight: normal;
-                    text-transform: none;
-                    letter-spacing: normal;
-                }
             }
 
             .profiles-list {
@@ -347,7 +338,7 @@ const handleProfileClick = (profile) => {
                         display: flex;
                         flex-direction: column;
 
-                        &:hover:not(.profile-button-disabled):not(:disabled) {
+                        &:hover:not(:disabled) {
                             background-color: var(--surface-hover);
                             border-color: var(--primary-color);
                         }
@@ -357,20 +348,12 @@ const handleProfileClick = (profile) => {
                             border-color: var(--primary-color);
                             color: var(--text-color);
 
-                            .profile-name-section,
-                            .profile-meta {
-                                color: var(--text-color);
-                            }
-
                             .profile-name {
                                 color: var(--primary-color);
                                 font-weight: 600;
                             }
 
-                            .access-icon {
-                                color: var(--primary-color);
-                            }
-
+                            .access-icon,
                             .state-icon {
                                 color: var(--primary-color);
                             }
@@ -381,60 +364,42 @@ const handleProfileClick = (profile) => {
                             flex-direction: column;
                             gap: 0.5rem;
                             flex: 1;
-
-                            .profile-name-section {
-                                display: flex;
-                                align-items: center;
-                                justify-content: space-between;
-                                gap: 0.5rem;
-                                color: var(--text-color);
-
-                                .profile-name {
-                                    font-weight: 500;
-                                    flex: 1;
-                                    overflow: hidden;
-                                    text-overflow: ellipsis;
-                                    white-space: nowrap;
-                                }
-
-                                .access-icon {
-                                    font-size: 0.875rem;
-                                    flex-shrink: 0;
-                                    color: var(--text-color-secondary);
-                                    transition: color var(--element-transition-duration);
-                                }
-                            }
                         }
-                    }
 
-                    .state-icon {
-                        font-size: 0.875rem;
-                        flex-shrink: 0;
-                        color: var(--text-color-secondary);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
+                        .profile-name-section {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            gap: 0.5rem;
+                            color: var(--text-color);
+                        }
 
-                        &.pi-spinner {
+                        .profile-name {
+                            font-weight: 500;
+                            flex: 1;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+
+                        .access-icon {
+                            font-size: 0.875rem;
+                            flex-shrink: 0;
+                            color: var(--text-color-secondary);
+                            transition: color var(--element-transition-duration);
+                        }
+
+                        .state-icon {
+                            font-size: 0.875rem;
+                            flex-shrink: 0;
+                            color: var(--text-color-secondary);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+
+                        .state-icon.pi-spinner {
                             animation: spin 2s linear infinite;
-                        }
-
-                        .profile-button-active & {
-                            color: var(--primary-contrast-color);
-                        }
-
-                        .profile-button-readonly & {
-                            color: #f59e0b;
-                        }
-
-                        .profile-button-disabled & {
-                            color: #ef4444;
-                        }
-                    }
-
-                    .access-icon {
-                        .profile-button-active & {
-                            color: var(--primary-color);
                         }
                     }
                 }
