@@ -6,13 +6,9 @@ on:
       - master
     paths:
       - "backend/**"
-      - "eslint.config.js"
-      - "package.json"
   pull_request:
     paths:
       - "backend/**"
-      - "eslint.config.js"
-      - "package.json"
 
 jobs:
   lint-and-test:
