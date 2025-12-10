@@ -98,22 +98,22 @@ resource "google_cloudbuild_trigger" "backend" {
   ]
   build {
     step {
+      name = "alpine"
+      entrypoint = "sh"
+      args = [ "-c", "mv backend/.dockerignore .dockerignore && mv backend/Dockerfile Dockerfile" ]
+    }
+    step {
       name = "node:22-alpine"
       entrypoint = "npm"
       args = [ "install", "--omit=dev" ]
       dir = "backend"
     }
     step {
-      name = "alpine"
-      entrypoint = "sh"
-      args = [ "-c", "mv backend/.dockerignore .dockerignore" ]
-    }
-    step {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "build", ".",
         "-t", "${google_artifact_registry_repository.artifact_registry.registry_uri}/backend:$COMMIT_SHA",
-        "-f", "backend/Dockerfile",
+        "-f", "Dockerfile",
       ]
     }
     step {
