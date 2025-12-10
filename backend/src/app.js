@@ -53,7 +53,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get(`/ls`, (req, res) => {
+app.get(`/api/ls`, (req, res) => {
   try {
     const files = fs.readdirSync(".");
     res.json({ files });
