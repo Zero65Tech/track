@@ -104,6 +104,11 @@ resource "google_cloudbuild_trigger" "backend" {
       dir = "backend"
     }
     step {
+      name = "alpine"
+      entrypoint = "sh"
+      args = [ "-c", "mv backend/.dockerignore .dockerignore" ]
+    }
+    step {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "build", ".",

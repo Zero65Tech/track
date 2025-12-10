@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 
 app.get(`/api/ls`, (req, res) => {
   try {
-    const appFiles = fs.readdirSync("./backend");
+    const appFiles = fs.readdirSync(".");
     const backendFiles = fs.readdirSync("./backend");
     const node_modules = fs.readdirSync("./node_modules");
     res.json({
