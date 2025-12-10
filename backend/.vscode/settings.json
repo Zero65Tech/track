@@ -4,7 +4,8 @@
   },
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "package.json": "package-lock.json"
+    ".env": ".env.*",
+    "package.json": "package-lock.json, eslint.config.js, prettier.config.js"
   },
   "editor.formatOnType": true,
   "editor.formatOnSave": true,
