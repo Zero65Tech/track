@@ -8,7 +8,7 @@
         "node": "^20.19.0 || >=22.12.0"
     },
     "scripts": {
-        "dev": "vite --port 1080",
+        "dev": "vite --port 8080",
         "build": "vite build",
         "preview": "vite preview",
         "lint": "eslint --fix . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",

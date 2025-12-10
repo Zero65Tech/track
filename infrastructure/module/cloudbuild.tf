@@ -70,7 +70,7 @@ resource "google_cloudbuild_trigger" "frontend" {
     step {
       name = "node:22-alpine"
       entrypoint = "npm"
-      args = [ "run", "build", "--workspace=frontend" ]
+      args = [ "run", "build", "--workspace=frontend", "--", "--mode=${var.stage}" ]
     }
     step {
       name = "us-docker.pkg.dev/firebase-cli/us/firebase"
