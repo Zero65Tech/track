@@ -1,3 +1,3 @@
-.env.alpha
-.env.gamma
-test/
+backend/.env.alpha
+backend/.env.gamma
+backend/test/
