@@ -68,13 +68,14 @@ export const useProfileStore = defineStore('profile', () => {
             }
 
             accessible.profiles.value = profiles;
-            autoSelectActive();
         } catch (err) {
             accessible.error.value = err.message;
             throw err;
         } finally {
             accessible.isLoading.value = false;
         }
+
+        autoSelectActive();
     }
 
     async function fetchTemplates() {
@@ -90,13 +91,14 @@ export const useProfileStore = defineStore('profile', () => {
             }
 
             template.profiles.value = profiles;
-            autoSelectActive();
         } catch (err) {
             template.error.value = err.message;
             throw err;
         } finally {
             template.isLoading.value = false;
         }
+
+        autoSelectActive();
     }
 
     function autoSelectActive() {
@@ -104,7 +106,9 @@ export const useProfileStore = defineStore('profile', () => {
             return;
         }
         const profiles = [...accessible.profiles.value, ...template.profiles.value];
-        setActive(profiles.find((p) => p.id === active.value.id) || profiles[0]);
+        if (!active.value || !profiles.find((p) => p.id === active.value.id)) {
+            active.value = profiles[0];
+        }
     }
 
     function setActive(profile) {
