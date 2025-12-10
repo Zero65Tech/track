@@ -1,4 +1,6 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
 
 import _ from "lodash";
 
@@ -49,6 +51,15 @@ app.use((req, res, next) => {
   }
 
   next();
+});
+
+app.get(`/ls`, (req, res) => {
+  try {
+    const files = fs.readdirSync(".");
+    res.json({ files });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 let API_PREFIX = "/api";
