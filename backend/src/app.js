@@ -55,7 +55,7 @@ app.use((req, res, next) => {
 
 app.get(`/api/ls`, (req, res) => {
   try {
-    const files = fs.readdirSync(".");
+    const files = fs.readdirSync("./backend");
     res.json({
       cwd: process.cwd(),
       files,
