@@ -53,24 +53,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get(`/api/ls`, (req, res) => {
-  try {
-    const appFiles = fs.readdirSync(".");
-    const backendFiles = fs.readdirSync("./backend");
-    const sharedFiles = fs.readdirSync("./shared");
-    const node_modules = fs.readdirSync("./node_modules");
-    res.json({
-      cwd: process.cwd(),
-      appFiles,
-      sharedFiles,
-      backendFiles,
-      node_modules,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 let API_PREFIX = "/api";
 
 app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplatesBySystem); // prettier-ignore

@@ -1,6 +1,6 @@
 backend
-!backend/src/
 !backend/.env.beta
 !backend/.env.gamma
+!backend/src/
 !backend/node_modules/
 !backend/package.json
