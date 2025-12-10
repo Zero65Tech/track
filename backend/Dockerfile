@@ -6,6 +6,6 @@ COPY node_modules node_modules
 COPY shared shared
 COPY backend backend
 
-ls -la backend
+ls -al node_modules
 
 CMD ["backend/src/index.js"]
