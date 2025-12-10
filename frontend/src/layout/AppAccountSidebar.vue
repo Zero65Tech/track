@@ -157,30 +157,48 @@ const handleProfileClick = (profile) => {
     </div>
 </template>
 
+<!-- NOTE: Styles below are AI-generated and AI-managed. -->
 <style lang="scss" scoped>
 .layout-account-sidebar {
+    position: fixed;
+    width: 20rem;
+    height: calc(100vh - 8rem);
+    z-index: 999;
+    overflow-y: auto;
+    user-select: none;
+    top: 6rem;
+    right: 0;
+    transition:
+        transform var(--layout-section-transition-duration),
+        right var(--layout-section-transition-duration);
+    background-color: var(--surface-overlay);
+    border-radius: var(--content-border-radius);
+    padding: 0.5rem 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 1.5rem;
 
     .user-profile-card {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 1rem;
         padding: 1rem;
         background-color: var(--surface-50);
         border-radius: var(--content-border-radius);
+        align-items: center;
+        text-align: center;
+        margin: 1rem 0;
 
         .user-avatar {
-            width: 48px;
-            height: 48px;
+            width: 4rem;
+            height: 4rem;
             border-radius: 50%;
-            overflow: hidden;
-            background-color: var(--surface-hover);
+            background-color: var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            color: var(--primary-contrast-color);
             flex-shrink: 0;
 
             .avatar-image {
@@ -191,31 +209,50 @@ const handleProfileClick = (profile) => {
 
             .avatar-icon {
                 font-size: 1.5rem;
-                color: var(--text-color-secondary);
             }
         }
 
         .user-info {
-            flex: 1;
-            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex-grow: 1;
 
             .user-name {
                 margin: 0;
+                font-size: 1rem;
                 font-weight: 600;
                 color: var(--text-color);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                word-break: break-word;
             }
 
             .user-email {
-                margin: 0.25rem 0 0;
+                margin: 0;
                 font-size: 0.875rem;
                 color: var(--text-color-secondary);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                word-break: break-word;
             }
+        }
+    }
+
+    .auth-prompt {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 2rem 1rem;
+        text-align: center;
+
+        .auth-icon {
+            font-size: 2rem;
+            color: var(--text-color-secondary);
+        }
+
+        .auth-message {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--text-color);
+            font-weight: 500;
         }
     }
 
@@ -254,19 +291,19 @@ const handleProfileClick = (profile) => {
             gap: 0.75rem;
             padding: 1.5rem 1rem;
             text-align: center;
-            background-color: rgba(239, 68, 68, 0.1);
+            background-color: var(--red-50);
             border-radius: var(--content-border-radius);
-            border: 1px solid #ef4444;
+            border: 1px solid var(--red-500);
 
             i {
                 font-size: 1.75rem;
-                color: #ef4444;
+                color: var(--red-500);
             }
 
             .error-text {
                 margin: 0;
                 font-size: 0.875rem;
-                color: #ef4444;
+                color: var(--red-500);
             }
 
             .retry-button {
@@ -275,7 +312,7 @@ const handleProfileClick = (profile) => {
                 gap: 0.5rem;
                 margin-top: 0.5rem;
                 padding: 0.5rem 1rem;
-                background-color: #ef4444;
+                background-color: var(--red-500);
                 color: white;
                 border: none;
                 border-radius: var(--content-border-radius);
@@ -290,7 +327,7 @@ const handleProfileClick = (profile) => {
                 }
 
                 &:hover {
-                    background-color: #dc2626;
+                    background-color: var(--red-600);
                 }
             }
         }
@@ -396,10 +433,10 @@ const handleProfileClick = (profile) => {
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                        }
 
-                        .state-icon.pi-spinner {
-                            animation: spin 2s linear infinite;
+                            &.pi-spinner {
+                                animation: spin 1s linear infinite;
+                            }
                         }
                     }
                 }
@@ -430,51 +467,36 @@ const handleProfileClick = (profile) => {
                 font-size: 0.875rem;
                 color: var(--text-color-secondary);
             }
-
-            .create-profile-btn {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-top: 0.5rem;
-                padding: 0.5rem 1rem;
-                background-color: var(--primary-color);
-                color: var(--primary-contrast-color);
-                border: none;
-                border-radius: var(--content-border-radius);
-                font-size: 0.875rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition: background-color var(--element-transition-duration);
-
-                &:hover {
-                    background-color: var(--primary-600);
-                }
-            }
         }
     }
 
     .account-actions {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.75rem;
 
         .account-action-button {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.75rem;
             padding: 0.75rem 1rem;
-            background-color: var(--surface-hover);
             border: 1px solid var(--surface-border);
-            border-radius: var(--content-border-radius);
+            background-color: var(--surface-card);
             color: var(--text-color);
-            font-weight: 500;
+            border-radius: var(--content-border-radius);
             cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
             transition: all var(--element-transition-duration);
 
+            i {
+                font-size: 1rem;
+            }
+
             &:hover:not(:disabled) {
-                background-color: var(--surface-0);
+                background-color: var(--surface-hover);
                 border-color: var(--primary-color);
-                color: var(--primary-color);
             }
 
             &:disabled {
@@ -482,40 +504,15 @@ const handleProfileClick = (profile) => {
                 cursor: not-allowed;
             }
 
-            i {
-                font-size: 1rem;
-            }
-
-            &.login-button {
+            &.login-button:not(:disabled) {
                 background-color: var(--primary-color);
-                border-color: var(--primary-color);
                 color: var(--primary-contrast-color);
+                border-color: var(--primary-color);
 
-                &:hover:not(:disabled) {
-                    background-color: var(--primary-600);
-                    border-color: var(--primary-600);
+                &:hover {
+                    opacity: 0.9;
                 }
             }
-        }
-    }
-
-    .auth-prompt {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 2rem 1rem;
-        text-align: center;
-
-        .auth-icon {
-            font-size: 2rem;
-            color: var(--text-color-secondary);
-        }
-
-        .auth-message {
-            margin: 0;
-            font-weight: 500;
-            color: var(--text-color);
         }
     }
 }
