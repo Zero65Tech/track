@@ -6,7 +6,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "dev": "node src/index.js",
+    "dev": "STAGE=${STAGE:-alpha} nodemon src/index.js",
     "test": "jest --coverage --testPathPattern=test/",
     "lint": "npx eslint src test"
   },

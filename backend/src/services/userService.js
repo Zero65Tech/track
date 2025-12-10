@@ -1,5 +1,5 @@
 import { LRUCache } from "lru-cache";
-import admin from "../config/firebase.js";
+import { firebaseAdmin } from "../config/firebase.js";
 
 const cache = new LRUCache({
   max: 1024,
@@ -9,7 +9,7 @@ const cache = new LRUCache({
 async function _getCached(uid) {
   let data = cache.get(uid);
   if (!data) {
-    data = await admin.auth().getUser(uid);
+    data = await firebaseAdmin.auth().getUser(uid);
     cache.set(uid, data);
   }
   return data;

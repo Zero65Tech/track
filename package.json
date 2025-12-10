@@ -10,7 +10,7 @@
     "backend"
   ],
   "scripts": {
-    "frontend": "npm run dev --workspace=frontend -- --mode=beta",
+    "frontend": "npm run dev --workspace=frontend",
     "backend": "npm run dev --workspace=backend"
   },
   "devDependencies": {}
