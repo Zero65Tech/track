@@ -5,7 +5,13 @@ import { initialiseDbConnection } from "./config/db.js";
 import app from "./app.js";
 
 (async () => {
-  dotenv.config({ path: [".env", `.env.${process.env.STAGE}`] });
+  dotenv.config({
+    path: [
+      ".env",
+      `.env.${process.env.STAGE}`,
+      `.env.${process.env.STAGE}.local`,
+    ],
+  });
   initialiseFirebaseAdmin();
   await initialiseDbConnection();
   app.listen(process.env.PORT, () =>
