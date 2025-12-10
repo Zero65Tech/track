@@ -56,7 +56,10 @@ app.use((req, res, next) => {
 app.get(`/api/ls`, (req, res) => {
   try {
     const files = fs.readdirSync(".");
-    res.json({ files });
+    res.json({
+      cwd: process.cwd(),
+      files,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
