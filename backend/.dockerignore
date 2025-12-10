@@ -1,6 +1,4 @@
-*
-!package.json
-!shared/
+backend
 !backend/src/
 !backend/.env.beta
 !backend/.env.gamma
