@@ -1,6 +1,8 @@
 *
-!src/
-!.env.beta
-!.env.gamma
-!node_modules/
 !package.json
+!shared/
+!backend/src/
+!backend/.env.beta
+!backend/.env.gamma
+!backend/node_modules/
+!backend/package.json
