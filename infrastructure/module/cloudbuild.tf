@@ -98,6 +98,12 @@ resource "google_cloudbuild_trigger" "backend" {
   ]
   build {
     step {
+      name = "node:22-alpine"
+      entrypoint = "npm"
+      args = [ "install", "--omit=dev" ]
+      dir = "backend"
+    }
+    step {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "build", ".",
