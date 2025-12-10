@@ -22,20 +22,13 @@
     },
   ],
   "settings": {
-    "files.exclude": {
-      "**/node_modules/": true,
-      "**/dist/": true,
-    },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
       "README.md": "PULL_REQUEST_TEMPLATE.md",
-      "package.json": "package-lock.json, eslint*, prettier*",
+      "package.json": "package-lock.json",
       "firebase.json": ".firebaserc",
       "Dockerfile": ".dockerignore",
     },
-    "editor.formatOnType": true,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "diffEditor.ignoreTrimWhitespace": false,
     "git.autofetch": true,
     "git.confirmSync": false,
@@ -57,10 +50,6 @@
       "google.geminicodeassist",
       "gruntfuggly.todo-tree",
       "mermaidchart.vscode-mermaid-chart",
-      "esbenp.prettier-vscode",
-      "dbaeumer.vscode-eslint",
-      "vue.volar",
-      "hashicorp.terraform",
     ],
   },
 }

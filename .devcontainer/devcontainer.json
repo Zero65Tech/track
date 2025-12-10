@@ -1,6 +1,6 @@
 {
   "dockerFile": "Dockerfile",
-  "postCreateCommand": "npm update",
+  "postStartCommand": "npm update",
   "customizations": {
     "vscode": {
       "extensions": [
