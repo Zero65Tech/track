@@ -58,21 +58,23 @@ resource "google_cloudbuild_trigger" "frontend" {
   ]
   build {
     step {
-      name = "node:22-alpine"
-      entrypoint = "npm"
-      args = [ "install" ]
-      dir = "frontend"
+      name = "alpine"
+      entrypoint = "sh"
+      args = [ "-c", "mv frontend/firebase.json firebase.json" ]
     }
     step {
       name = "node:22-alpine"
       entrypoint = "npm"
-      args = [ "run", "build" ]
-      dir = "frontend"
+      args = [ "install", "--workspace=frontend" ]
+    }
+    step {
+      name = "node:22-alpine"
+      entrypoint = "npm"
+      args = [ "run", "build", "--workspace=frontend" ]
     }
     step {
       name = "us-docker.pkg.dev/firebase-cli/us/firebase"
       args = [ "deploy", "--project=$PROJECT_ID", "--only=hosting:${var.stage == "prod" ? var.name : var.project_id }" ]
-      dir = "frontend"
     }
     options {
       logging = "CLOUD_LOGGING_ONLY"
@@ -105,8 +107,7 @@ resource "google_cloudbuild_trigger" "backend" {
     step {
       name = "node:22-alpine"
       entrypoint = "npm"
-      args = [ "install", "--omit=dev" ]
-      dir = "backend"
+      args = [ "install", "--omit=dev", "--workspace=backend" ]
     }
     step {
       name = "gcr.io/cloud-builders/docker"
