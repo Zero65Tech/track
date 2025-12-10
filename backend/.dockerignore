@@ -1,3 +1,6 @@
+backend/.vscode
+backend/.gitignore
+backend/Dockerfile
 backend/.env.alpha
 backend/.env.gamma
 backend/test/
