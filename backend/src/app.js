@@ -1,9 +1,5 @@
 import express from "express";
 
-import _ from "lodash";
-
-import idMappings from "./config/idMappings.js";
-
 import authMiddleware from "./middlewares/auth.js";
 import accessMiddleware from "./middlewares/access.js";
 
@@ -25,29 +21,11 @@ import aggregationController from "./controllers/aggregationController.js";
 const app = express();
 app.use(express.json());
 
-app.param("profileId", (req, res, next, profileId) => {
-  if (profileId.startsWith("$"))
-    req.params.profileId =
-      _.get(idMappings, req.params.profileId.substring(1)) ||
-      req.params.profileId;
-  next();
-});
-
 app.use((req, res, next) => {
   if (req.body) {
     if ("_id" in req.body) delete req.body._id;
     if ("profileId" in req.body) delete req.body.profileId;
-    if ("bookId" in req.body && req.body.bookId.startsWith("$"))
-      req.body.bookId =
-        _.get(idMappings, req.body.bookId.substring(1)) || req.body.bookId;
-    if ("headId" in req.body && req.body.headId.startsWith("$"))
-      req.body.headId =
-        _.get(idMappings, req.body.headId.substring(1)) || req.body.headId;
-    if ("tagId" in req.body && req.body.tagId.startsWith("$"))
-      req.body.tagId =
-        _.get(idMappings, req.body.tagId.substring(1)) || req.body.tagId;
   }
-
   next();
 });
 
