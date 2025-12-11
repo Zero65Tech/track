@@ -9,7 +9,6 @@ import {
 
 import transaction from "../utils/transaction.js";
 import config from "../config/coin.js";
-import getNamedAggregationPipeline from "../config/named-aggregation-pipelines.js";
 
 import EntryModel from "../models/Entry.js";
 import TriggerModel from "../models/Trigger.js";
@@ -33,10 +32,10 @@ async function create(profileId, data, userId) {
   return doc.toObject();
 }
 
-async function processAll() {
+async function processAll(limit = 1000) {
   // Concurrent execution safety: This function may be invoked repeatedly (e.g., via cron) while
   // a previous invocation is still processing triggers. Overlapping invocations may fetch the same
-  // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on updatedAt
+  // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on state
   // to prevent duplicate processing: the first invocation succeeds and transitions the trigger to
   // RUNNING state, causing subsequent attempts to fail the OCC check (modifiedCount === 0) and skip.
 
@@ -46,13 +45,13 @@ async function processAll() {
     state: TriggerState.QUEUED.id,
   })
     .sort({ createdAt: 1 })
-    .limit(1000)
+    .limit(limit)
     .lean();
 
   let processedCount = 0;
   for (const triggerData of triggerDataArr) {
     const result = await TriggerModel.updateOne(
-      { _id: triggerData._id, updatedAt: triggerData.updatedAt },
+      { _id: triggerData._id, state: TriggerState.QUEUED.id },
       { $set: { state: TriggerState.RUNNING.id } },
     );
     if (result.modifiedCount === 0) continue;
@@ -74,7 +73,7 @@ async function _processOne(triggerData) {
 
     if (profile.coins < 1) {
       const updateResult = await TriggerModel.updateOne(
-        { _id: triggerData._id, updatedAt: triggerData.updatedAt },
+        { _id: triggerData._id, state: TriggerState.RUNNING.id },
         {
           $set: {
             state: TriggerState.FAILED.id,
@@ -99,10 +98,10 @@ async function _processOne(triggerData) {
 }
 
 async function _processNamedAggregation(triggerData) {
-  const aggregationPipeline = getNamedAggregationPipeline(
-    triggerData.profileId,
-    triggerData.params.name,
+  const { default: pipelineBuilder } = await import(
+    `../config/aggregations/${triggerData.params.name}.js`
   );
+  const aggregationPipeline = pipelineBuilder(triggerData.profileId);
   const aggregationResult = await EntryModel.aggregate(aggregationPipeline);
   const entriesProcessed = aggregationResult.reduce(
     (sum, item) => sum + item.count,
@@ -115,7 +114,7 @@ async function _processNamedAggregation(triggerData) {
       {
         profileId: triggerData.profileId,
         name: triggerData.params.name,
-        aggregationResult,
+        result: aggregationResult,
       },
       session,
     );
@@ -133,7 +132,11 @@ async function _processNamedAggregation(triggerData) {
     await profileService._update({ coins: coinsRemaining }, session);
 
     const updateResult = await TriggerModel.updateOne(
-      { _id: triggerData._id, updatedAt: triggerData.updatedAt },
+      {
+        _id: triggerData._id,
+        type: TriggerType.DATA_AGGREGATION.id, // without this Mongoose won't $set 'result'
+        state: TriggerState.RUNNING.id,
+      },
       {
         $set: {
           state: TriggerState.COMPLETED.id,

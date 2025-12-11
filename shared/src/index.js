@@ -123,11 +123,10 @@ const TriggerState = Object.freeze({
 });
 
 const AggregationName = Object.freeze({
-  HEAD_TAG: Object.freeze({ id: "head-tag", name: "Head Tag" }),
-  BALANCE: Object.freeze({ id: "balance", name: "Balance" }),
-  INCOME: Object.freeze({ id: "income", name: "Income" }),
-  EXPENSE: Object.freeze({ id: "expense", name: "Expense" }),
-  CUSTOM: Object.freeze({ id: "custom", name: "Custom" }),
+  COUNTS_BY_HEAD_TAG: Object.freeze({ id: "counts_by_head_tag", name: "Counts by Head & Tag" }),
+  BALANCES_BY_BOOK: Object.freeze({ id: "balances_by_book", name: "Balances by Book" }),
+  BALANCES_BY_SOURCE: Object.freeze({ id: "balances_by_source", name: "Balances by Source" }),
+  AMOUNTS_BY_TYPE: Object.freeze({ id: "amounts_by_type", name: "Amounts by Type" }),
 });
 
 const CoinLedgerRef = Object.freeze({
