@@ -1,0 +1,101 @@
+import { EntryType } from "@zero65/track";
+
+export default (profileId) => [
+  {
+    $match: {
+      profileId,
+      type: {
+        $in: [
+          EntryType.CREDIT.id,
+          EntryType.DEBIT.id,
+          EntryType.INCOME.id,
+          EntryType.EXPENSE.id,
+          EntryType.REFUND.id,
+          EntryType.TAX.id,
+          EntryType.PAYMENT.id,
+          EntryType.RECEIPT.id,
+          EntryType.TRANSFER.id,
+        ],
+      },
+    },
+  },
+  {
+    $facet: {
+      sourceEntries: [
+        {
+          $match: {
+            type: {
+              $not: { $eq: EntryType.TRANSFER.id },
+            },
+            sourceId: { $exists: true, $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: "$sourceId",
+            balance: {
+              $sum: {
+                $cond: [
+                  {
+                    $in: [
+                      "$type",
+                      [
+                        EntryType.CREDIT.id,
+                        EntryType.INCOME.id,
+                        EntryType.REFUND.id,
+                      ],
+                    ],
+                  },
+                  "$amount",
+                  { $multiply: ["$amount", -1] },
+                ],
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ],
+      transferFrom: [
+        {
+          $match: { type: EntryType.TRANSFER.id },
+        },
+        {
+          $group: {
+            _id: "$sourceIdFrom",
+            balance: { $sum: { $multiply: ["$amount", -1] } },
+            count: { $sum: 1 },
+          },
+        },
+      ],
+      transferTo: [
+        {
+          $match: { type: EntryType.TRANSFER.id },
+        },
+        {
+          $group: {
+            _id: "$sourceIdTo",
+            balance: { $sum: "$amount" },
+            count: { $sum: 1 },
+          },
+        },
+      ],
+    },
+  },
+  {
+    $project: {
+      allResults: {
+        $concatArrays: ["$sourceEntries", "$transferFrom", "$transferTo"],
+      },
+    },
+  },
+  {
+    $unwind: "$allResults",
+  },
+  {
+    $group: {
+      _id: "$allResults._id",
+      balance: { $sum: "$allResults.balance" },
+      count: { $sum: "$allResults.count" },
+    },
+  },
+];
