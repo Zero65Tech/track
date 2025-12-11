@@ -1,113 +1,130 @@
-import _ from "lodash";
-import { TriggerType, TriggerState } from "@zero65/track";
+import assert from "assert";
+
+import {
+  TriggerType,
+  TriggerState,
+  CoinLedgerRef,
+  CoinLedgerType,
+} from "@zero65/track";
 
 import transaction from "../utils/transaction.js";
 import config from "../config/coin.js";
 import getNamedAggregationPipeline from "../config/named-aggregation-pipelines.js";
 
 import EntryModel from "../models/Entry.js";
-import Trigger from "../models/Trigger.js";
+import TriggerModel from "../models/Trigger.js";
 
 import profileService from "./profileService.js";
 import aggregationService from "./aggregationService.js";
 import coinLedger from "./coinLedger.js";
 
-async function create(profileId, type, params, userId) {
-  const doc = await Trigger.create({
-    userId,
-    profileId,
-    type,
-    state: TriggerState.PENDING.id,
-    params,
-  });
+async function _create({ profileId, data, userId }, session) {
+  data["profileId"] = profileId;
+  data["state"] = TriggerState.PENDING.id;
+  data["userId"] = userId;
+  await TriggerModel.create([data], { session });
+}
+
+async function create(profileId, data, userId) {
+  data["profileId"] = profileId;
+  data["state"] = TriggerState.PENDING.id;
+  data["userId"] = userId;
+  const doc = await TriggerModel.create(data);
   return doc.toObject();
 }
 
-async function _process(deadLine) {
-  const summary = {};
+async function processAll() {
+  // Concurrent execution safety: This function may be invoked repeatedly (e.g., via cron) while
+  // a previous invocation is still processing triggers. Overlapping invocations may fetch the same
+  // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on updatedAt
+  // to prevent duplicate processing: the first invocation succeeds and transitions the trigger to
+  // RUNNING state, causing subsequent attempts to fail the OCC check (modifiedCount === 0) and skip.
 
-  const docs = await Trigger.find({ state: TriggerState.PENDING.id })
+  const timestamp = Date.now();
+
+  const triggerDataArr = await TriggerModel.find({
+    state: TriggerState.QUEUED.id,
+  })
     .sort({ createdAt: 1 })
-    .limit(1000);
+    .limit(1000)
+    .lean();
 
-  for (let i = 0; i < docs.length - 1; i++) {
-    for (let j = i + 1; j < docs.length; j++) {
-      if (!docs[i].profileId.equals(docs[j].profileId)) continue;
-      if (docs[i].type !== docs[j].type) continue;
-      if (!_.isEqual(docs[i].params, docs[j].params)) continue;
-      docs[i].set("state", TriggerState.CANCELLED.id);
-      docs[i].set("result", { message: "Duplicate Trigger." });
-      await docs[i].save(); // OCC Kicks-In
-      _.update(
-        summary,
-        [docs[i].type, TriggerState.CANCELLED.id],
-        (val) => (val || 0) + 1,
-      );
-      break;
-    }
+  let processedCount = 0;
+  for (const triggerData of triggerDataArr) {
+    const result = await TriggerModel.updateOne(
+      { _id: triggerData._id, updatedAt: triggerData.updatedAt },
+      { $set: { state: TriggerState.RUNNING.id } },
+    );
+    if (result.modifiedCount === 0) continue;
+    await _processOne(triggerData);
+    processedCount++;
   }
-
-  while (Date.now() < deadLine) {
-    const trigger = docs.find((doc) => doc.state == TriggerState.PENDING.id);
-    if (!trigger) break;
-
-    if (trigger.type === TriggerType.PROFILE_CREATED.id) {
-      // TODO: TriggerType.PROFILE_CREATED
-    } else if (trigger.type === TriggerType.PROFILE_OPENED.id) {
-      // TODO: TriggerType.PROFILE_OPENED
-    } else if (trigger.type === TriggerType.DATA_AGGREGATION.id) {
-      const profile = profileService._getCached(trigger.profileId);
-
-      if (profile.coins < 1) {
-        trigger.set("state", TriggerState.CANCELLED.id);
-        trigger.set("result", { message: "Insufficient Coins." });
-        await trigger.save(); // OCC Kicks-In
-        _.update(
-          summary,
-          [trigger.type, TriggerState.CANCELLED.id],
-          (val) => (val || 0) + 1,
-        );
-      }
-
-      if (trigger.params.name === "custom") {
-        // TODO: TriggerType.DATA_AGGREGATION, custom
-      } else {
-        await _processNamedAggregation(trigger, summary);
-      }
-    } else if (trigger.type === TriggerType.DATA_EXPORT.id) {
-      // TODO: TriggerType.DATA_EXPORT
-    } else {
-      throw new Error("Unexpected condition reached.");
-    }
-  }
-
-  return summary;
+  console.log(
+    `${processedCount} trigger(s) processed in ${Date.now() - timestamp}ms`,
+  );
 }
 
-async function _processNamedAggregation(trigger, summary) {
-  await transaction(async (session) => {
-    const aggregationPipeline = getNamedAggregationPipeline(
-      trigger.profileId,
-      trigger.params.name,
-    );
-    const result = await EntryModel.aggregate(aggregationPipeline);
-    const entriesProcessed = result.reduce((sum, item) => sum + item.count, 0);
-    const coinsToDeduct = config.aggregation(entriesProcessed);
+async function _processOne(triggerData) {
+  if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
+    // TODO: TriggerType.PROFILE_CREATED
+  } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
+    // TODO: TriggerType.PROFILE_OPENED
+  } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
+    const profile = profileService._getCached(triggerData.profileId);
 
+    if (profile.coins < 1) {
+      const updateResult = await TriggerModel.updateOne(
+        { _id: triggerData._id, updatedAt: triggerData.updatedAt },
+        {
+          $set: {
+            state: TriggerState.FAILED.id,
+            result: { message: "Insufficient Coins." }, // TOOD: Move this to i18n
+          },
+        },
+      );
+      assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+      return;
+    }
+
+    if (triggerData.params.name === "custom") {
+      // TODO: TriggerType.DATA_AGGREGATION, custom
+    } else {
+      await _processNamedAggregation(triggerData);
+    }
+  } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
+    // TODO: TriggerType.DATA_EXPORT
+  } else {
+    assert.fail(); // 💪🏻
+  }
+}
+
+async function _processNamedAggregation(triggerData) {
+  const aggregationPipeline = getNamedAggregationPipeline(
+    triggerData.profileId,
+    triggerData.params.name,
+  );
+  const aggregationResult = await EntryModel.aggregate(aggregationPipeline);
+  const entriesProcessed = aggregationResult.reduce(
+    (sum, item) => sum + item.count,
+    0,
+  );
+  const coinsToDeduct = config.aggregation(entriesProcessed);
+
+  await transaction(async (session) => {
     await aggregationService._setNamedResult(
       {
-        profileId: trigger.profileId,
-        name: trigger.params.name,
-        result,
+        profileId: triggerData.profileId,
+        name: triggerData.params.name,
+        aggregationResult,
       },
       session,
     );
 
     const coinsRemaining = await coinLedger._deduct(
       {
-        profileId: trigger.profileId,
-        ref: { type: "trigger", id: trigger._id },
-        type: "aggregation",
+        profileId: triggerData.profileId,
+        ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
+        type: CoinLedgerType.DATA_AGGREGATION.id,
         countDeduct: coinsToDeduct,
       },
       session,
@@ -115,28 +132,22 @@ async function _processNamedAggregation(trigger, summary) {
 
     await profileService._update({ coins: coinsRemaining }, session);
 
-    trigger.set("state", TriggerState.COMPLETED.id);
-    trigger.set("result", {
-      message: `Aggregated ${entriesProcessed} Entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed .`,
-    });
-    await trigger.save({ session }); // OCC Kicks-In
+    const updateResult = await TriggerModel.updateOne(
+      { _id: triggerData._id, updatedAt: triggerData.updatedAt },
+      {
+        $set: {
+          state: TriggerState.COMPLETED.id,
+          result: {
+            // TOOD: Move this to i18n
+            message: `Aggregated ${entriesProcessed} Entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed .`,
+          },
+        },
+      },
+    ).session(session);
 
-    _.update(
-      summary,
-      [trigger.type, TriggerState.COMPLETED.id],
-      (val) => (val || 0) + 1,
-    );
-    _.update(
-      summary,
-      [trigger.type, "entriesProcessed"],
-      (val) => (val || 0) + entriesProcessed,
-    );
-    _.update(
-      summary,
-      [trigger.type, "coinsDeducted"],
-      (val) => (val || 0) + coinsToDeduct,
-    );
+    // If modifiedCount is 0, throw error to rollback the entire transaction.
+    assert.notEqual(updateResult.modifiedCount, 0);
   });
 }
 
-export default { create, _process };
+export default { create, _create, processAll };

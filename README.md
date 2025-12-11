@@ -62,7 +62,7 @@ function names starting with '\_' are meant to be used internally, i.e. not call
   - [x] Do **not** check if nested `docId` exists and active
   - [ ] Allow only Read APIs for `inactive` and `disabled` Profiles
   - [ ] Disallow all APIs for `deleted` Profiles
-- Audit Logs
+- Audit Logs (Profiles, Core Components)
   - [ ] Read APIs
 - Purchase
 - Promotions

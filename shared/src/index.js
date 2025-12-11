@@ -104,13 +104,13 @@ const TriggerType = Object.freeze({
 });
 
 const TriggerState = Object.freeze({
-  PENDING: Object.freeze({
-    id: "pending",
-    name: "Pending",
+  QUEUED: Object.freeze({
+    id: "queued",
+    name: "Queued",
   }),
-  CANCELLED: Object.freeze({
-    id: "cancelled",
-    name: "Cancelled",
+  RUNNING: Object.freeze({
+    id: "running",
+    name: "Running",
   }),
   FAILED: Object.freeze({
     id: "failed",

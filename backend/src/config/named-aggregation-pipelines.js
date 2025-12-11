@@ -1,4 +1,5 @@
 const configs = {
+  // TODO: Move this enum
   "head-tag": {
     match: {
       type: ["credit", "debit", "income", "expense", "refund", "tax"],
