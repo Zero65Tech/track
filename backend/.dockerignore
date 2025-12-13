@@ -2,5 +2,5 @@ backend
 !backend/package.json
 !backend/node_modules/
 !backend/.env.beta
-!backend/.env.gamma
+!backend/.env.prod
 !backend/src/
