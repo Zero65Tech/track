@@ -19,14 +19,14 @@ import coinLedger from "./coinLedger.js";
 
 async function _create({ profileId, data, userId }, session) {
   data["profileId"] = profileId;
-  data["state"] = TriggerState.PENDING.id;
+  data["state"] = TriggerState.QUEUED.id;
   data["userId"] = userId;
   await TriggerModel.create([data], { session });
 }
 
 async function create(profileId, data, userId) {
   data["profileId"] = profileId;
-  data["state"] = TriggerState.PENDING.id;
+  data["state"] = TriggerState.QUEUED.id;
   data["userId"] = userId;
   const doc = await TriggerModel.create(data);
   return doc.toObject();

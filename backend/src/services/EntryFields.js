@@ -23,9 +23,9 @@ class GenericService {
       .lean();
 
     for (let data of dataArr) {
-      delete data["profileId"];
-      // DEPRECATE: _id in response
       data.id = data._id.toString();
+      delete data["_id"];
+      delete data["profileId"];
     }
 
     return dataArr;
