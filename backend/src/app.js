@@ -3,6 +3,7 @@ import express from "express";
 import authMiddleware from "./middlewares/auth.js";
 import accessMiddleware from "./middlewares/access.js";
 
+import userFcmTokenController from "./controllers/userFcmTokenController.js";
 import profileController from "./controllers/profileController.js";
 import {
   bookController,
@@ -37,6 +38,8 @@ app.get(`${API_PREFIX}/cron`, cronController);
 // NOTE: User must be loggedin for following routes
 
 app.use(authMiddleware);
+
+app.post(`${API_PREFIX}/users/fcm-token`, userFcmTokenController.storeFcmToken);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAllAccessible);
 app.post(`${API_PREFIX}/profiles`, profileController.create);
