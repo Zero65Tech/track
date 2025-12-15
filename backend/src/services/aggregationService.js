@@ -4,12 +4,8 @@ import Aggregation from "../models/Aggregation.js";
 
 // Named
 
-async function getNamedResult(profileId, name) {
-  const doc = await Aggregation.findOne({ profileId, name })
-    .select({ _id: 0, result: 1 })
-    .sort({ timestamp: -1 });
-
-  return doc ? doc.result : null;
+async function getNamed(profileId, name) {
+  return await Aggregation.findOne({ profileId, name }).lean();
 }
 
 async function _setNamedResult({ profileId, name, result }, session) {
@@ -47,7 +43,7 @@ async function _setCustomResult({ profileId, id, result }, session) {
 }
 
 export default {
-  getNamedResult,
+  getNamed,
   createCustomPipeline,
   getCustomResult,
   _setNamedResult,

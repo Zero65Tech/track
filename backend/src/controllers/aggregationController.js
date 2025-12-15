@@ -5,11 +5,11 @@ import aggregationService from "../services/aggregationService.js";
 // Named
 
 async function getNamedResult(req, res) {
-  const result = await aggregationService.getNamedResult(
+  const data = await aggregationService.getNamed(
     req.params.profileId,
     req.params.name,
   );
-  sendData(res, { result });
+  sendData(res, { result: data.result, timestamp: data.updatedAt });
 }
 
 // Custom
