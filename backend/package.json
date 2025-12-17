@@ -9,7 +9,7 @@
     "dev": "STAGE=${STAGE:-alpha} nodemon src/index.js",
     "test": "jest --coverage --testPathPattern=test/",
     "lint": "npx eslint src test",
-    "callgraph": "npx madge --extensions js --image callgraph.svg src/services"
+    "callgraph": "npx madge --exclude 'utils/(transaction|response)' --image callgraph.svg src"
   },
   "dependencies": {
     "@zero65/track": "^5.0.0",
