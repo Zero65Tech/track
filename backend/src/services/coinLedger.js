@@ -1,9 +1,9 @@
-import Coin from "../models/Coin.js";
+import CoinModel from "../models/Coin.js";
 
 import config from "../config/coin.js";
 
 async function _initCoinLedger({ profileId }, session) {
-  await Coin.create(
+  await CoinModel.create(
     [
       {
         profileId,
@@ -20,7 +20,7 @@ async function _initCoinLedger({ profileId }, session) {
 }
 
 async function _deductCoin({ profileId, ref, type, countDeduct }, session) {
-  let latestTxn = await Coin.findOne({ profileId, latest: true }).session(
+  let latestTxn = await CoinModel.findOne({ profileId, latest: true }).session(
     session,
   );
 
@@ -48,7 +48,7 @@ async function _deductCoin({ profileId, ref, type, countDeduct }, session) {
   latestTxn.latest = false;
   await latestTxn.save({ session });
 
-  latestTxn = await Coin.create(
+  latestTxn = await CoinModel.create(
     [
       {
         profileId,

@@ -1,18 +1,18 @@
 import { AggregationName } from "@zero65/track";
 
-import Aggregation from "../models/Aggregation.js";
+import AggregationModel from "../models/Aggregation.js";
 
 // Named
 
 async function getNamed(profileId, name) {
-  return await Aggregation.findOne({ profileId, name }).lean();
+  return await AggregationModel.findOne({ profileId, name }).lean();
 }
 
 async function _setNamedAggregationResult(
   { profileId, name, result },
   session,
 ) {
-  await Aggregation.updateOne(
+  await AggregationModel.updateOne(
     { profileId, name },
     { $set: { result } },
     { upsert: true },
@@ -23,12 +23,16 @@ async function _setNamedAggregationResult(
 
 async function createCustomPipeline(profileId, pipeline) {
   // TODO
-  const doc = await Aggregation.create({ profileId, name: "custom", pipeline });
+  const doc = await AggregationModel.create({
+    profileId,
+    name: "custom",
+    pipeline,
+  });
   return doc._id;
 }
 
 async function getCustomResult(profileId, id) {
-  const doc = await Aggregation.findOne({
+  const doc = await AggregationModel.findOne({
     profileId,
     name: AggregationName.CUSTOM.id,
     _id: id,
@@ -38,7 +42,7 @@ async function getCustomResult(profileId, id) {
 }
 
 async function _setCustomAggregationResult({ profileId, id, result }, session) {
-  await Aggregation.updateOne(
+  await AggregationModel.updateOne(
     { profileId, name: "custom", _id: id },
     { $set: { result, timestamp: Date.now } },
     { upsert: true },
