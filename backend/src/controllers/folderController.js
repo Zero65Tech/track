@@ -1,13 +1,18 @@
 import { sendData } from "../utils/response.js";
-import folderService from "../services/folderService.js";
+import {
+  getAll as getAllFolders,
+  create as createFolder,
+  update as updateFolder,
+  remove as removeFolder,
+} from "../services/folderService.js";
 
 async function getAll(req, res) {
-  const folders = await folderService.getAll(req.params.profileId);
+  const folders = await getAllFolders(req.params.profileId);
   sendData(res, { folders });
 }
 
 async function create(req, res) {
-  const folder = await folderService.create(
+  const folder = await createFolder(
     req.params.profileId,
     req.body,
     req.user.uid,
@@ -16,7 +21,7 @@ async function create(req, res) {
 }
 
 async function update(req, res) {
-  const folder = await folderService.update(
+  const folder = await updateFolder(
     req.params.profileId,
     req.params.id,
     req.body,
@@ -26,7 +31,7 @@ async function update(req, res) {
 }
 
 async function remove(req, res) {
-  await folderService.remove(req.params.profileId, req.params.id, req.user.uid);
+  await removeFolder(req.params.profileId, req.params.id, req.user.uid);
   sendData(res, null, "Folder deleted successfully");
 }
 

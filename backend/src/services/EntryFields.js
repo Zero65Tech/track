@@ -9,7 +9,11 @@ import {
   SourceModel,
 } from "../models/EntryFields.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
 class GenericService {
   constructor(model) {
@@ -38,7 +42,7 @@ class GenericService {
       const [doc] = await this.model.create([data], { session });
 
       data = doc.toObject();
-      await auditLogService._logCreate(
+      await _logCreateAudit(
         { userId, docType: this.model.collection.name, data },
         session,
       );
@@ -66,7 +70,7 @@ class GenericService {
 
       const newData = doc.toObject();
 
-      await auditLogService._logUpdate(
+      await _logUpdateAudit(
         { userId, docType: this.model.collection.name, oldData, newData },
         session,
       );
@@ -110,7 +114,7 @@ class GenericService {
       // TODO: Ensure there are no Entries with this docId
 
       const data = doc.toObject();
-      await auditLogService._logDelete(
+      await _logDeleteAudit(
         { userId, docType: this.model.collection.name, data },
         session,
       );

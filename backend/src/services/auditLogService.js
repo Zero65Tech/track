@@ -14,7 +14,7 @@ async function getAll(profileId, lastTimestamp, pageSize = 10) {
   return dataArr;
 }
 
-async function _logCreate({ userId, docType, data }, session) {
+async function _logCreateAudit({ userId, docType, data }, session) {
   const { _id, profileId, ...dataAfter } = data;
 
   await AuditLogModel.create(
@@ -33,7 +33,7 @@ async function _logCreate({ userId, docType, data }, session) {
   );
 }
 
-async function _logUpdate({ userId, docType, oldData, newData }, session) {
+async function _logUpdateAudit({ userId, docType, oldData, newData }, session) {
   const { _id, profileId, ...dataBefore } = oldData;
 
   const dataAfter = { ...newData };
@@ -56,7 +56,7 @@ async function _logUpdate({ userId, docType, oldData, newData }, session) {
   );
 }
 
-async function _logDelete({ userId, docType, data }, session) {
+async function _logDeleteAudit({ userId, docType, data }, session) {
   const { _id, profileId, ...dataBefore } = data;
 
   await AuditLogModel.create(
@@ -75,4 +75,4 @@ async function _logDelete({ userId, docType, data }, session) {
   );
 }
 
-export default { getAll, _logCreate, _logUpdate, _logDelete };
+export { getAll, _logCreateAudit, _logUpdateAudit, _logDeleteAudit };

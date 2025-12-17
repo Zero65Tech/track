@@ -5,15 +5,15 @@ import transaction from "../utils/transaction.js";
 
 import ProfileModel from "../models/Profile.js";
 
-import auditLogService from "./auditLogService.js";
-import coinLedger from "./coinLedger.js";
+import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
+import { _initCoinLedger } from "./coinLedger.js";
 
 const cache = new LRUCache({
   max: 1024,
   ttl: 1000 * 60 * 60 * 3, // 3 hours
 });
 
-async function _getCached(id) {
+async function _getCachedProfile(id) {
   id = typeof id === "string" ? id : id.toString();
   let data = cache.get(id);
   if (!data) {
@@ -75,13 +75,13 @@ async function create(name, userId) {
     );
 
     const data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: ProfileModel.collection.name, data },
       session,
     );
 
     // TODO: Remove dependency on coinLedger
-    await coinLedger._init({ profileId: doc._id }, session);
+    await _initCoinLedger({ profileId: doc._id }, session);
 
     return data;
   });
@@ -111,7 +111,7 @@ async function update(id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: ProfileModel.collection.name, oldData, newData },
       session,
     );
@@ -129,7 +129,7 @@ async function update(id, updates, userId) {
   };
 }
 
-async function _update({ id, updates }, session) {
+async function _updateProfile({ id, updates }, session) {
   await ProfileModel.updateOne(
     { _id: id },
     { $set: updates },
@@ -138,11 +138,11 @@ async function _update({ id, updates }, session) {
   cache.delete(id);
 }
 
-export default {
-  _getCached,
+export {
+  _getCachedProfile,
   getAllAccessible,
   getTemplatesBySystem,
   create,
   update,
-  _update,
+  _updateProfile,
 };

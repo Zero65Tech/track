@@ -1,22 +1,23 @@
 import { sendData } from "../utils/response.js";
-import groupService from "../services/groupService.js";
+import {
+  getAll as getAllGroups,
+  create as createGroup,
+  update as updateGroup,
+  remove as removeGroup,
+} from "../services/groupService.js";
 
 async function getAll(req, res) {
-  const groups = await groupService.getAll(req.params.profileId);
+  const groups = await getAllGroups(req.params.profileId);
   sendData(res, { groups });
 }
 
 async function create(req, res) {
-  const group = await groupService.create(
-    req.params.profileId,
-    req.body,
-    req.user.uid,
-  );
+  const group = await createGroup(req.params.profileId, req.body, req.user.uid);
   sendData(res, { group }, "Group created successfully.");
 }
 
 async function update(req, res) {
-  const group = await groupService.update(
+  const group = await updateGroup(
     req.params.profileId,
     req.params.id,
     req.body,
@@ -26,7 +27,7 @@ async function update(req, res) {
 }
 
 async function remove(req, res) {
-  await groupService.remove(req.params.profileId, req.params.id, req.user.uid);
+  await removeGroup(req.params.profileId, req.params.id, req.user.uid);
   sendData(res, null, "Group deleted successfully");
 }
 

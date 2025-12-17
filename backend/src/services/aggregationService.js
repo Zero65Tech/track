@@ -8,7 +8,10 @@ async function getNamed(profileId, name) {
   return await Aggregation.findOne({ profileId, name }).lean();
 }
 
-async function _setNamedResult({ profileId, name, result }, session) {
+async function _setNamedAggregationResult(
+  { profileId, name, result },
+  session,
+) {
   await Aggregation.updateOne(
     { profileId, name },
     { $set: { result } },
@@ -34,7 +37,7 @@ async function getCustomResult(profileId, id) {
   return doc ? doc.result : null;
 }
 
-async function _setCustomResult({ profileId, id, result }, session) {
+async function _setCustomAggregationResult({ profileId, id, result }, session) {
   await Aggregation.updateOne(
     { profileId, name: "custom", _id: id },
     { $set: { result, timestamp: Date.now } },
@@ -42,10 +45,10 @@ async function _setCustomResult({ profileId, id, result }, session) {
   ).session(session);
 }
 
-export default {
+export {
   getNamed,
   createCustomPipeline,
   getCustomResult,
-  _setNamedResult,
-  _setCustomResult,
+  _setNamedAggregationResult,
+  _setCustomAggregationResult,
 };

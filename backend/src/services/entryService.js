@@ -2,7 +2,11 @@ import transaction from "../utils/transaction.js";
 
 import EntryModel from "../models/Entry.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
 async function getAll(profileId, filters) {
   const dataArr = await EntryModel.find({ profileId, ...filters })
@@ -24,7 +28,7 @@ async function create(profileId, data, userId) {
     const [doc] = await EntryModel.create([data], { session });
 
     data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: EntryModel.collection.name, data },
       session,
     );
@@ -52,7 +56,7 @@ async function update(profileId, id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: EntryModel.collection.name, oldData, newData },
       session,
     );
@@ -74,7 +78,7 @@ async function remove(profileId, id, userId) {
     }
 
     const data = doc.toObject();
-    await auditLogService._logDelete(
+    await _logDeleteAudit(
       { userId, docType: EntryModel.collection.name, data },
       session,
     );
@@ -88,10 +92,4 @@ async function aggregateByPipeline(profileId, aggregationPipeline) {
   return result;
 }
 
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-  aggregateByPipeline,
-};
+export { getAll, create, update, remove, aggregateByPipeline };

@@ -1,5 +1,5 @@
 import { sendData, sendBadRequestError } from "../utils/response.js";
-import userFcmTokenService from "../services/userFcmTokenService.js";
+import { storeFcmToken as storeUserFcmToken } from "../services/userFcmTokenService.js";
 
 async function storeFcmToken(req, res) {
   const { deviceId, fmcToken } = req.body;
@@ -13,7 +13,7 @@ async function storeFcmToken(req, res) {
     return sendBadRequestError(res, "'deviceId' is required");
   }
 
-  await userFcmTokenService.storeFcmToken(userId, deviceId, fmcToken);
+  await storeUserFcmToken(userId, deviceId, fmcToken);
 
   return sendData(res);
 }

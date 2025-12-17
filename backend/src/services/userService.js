@@ -1,11 +1,11 @@
 import { LRUCache } from "lru-cache";
 import { lruCacheConfig } from "../config/cache.js";
 import { firebaseAdmin, getMessaging } from "../config/firebase.js";
-import userFcmTokenService from "./userFcmTokenService.js";
+import { getFcmTokens } from "./userFcmTokenService.js";
 
 const cache = new LRUCache(lruCacheConfig);
 
-async function _getCached(uid) {
+async function _getCachedUser(uid) {
   let data = cache.get(uid);
   if (!data) {
     data = await firebaseAdmin.auth().getUser(uid);
@@ -15,7 +15,7 @@ async function _getCached(uid) {
 }
 
 async function _sendFcmNotification(userIds, messageData) {
-  const fcmTokens = await userFcmTokenService.getFcmTokens(...userIds);
+  const fcmTokens = await getFcmTokens(...userIds);
 
   if (fcmTokens.length === 0) return;
 
@@ -36,4 +36,4 @@ async function _sendFcmNotification(userIds, messageData) {
   }
 }
 
-export default { _getCached, _sendFcmNotification };
+export { _getCachedUser, _sendFcmNotification };

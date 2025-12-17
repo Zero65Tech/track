@@ -1,8 +1,8 @@
 import { sendData } from "../utils/response.js";
-import triggerService from "../services/triggerService.js";
+import { create as createTrigger } from "../services/triggerService.js";
 
 async function create(req, res) {
-  const result = await triggerService.create(
+  const result = await createTrigger(
     req.params.profileId,
     req.body,
     req.user.uid,

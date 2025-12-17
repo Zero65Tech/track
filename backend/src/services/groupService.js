@@ -2,7 +2,11 @@ import transaction from "../utils/transaction.js";
 
 import GroupModel from "../models/Group.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
 async function getAll(profileId) {
   const dataArr = await GroupModel.find({ profileId }).lean();
@@ -22,7 +26,7 @@ async function create(profileId, data, userId) {
     const [doc] = await GroupModel.create([data], { session });
 
     data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: GroupModel.collection.name, data },
       session,
     );
@@ -51,7 +55,7 @@ async function update(profileId, id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: GroupModel.collection.name, oldData, newData },
       session,
     );
@@ -74,7 +78,7 @@ async function remove(profileId, id, userId) {
     }
 
     const data = doc.toObject();
-    await auditLogService._logDelete(
+    await _logDeleteAudit(
       { userId, docType: GroupModel.collection.name, data },
       session,
     );
@@ -83,9 +87,4 @@ async function remove(profileId, id, userId) {
   });
 }
 
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-};
+export { getAll, create, update, remove };

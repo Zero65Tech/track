@@ -1,8 +1,8 @@
 import { sendForbiddenError } from "../utils/response.js";
-import profileService from "../services/profileService.js";
+import { _getCachedProfile } from "../services/profileService.js";
 
 export default async function (req, res, next) {
-  const profile = await profileService._getCached(req.params.profileId);
+  const profile = await _getCachedProfile(req.params.profileId);
 
   if (req.user.uid === profile.owner)
     return next(); // prettier-ignore

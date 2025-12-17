@@ -2,7 +2,11 @@ import transaction from "../utils/transaction.js";
 
 import FolderModel from "../models/Folder.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
 async function getAll(profileId) {
   const dataArr = await FolderModel.find({ profileId })
@@ -24,7 +28,7 @@ async function create(profileId, data, userId) {
     const [doc] = await FolderModel.create([data], { session });
 
     data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: FolderModel.collection.name, data },
       session,
     );
@@ -53,7 +57,7 @@ async function update(profileId, id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: FolderModel.collection.name, oldData, newData },
       session,
     );
@@ -76,7 +80,7 @@ async function remove(profileId, id, userId) {
     }
 
     const data = doc.toObject();
-    await auditLogService._logDelete(
+    await _logDeleteAudit(
       { userId, docType: FolderModel.collection.name, data },
       session,
     );
@@ -85,9 +89,4 @@ async function remove(profileId, id, userId) {
   });
 }
 
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-};
+export { getAll, create, update, remove };
