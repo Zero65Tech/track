@@ -1,10 +1,8 @@
 import { LRUCache } from "lru-cache";
+import { lruCacheConfig } from "../config/cache.js";
 import { firebaseAdmin } from "../config/firebase.js";
 
-const cache = new LRUCache({
-  max: 1024,
-  ttl: 1000 * 60 * 60 * 3, // 3 hours
-});
+const cache = new LRUCache(lruCacheConfig);
 
 async function _getCached(uid) {
   let data = cache.get(uid);

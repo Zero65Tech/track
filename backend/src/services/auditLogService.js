@@ -1,5 +1,4 @@
 import AuditLogModel from "../models/AuditLog.js";
-import userService from "./userService.js";
 
 async function getAll(profileId, lastTimestamp, pageSize = 10) {
   const query = { profileId };
@@ -11,13 +10,6 @@ async function getAll(profileId, lastTimestamp, pageSize = 10) {
     .sort({ timestamp: -1 })
     .limit(pageSize)
     .lean();
-
-  for (let data of dataArr) {
-    const userData = await userService._getCached(data.userId);
-    delete data["userId"];
-    data["userName"] =
-      userData.displayName || userData.phoneNumber || userData.email;
-  }
 
   return dataArr;
 }
