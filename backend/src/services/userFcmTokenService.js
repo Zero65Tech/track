@@ -12,12 +12,14 @@ async function storeFcmToken(userId, deviceId, fcmToken) {
   );
 }
 
-async function getFcmTokens(userId) {
-  if (!userId) {
-    throw new Error("userId is required");
+async function getFcmTokens(...userIds) {
+  if (!userIds || userIds.length === 0) {
+    throw new Error("At least one userId is required");
   }
 
-  const results = await UserFcmTokenModel.find({ userId }).lean();
+  const results = await UserFcmTokenModel.find({
+    userId: { $in: userIds },
+  }).lean();
   return results.map((result) => result.fcmToken);
 }
 

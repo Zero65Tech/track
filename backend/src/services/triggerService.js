@@ -7,12 +7,14 @@ import {
   CoinLedgerType,
 } from "@zero65/track";
 
-import transaction from "../utils/transaction.js";
 import config from "../config/coin.js";
+
+import transaction from "../utils/transaction.js";
 
 import EntryModel from "../models/Entry.js";
 import TriggerModel from "../models/Trigger.js";
 
+import userService from "./userService.js";
 import profileService from "./profileService.js";
 import aggregationService from "./aggregationService.js";
 import coinLedger from "./coinLedger.js";
@@ -88,7 +90,7 @@ async function _processOne(triggerData) {
     if (triggerData.params.name === "custom") {
       // TODO: TriggerType.DATA_AGGREGATION, custom
     } else {
-      await _processNamedAggregation(triggerData);
+      await _processNamedAggregation(triggerData, profile);
     }
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
     // TODO: TriggerType.DATA_EXPORT
@@ -97,7 +99,7 @@ async function _processOne(triggerData) {
   }
 }
 
-async function _processNamedAggregation(triggerData) {
+async function _processNamedAggregation(triggerData, profile) {
   const { default: pipelineBuilder } = await import(
     `../config/aggregations/${triggerData.params.name}.js`
   );
@@ -150,6 +152,15 @@ async function _processNamedAggregation(triggerData) {
 
     // If modifiedCount is 0, throw error to rollback the entire transaction.
     assert.notEqual(updateResult.modifiedCount, 0);
+  });
+
+  // Send FCM notification after successful completion
+  await userService._sendFcmNotification([profile.owner, ...profile.editors], {
+    triggerType: triggerData.type,
+    triggerState: TriggerState.COMPLETED.id,
+    profileId: triggerData.profileId.toString(),
+    triggerId: triggerData._id.toString(),
+    message: triggerData.result?.message || "Trigger completed successfully",
   });
 }
 
