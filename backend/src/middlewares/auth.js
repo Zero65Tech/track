@@ -1,5 +1,5 @@
 import { sendUnauthorizedError } from "../utils/response.js";
-import { firebaseAdmin } from "../config/firebase.js";
+import { getFirebaseAuth } from "../config/firebase.js";
 
 export default async function (req, res, next) {
   const token = req.headers.authorization?.split(" ")[1];
@@ -7,7 +7,7 @@ export default async function (req, res, next) {
     return sendUnauthorizedError(res, "Authorization token is required.");
 
   try {
-    const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+    const decodedToken = await getFirebaseAuth().verifyIdToken(token);
     req.user = decodedToken;
     next();
   } catch (error) {

@@ -9,4 +9,4 @@ async function connect() {
   );
 }
 
-export { connect as initialiseDbConnection };
+export { connect as connectToDatabase };

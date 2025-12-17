@@ -1,6 +1,7 @@
 import { LRUCache } from "lru-cache";
 import { ProfileAccess, ProfileState } from "@zero65/track";
 
+import { lruCacheConfig } from "../config/cache.js";
 import transaction from "../utils/transaction.js";
 
 import ProfileModel from "../models/Profile.js";
@@ -8,10 +9,7 @@ import ProfileModel from "../models/Profile.js";
 import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
 import { _initCoinLedger } from "./coinLedger.js";
 
-const cache = new LRUCache({
-  max: 1024,
-  ttl: 1000 * 60 * 60 * 3, // 3 hours
-});
+const cache = new LRUCache(lruCacheConfig);
 
 async function _getCachedProfile(id) {
   id = typeof id === "string" ? id : id.toString();

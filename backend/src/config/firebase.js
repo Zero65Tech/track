@@ -1,23 +1,26 @@
 import admin from "firebase-admin";
 
+let auth = null;
 let messaging = null;
-function initialise() {
+
+function initialiseFirebase() {
   admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
+    credential: admin.credential.applicationDefault(),
   });
+  auth = admin.auth();
   messaging = admin.messaging();
   console.log(
     `🚀 Firebase Admin SDK initialized (${process.env.GOOGLE_CLOUD_PROJECT})`,
   );
 }
 
-function getMessaging() {
+function getFirebaseAuth() {
+  return auth;
+}
+
+function getFirebaseMessaging() {
   return messaging;
 }
 
-export {
-  initialise as initialiseFirebaseAdmin,
-  admin as firebaseAdmin,
-  getMessaging,
-};
+export { initialiseFirebase, getFirebaseAuth, getFirebaseMessaging };
