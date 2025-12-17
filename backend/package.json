@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "STAGE=${STAGE:-alpha} nodemon src/index.js",
     "test": "jest --coverage --testPathPattern=test/",
-    "lint": "npx eslint src test"
+    "lint": "npx eslint src test",
+    "callgraph": "npx madge --extensions js --image callgraph.svg src/services"
   },
   "dependencies": {
     "@zero65/track": "^5.0.0",

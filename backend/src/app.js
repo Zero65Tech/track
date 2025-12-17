@@ -39,7 +39,7 @@ app.get(`${API_PREFIX}/cron`, cronController);
 
 app.use(authMiddleware);
 
-app.post(`${API_PREFIX}/users/fcm-token`, userFcmTokenController.storeFcmToken);
+app.post(`${API_PREFIX}/users/fcm-tokens`, userFcmTokenController.storeFcmToken);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAllAccessible);
 app.post(`${API_PREFIX}/profiles`, profileController.create);
