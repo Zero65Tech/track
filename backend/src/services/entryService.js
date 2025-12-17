@@ -83,9 +83,15 @@ async function remove(profileId, id, userId) {
   });
 }
 
+async function aggregateByPipeline(profileId, aggregationPipeline) {
+  const result = await EntryModel.aggregate(aggregationPipeline);
+  return result;
+}
+
 export default {
   getAll,
   create,
   update,
   remove,
+  aggregateByPipeline,
 };

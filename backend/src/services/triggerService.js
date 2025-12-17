@@ -11,11 +11,11 @@ import config from "../config/coin.js";
 
 import transaction from "../utils/transaction.js";
 
-import EntryModel from "../models/Entry.js";
 import TriggerModel from "../models/Trigger.js";
 
 import userService from "./userService.js";
 import profileService from "./profileService.js";
+import entryService from "./entryService.js";
 import aggregationService from "./aggregationService.js";
 import coinLedger from "./coinLedger.js";
 
@@ -104,7 +104,10 @@ async function _processNamedAggregation(triggerData, profile) {
     `../config/aggregations/${triggerData.params.name}.js`
   );
   const aggregationPipeline = pipelineBuilder(triggerData.profileId);
-  const aggregationResult = await EntryModel.aggregate(aggregationPipeline);
+  const aggregationResult = await entryService.aggregateByPipeline(
+    triggerData.profileId,
+    aggregationPipeline,
+  );
   const entriesProcessed = aggregationResult.reduce(
     (sum, item) => sum + item.count,
     0,
