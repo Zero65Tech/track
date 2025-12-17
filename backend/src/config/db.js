@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-async function connect() {
+async function connectToDatabase() {
   await mongoose.connect(
     `mongodb+srv://${process.env.MONGODB_URL}?retryWrites=true&w=majority`,
   );
@@ -9,4 +9,4 @@ async function connect() {
   );
 }
 
-export { connect as connectToDatabase };
+export { connectToDatabase };

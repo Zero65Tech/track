@@ -1,6 +1,6 @@
 import CoinModel from "../models/Coin.js";
 
-import config from "../config/coin.js";
+import { signupBonusCoins } from "../config/coin.js";
 
 async function _initCoinLedger({ profileId }, session) {
   await CoinModel.create(
@@ -9,9 +9,9 @@ async function _initCoinLedger({ profileId }, session) {
         profileId,
         type: "signup_bonus",
         pulse: 0,
-        nova: config.signupBonus.nova,
+        nova: signupBonusCoins.nova,
         pulseTotal: 0,
-        novaTotal: config.signupBonus.nova,
+        novaTotal: signupBonusCoins.nova,
         latest: true,
       },
     ],

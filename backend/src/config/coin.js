@@ -1,8 +1,9 @@
 import _ from "lodash";
 
-export default {
-  signupBonus: { pulse: 0, nova: 1000 },
+const signupBonusCoins = { pulse: 0, nova: 1000 };
 
-  aggregation: (entriesProcessed) =>
-    Math.max(1, _.round(entriesProcessed / 1000, 2)),
-};
+function calculateAggregationCoins(entriesProcessed) {
+  return Math.max(1, _.round(entriesProcessed / 1000, 2));
+}
+
+export { signupBonusCoins, calculateAggregationCoins };

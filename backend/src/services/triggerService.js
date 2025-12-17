@@ -7,7 +7,7 @@ import {
   CoinLedgerType,
 } from "@zero65/track";
 
-import config from "../config/coin.js";
+import { calculateAggregationCoins } from "../config/coin.js";
 
 import transaction from "../utils/transaction.js";
 
@@ -112,7 +112,7 @@ async function _processNamedAggregation(triggerData, profile) {
     (sum, item) => sum + item.count,
     0,
   );
-  const coinsToDeduct = config.aggregation(entriesProcessed);
+  const coinsToDeduct = calculateAggregationCoins(entriesProcessed);
 
   await transaction(async (session) => {
     await _setNamedAggregationResult(
