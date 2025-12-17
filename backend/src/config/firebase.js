@@ -6,7 +6,7 @@ function initialise() {
     projectId: process.env.GOOGLE_CLOUD_PROJECT,
   });
   console.log(
-    `Firebase Admin SDK initialized (${process.env.GOOGLE_CLOUD_PROJECT}) 🔥`,
+    `🚀 Firebase Admin SDK initialized (${process.env.GOOGLE_CLOUD_PROJECT})`,
   );
 }
 

@@ -59,7 +59,7 @@ async function processAll(limit = 1000) {
     processedCount++;
   }
   console.log(
-    `${processedCount} trigger(s) processed in ${Date.now() - timestamp}ms`,
+    `⏰ ${processedCount} trigger(s) processed in ${Date.now() - timestamp}ms`,
   );
 }
 

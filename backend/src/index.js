@@ -18,7 +18,7 @@ import app from "./app.js";
   cron.start();
   app.listen(process.env.PORT, () =>
     console.log(
-      `Server (${process.env.STAGE}) is up and listening at ${process.env.PORT} port 🎉`,
+      `🎉 Server (${process.env.STAGE}) is listening on port ${process.env.PORT}`,
     ),
   );
 })();

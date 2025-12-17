@@ -15,7 +15,6 @@ import folderController from "./controllers/folderController.js";
 import groupController from "./controllers/groupController.js";
 import entryController from "./controllers/entryController.js";
 import auditLogController from "./controllers/auditLogController.js";
-import cronController from "./controllers/cronController.js";
 import triggerController from "./controllers/triggerController.js";
 import aggregationController from "./controllers/aggregationController.js";
 
@@ -33,13 +32,15 @@ app.use((req, res, next) => {
 let API_PREFIX = "/api";
 
 app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplatesBySystem); // prettier-ignore
-app.get(`${API_PREFIX}/cron`, cronController);
 
 // NOTE: User must be loggedin for following routes
 
 app.use(authMiddleware);
 
-app.post(`${API_PREFIX}/users/fcm-tokens`, userFcmTokenController.storeFcmToken);
+app.post(
+  `${API_PREFIX}/users/fcm-tokens`,
+  userFcmTokenController.storeFcmToken,
+);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAllAccessible);
 app.post(`${API_PREFIX}/profiles`, profileController.create);
