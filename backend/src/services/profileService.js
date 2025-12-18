@@ -6,7 +6,7 @@ import ProfileModel from "../models/Profile.js";
 import { lruCacheConfig } from "../config/cache.js";
 
 import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
-import { _createTrigger } from "./triggerService.js";
+import { _createProfileCreatedTrigger } from "./triggerService.js";
 
 const profileDataCache = new LRUCache(lruCacheConfig);
 
@@ -79,14 +79,7 @@ async function createProfile(userId, name) {
       session,
     );
 
-    await _createTrigger(
-      {
-        userId,
-        profileId: doc._id,
-        data: { type: TriggerType.PROFILE_CREATED.id },
-      },
-      session,
-    );
+    await _createProfileCreatedTrigger({ profileId: doc._id }, session);
 
     return data;
   });

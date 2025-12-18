@@ -21,18 +21,41 @@ import {
   _deductCoinsFromLedger,
 } from "./coinService.js";
 
-async function _createTrigger({ profileId, data }, session) {
-  data["userId"] = process.env.SYSTEM_USER_ID;
-  data["profileId"] = profileId;
-  data["state"] = TriggerState.QUEUED.id;
-  await TriggerModel.create([data], { session });
+async function _createProfileCreatedTrigger({ profileId }, session) {
+  await TriggerModel.create(
+    [
+      {
+        userId: process.env.SYSTEM_USER_ID,
+        profileId,
+        type: TriggerType.PROFILE_CREATED.id,
+        state: TriggerState.QUEUED.id,
+      },
+    ],
+    { session },
+  );
 }
 
-async function createTrigger(userId, profileId, data) {
-  data["userId"] = userId;
-  data["profileId"] = profileId;
-  data["state"] = TriggerState.QUEUED.id;
-  const doc = await TriggerModel.create(data);
+async function createDataAggregationTrigger(
+  userId,
+  profileId,
+  aggregationName,
+) {
+  let doc = await TriggerModel.findOne({
+    profileId,
+    type: TriggerType.DATA_AGGREGATION.id,
+    params: { name: aggregationName },
+    state: { $in: [TriggerState.QUEUED.id, TriggerState.RUNNING.id] },
+  });
+
+  if (!doc)
+    doc = await TriggerModel.create({
+      userId,
+      profileId,
+      type: TriggerType.DATA_AGGREGATION.id,
+      params: { name: aggregationName },
+      state: TriggerState.QUEUED.id,
+    });
+
   return doc.toObject();
 }
 
@@ -183,4 +206,8 @@ async function _processNamedDataAggregation(triggerData, profile) {
   });
 }
 
-export { _createTrigger, createTrigger, processAll };
+export {
+  _createProfileCreatedTrigger,
+  createDataAggregationTrigger,
+  processAll,
+};
