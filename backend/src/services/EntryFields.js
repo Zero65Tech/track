@@ -35,7 +35,7 @@ class GenericService {
     return dataArr;
   };
 
-  create = async (profileId, data, userId) => {
+  create = async (userId, profileId, data) => {
     data["profileId"] = profileId;
     data["state"] = EntryFieldState.ACTIVE.id;
     data = await transaction(async (session) => {
@@ -49,15 +49,18 @@ class GenericService {
 
       return data;
     });
-    delete data["profileId"];
-    // DEPRECATE: _id in response
+
     data.id = data._id.toString();
+    delete data["profileId"];
+    delete data["_id"];
+
+    return data;
   };
 
-  update = async (profileId, id, updates, userId) => {
+  update = async (userId, profileId, entryFieldId, updates) => {
     const data = await transaction(async (session) => {
       const doc = await this.model
-        .findOne({ profileId, _id: id })
+        .findOne({ profileId, _id: entryFieldId })
         .session(session);
       if (!doc) {
         throw new Error(`${this.model.modelName} not found !`);
@@ -77,29 +80,18 @@ class GenericService {
 
       return newData;
     });
-    delete data["profileId"];
-    // DEPRECATE: _id in response
+
     data.id = data._id.toString();
+    delete data["profileId"];
+    delete data["_id"];
+
+    return data;
   };
 
-  bulkUpdateSortOrder = async (profileId, ids) => {
-    // TODO
-    return await transaction(async (session) => {
-      const bulkOps = ids.map((id, index) => ({
-        updateOne: {
-          filter: { profileId, _id: id },
-          update: { $set: { sortOrder: index + 1 } },
-        },
-      }));
-
-      await this.model.bulkWrite(bulkOps, { session });
-    });
-  };
-
-  remove = async (profileId, id, userId) => {
+  remove = async (profileId, entryFieldId, userId) => {
     await transaction(async (session) => {
       const doc = await this.model
-        .findOne({ profileId, _id: id })
+        .findOne({ profileId, _id: entryFieldId })
         .session(session);
       if (!doc) {
         throw new Error(`${this.model.modelName} not found !`);

@@ -42,7 +42,7 @@ function createSchema(collectionName) {
     },
   };
 
-  if (collectionName === "book") {
+  if (collectionName === "books") {
     delete fields["group"];
   }
 

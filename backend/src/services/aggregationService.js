@@ -4,8 +4,11 @@ import AggregationModel from "../models/Aggregation.js";
 
 // Named
 
-async function getNamedAggregation(profileId, name) {
-  const data = await AggregationModel.findOne({ profileId, name }).lean();
+async function getNamedAggregation(profileId, aggregationName) {
+  const data = await AggregationModel.findOne({
+    profileId,
+    name: aggregationName,
+  }).lean();
 
   data.id = data._id.toString();
   delete data["_id"];
@@ -14,23 +17,23 @@ async function getNamedAggregation(profileId, name) {
 }
 
 async function _setNamedAggregationResult(
-  { profileId, aggregationName, result },
+  { profileId, aggregationName, aggregationResult },
   session,
 ) {
   await AggregationModel.updateOne(
     { profileId, name: aggregationName },
-    { $set: { result } },
+    { $set: { result: aggregationResult } },
     { upsert: true },
   ).session(session);
 }
 
 // Custom
 
-async function createCustomAggregation(profileId, pipeline) {
+async function createCustomAggregation(profileId, aggregationPipeline) {
   const doc = await AggregationModel.create({
     profileId,
     name: AggregationName.CUSTOM.id,
-    pipeline,
+    pipeline: aggregationPipeline,
   });
 
   const data = doc.toObject();
@@ -54,12 +57,12 @@ async function getCustomAggregation(profileId, aggregationId) {
 }
 
 async function _setCustomAggregationResult(
-  { profileId, aggregationId, result },
+  { profileId, aggregationId, aggregationResult },
   session,
 ) {
   await AggregationModel.updateOne(
     { profileId, name: AggregationName.CUSTOM.id, _id: aggregationId },
-    { $set: { result } },
+    { $set: { result: aggregationResult } },
     { upsert: true },
   ).session(session);
 }

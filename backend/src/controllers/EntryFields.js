@@ -14,37 +14,30 @@ class GenericController {
   }
 
   getAll = async (req, res) => {
-    const heads = await this.service.getAll(req.params.profileId);
-    sendData(res, { heads });
+    const key = `${this.name.toLowerCase()}s`;
+    const items = await this.service.getAll(req.params.profileId);
+    sendData(res, { [key]: items });
   };
 
   create = async (req, res) => {
-    const head = await this.service.create(
+    const key = this.name.toLowerCase();
+    const item = await this.service.create(
+      req.user.uid,
       req.params.profileId,
       req.body,
-      req.user.uid,
     );
-    sendData(res, { head }, `${this.name} created successfully.`);
+    sendData(res, { [key]: item }, `${this.name} created successfully.`);
   };
 
   update = async (req, res) => {
-    const head = await this.service.update(
+    const key = this.name.toLowerCase();
+    const item = await this.service.update(
+      req.user.uid,
       req.params.profileId,
       req.params.id,
       req.body,
-      req.user.uid,
     );
-    sendData(res, { head }, `${this.name} updated successfully.`);
-  };
-
-  bulkUpdateSortOrder = async (req, res) => {
-    // TODO
-    const { profileId } = req.params;
-    const { ids } = req.body;
-    if (!Array.isArray(ids))
-      return sendBadRequestError(res, "ids must be an array");
-    const result = await this.service.bulkUpdateSortOrder(profileId, ids);
-    sendData(res, result, `${this.name}s reordered successfully`);
+    sendData(res, { [key]: item }, `${this.name} updated successfully.`);
   };
 
   remove = async (req, res) => {
