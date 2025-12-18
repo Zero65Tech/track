@@ -3,25 +3,6 @@ import { ProfileState } from "@zero65/track";
 
 const profileSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-
-    versions: {
-      // TODO
-      book: Number,
-      heads: Number,
-      tags: Number,
-      sources: Number,
-    },
-
-    coins: {
-      type: Number,
-      default: 0,
-      required: true,
-    },
-
     owner: {
       type: String,
       required: true,
@@ -33,6 +14,17 @@ const profileSchema = new mongoose.Schema(
     viewers: {
       type: [String],
       default: undefined,
+    },
+
+    name: {
+      type: String,
+      required: true,
+    },
+
+    coins: {
+      type: Number,
+      default: 0,
+      required: true,
     },
 
     state: {

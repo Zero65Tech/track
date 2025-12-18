@@ -1,32 +1,33 @@
 import { LRUCache } from "lru-cache";
-import { ProfileAccess, ProfileState } from "@zero65/track";
+import { ProfileAccess, ProfileState, TriggerType } from "@zero65/track";
 
-import { lruCacheConfig } from "../config/cache.js";
 import transaction from "../utils/transaction.js";
-
 import ProfileModel from "../models/Profile.js";
+import { lruCacheConfig } from "../config/cache.js";
 
 import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
-import { _initCoinLedger } from "./coinLedger.js";
+import { _createTrigger } from "./triggerService.js";
 
 const cache = new LRUCache(lruCacheConfig);
 
-async function _getCachedProfile(id) {
-  id = typeof id === "string" ? id : id.toString();
-  let data = cache.get(id);
-  if (!data) {
-    data = await ProfileModel.findById(id).lean();
-    cache.set(id, data);
+async function _getCachedProfile(profileId) {
+  if (typeof profileId !== "string") {
+    profileId = profileId.toString();
   }
+
+  let data = cache.get(profileId);
+  if (!data) {
+    data = await ProfileModel.findById(profileId).lean();
+    cache.set(profileId, data);
+  }
+
   return data;
 }
 
-async function getAllAccessible(userId) {
+async function getAccessibleProfiles(userId) {
   const dataArr = await ProfileModel.find({
     $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
-  })
-    .sort({ createdAt: 1 })
-    .lean();
+  }).lean();
 
   for (let i = 0; i < dataArr.length; i++) {
     cache.set(dataArr[i]._id.toString(), dataArr[i]);
@@ -46,7 +47,7 @@ async function getAllAccessible(userId) {
   return dataArr;
 }
 
-async function getTemplatesBySystem() {
+async function getTemplateProfiles() {
   const dataArr = await ProfileModel.find({
     owner: process.env.SYSTEM_USER_ID,
     state: ProfileState.TEMPLATE.id,
@@ -56,19 +57,19 @@ async function getTemplatesBySystem() {
     cache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
       id: dataArr[i]._id.toString(),
+      name: dataArr[i].name,
       access: ProfileAccess.VIEWER.id,
       state: ProfileState.TEMPLATE.id,
-      name: dataArr[i].name,
     };
   }
 
   return dataArr;
 }
 
-async function create(name, userId) {
+async function createProfile(userId, name) {
   const data = await transaction(async (session) => {
     const [doc] = await ProfileModel.create(
-      [{ name, owner: userId, state: ProfileState.INACTIVE.id }],
+      [{ owner: userId, name, state: ProfileState.INACTIVE.id }],
       { session },
     );
 
@@ -78,8 +79,14 @@ async function create(name, userId) {
       session,
     );
 
-    // TODO: Remove dependency on coinLedger
-    await _initCoinLedger({ profileId: doc._id }, session);
+    await _createTrigger(
+      {
+        userId,
+        profileId: doc._id,
+        data: { type: TriggerType.PROFILE_CREATED.id },
+      },
+      session,
+    );
 
     return data;
   });
@@ -94,9 +101,18 @@ async function create(name, userId) {
   };
 }
 
-async function update(id, updates, userId) {
+async function _updateProfile({ profileId, updates }, session) {
+  await ProfileModel.updateOne(
+    { _id: profileId },
+    { $set: updates },
+    { upsert: false },
+  ).session(session);
+  cache.delete(profileId);
+}
+
+async function updateProfile(userId, profileId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await ProfileModel.findById(id).session(session);
+    const doc = await ProfileModel.findById(profileId).session(session);
     if (!doc) {
       throw new Error(`${ProfileModel.modelName} not found !`);
     }
@@ -127,20 +143,11 @@ async function update(id, updates, userId) {
   };
 }
 
-async function _updateProfile({ id, updates }, session) {
-  await ProfileModel.updateOne(
-    { _id: id },
-    { $set: updates },
-    { upsert: false },
-  ).session(session);
-  cache.delete(id);
-}
-
 export {
   _getCachedProfile,
-  getAllAccessible,
-  getTemplatesBySystem,
-  create,
-  update,
+  getAccessibleProfiles,
+  getTemplateProfiles,
+  createProfile,
   _updateProfile,
+  updateProfile,
 };

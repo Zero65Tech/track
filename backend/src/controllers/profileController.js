@@ -1,18 +1,18 @@
 import { sendData } from "../utils/response.js";
 import {
-  getAllAccessible as getAllAccessibleProfiles,
-  getTemplatesBySystem as getProfileTemplates,
-  create as createProfile,
-  update as updateProfile,
+  getAccessibleProfiles,
+  getTemplateProfiles,
+  createProfile,
+  updateProfile,
 } from "../services/profileService.js";
 
 async function getAllAccessible(req, res) {
-  const profiles = await getAllAccessibleProfiles(req.user.uid);
+  const profiles = await getAccessibleProfiles(req.user.uid);
   sendData(res, { profiles });
 }
 
 async function getTemplatesBySystem(req, res) {
-  const profiles = await getProfileTemplates();
+  const profiles = await getTemplateProfiles();
   sendData(res, { profiles });
 }
 
@@ -22,7 +22,7 @@ async function create(req, res) {
 }
 
 async function update(req, res) {
-  const profile = await updateProfile(req.params.id, req.body, req.user.uid);
+  const profile = await updateProfile(req.user.uid, req.params.id, req.body);
   sendData(res, { profile }, "Profile updated successfully.");
 }
 

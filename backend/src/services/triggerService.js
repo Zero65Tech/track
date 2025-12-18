@@ -16,7 +16,7 @@ import TriggerModel from "../models/Trigger.js";
 import { _getCachedProfile, _updateProfile } from "./profileService.js";
 import { aggregateByPipeline } from "./entryService.js";
 import { _setNamedAggregationResult } from "./aggregationService.js";
-import { _deductCoin } from "./coinLedger.js";
+import { _initCoinLedger, _deductCoin } from "./coinLedger.js";
 import { _sendFcmNotification } from "./userService.js";
 
 async function _createTrigger({ profileId, data, userId }, session) {
@@ -67,7 +67,16 @@ async function processAll(limit = 1000) {
 
 async function _processTrigger(triggerData) {
   if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
-    // TODO: TriggerType.PROFILE_CREATED
+    await transaction(async (session) => {
+      await _initCoinLedger({ profileId: triggerData.profileId }, session);
+
+      const updateResult = await TriggerModel.updateOne(
+        { _id: triggerData._id, state: TriggerState.RUNNING.id },
+        { $set: { state: TriggerState.COMPLETED.id } },
+      ).session(session);
+
+      assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+    });
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {

@@ -1,22 +1,14 @@
 import UserFcmTokenModel from "../models/UserFcmToken.js";
 
 async function storeFcmToken(userId, deviceId, fcmToken) {
-  if (!userId || !deviceId || !fcmToken) {
-    throw new Error("userId, deviceId, and fcmToken are required");
-  }
-
   await UserFcmTokenModel.updateOne(
     { userId, deviceId },
-    { userId, deviceId, fcmToken },
+    { fcmToken },
     { upsert: true },
   );
 }
 
-async function getFcmTokens(...userIds) {
-  if (!userIds || userIds.length === 0) {
-    throw new Error("At least one userId is required");
-  }
-
+async function _getFcmTokens(...userIds) {
   const results = await UserFcmTokenModel.find({
     userId: { $in: userIds },
   }).lean();
@@ -24,11 +16,7 @@ async function getFcmTokens(...userIds) {
 }
 
 async function deleteFcmToken(userId, deviceId) {
-  if (!userId || !deviceId) {
-    throw new Error("userId and deviceId are required");
-  }
-
   return await UserFcmTokenModel.deleteOne({ userId, deviceId });
 }
 
-export { storeFcmToken, getFcmTokens, deleteFcmToken };
+export { storeFcmToken, _getFcmTokens, deleteFcmToken };
