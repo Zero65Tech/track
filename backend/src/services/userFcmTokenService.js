@@ -16,7 +16,7 @@ async function _getFcmTokens(...userIds) {
 }
 
 async function deleteFcmToken(userId, deviceId) {
-  return await UserFcmTokenModel.deleteOne({ userId, deviceId });
+  await UserFcmTokenModel.deleteOne({ userId, deviceId });
 }
 
 export { storeFcmToken, _getFcmTokens, deleteFcmToken };

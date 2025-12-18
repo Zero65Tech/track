@@ -14,7 +14,7 @@ import transaction from "../utils/transaction.js";
 import TriggerModel from "../models/Trigger.js";
 
 import { _getCachedProfile, _updateProfile } from "./profileService.js";
-import { aggregateByPipeline } from "./entryService.js";
+import { aggregateEntries } from "./entryService.js";
 import { _setNamedAggregationResult } from "./aggregationService.js";
 import { _initCoinLedger, _deductCoin } from "./coinLedger.js";
 import { _sendFcmNotification } from "./userService.js";
@@ -113,7 +113,7 @@ async function _processNamedAggregation(triggerData, profile) {
     `../config/aggregations/${triggerData.params.name}.js`
   );
   const aggregationPipeline = pipelineBuilder(triggerData.profileId);
-  const aggregationResult = await aggregateByPipeline(
+  const aggregationResult = await aggregateEntries(
     triggerData.profileId,
     aggregationPipeline,
   );

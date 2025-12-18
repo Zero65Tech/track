@@ -8,21 +8,25 @@ import {
   _logDeleteAudit,
 } from "./auditLogService.js";
 
-async function getAll(profileId, filters) {
+async function getEntries(profileId, filters) {
   const dataArr = await EntryModel.find({ profileId, ...filters })
     .limit(1000)
     .lean();
 
   for (let data of dataArr) {
-    delete data["profileId"];
-    // DEPRECATE: _id in response
     data.id = data._id.toString();
+    delete data["_id"];
+    delete data["profileId"];
   }
 
   return dataArr;
 }
 
-async function create(profileId, data, userId) {
+async function aggregateEntries(profileId, aggregationPipeline) {
+  return await EntryModel.aggregate(aggregationPipeline);
+}
+
+async function createEntry(userId, profileId, data) {
   data["profileId"] = profileId;
   data = await transaction(async (session) => {
     const [doc] = await EntryModel.create([data], { session });
@@ -35,14 +39,17 @@ async function create(profileId, data, userId) {
 
     return data;
   });
-  delete data["profileId"];
-  // DEPRECATE: _id in response
+
   data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+
+  return data;
 }
 
-async function update(profileId, id, updates, userId) {
+async function updateEntry(userId, profileId, entryId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await EntryModel.findOne({ profileId, _id: id }).session(
+    const doc = await EntryModel.findOne({ profileId, _id: entryId }).session(
       session,
     );
     if (!doc) {
@@ -63,14 +70,17 @@ async function update(profileId, id, updates, userId) {
 
     return newData;
   });
-  delete data["profileId"];
-  // DEPRECATE: _id in response
+
   data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+
+  return data;
 }
 
-async function remove(profileId, id, userId) {
+async function deleteEntry(userId, profileId, entryId) {
   await transaction(async (session) => {
-    const doc = await EntryModel.findOne({ profileId, _id: id }).session(
+    const doc = await EntryModel.findOne({ profileId, _id: entryId }).session(
       session,
     );
     if (!doc) {
@@ -87,9 +97,4 @@ async function remove(profileId, id, userId) {
   });
 }
 
-async function aggregateByPipeline(profileId, aggregationPipeline) {
-  const result = await EntryModel.aggregate(aggregationPipeline);
-  return result;
-}
-
-export { getAll, create, update, remove, aggregateByPipeline };
+export { getEntries, aggregateEntries, createEntry, updateEntry, deleteEntry };

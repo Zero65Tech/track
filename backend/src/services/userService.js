@@ -16,7 +16,9 @@ async function _getCachedUser(userId) {
 
 async function _sendFcmNotification(userIds, messageData) {
   const fcmTokens = await _getFcmTokens(...userIds);
-  if (fcmTokens.length === 0) return;
+  if (fcmTokens.length === 0) {
+    return;
+  }
 
   const messaging = getFirebaseMessaging();
   for (const token of fcmTokens) {
