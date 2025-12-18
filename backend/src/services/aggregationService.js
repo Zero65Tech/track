@@ -1,4 +1,4 @@
-import { AggregationName } from "@zero65/track";
+import { AggregationName } from "@shared/enums";
 
 import AggregationModel from "../models/Aggregation.js";
 

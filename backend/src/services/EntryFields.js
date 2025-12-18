@@ -1,4 +1,4 @@
-import { EntryFieldState } from "@zero65/track";
+import { EntryFieldState } from "@shared/enums";
 
 import transaction from "../utils/transaction.js";
 

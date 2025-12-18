@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EntryFieldState } from "@zero65/track";
+import { EntryFieldState } from "@shared/enums";
 
 function createSchema(collectionName) {
   const fields = {

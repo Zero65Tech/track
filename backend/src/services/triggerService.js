@@ -5,7 +5,7 @@ import {
   TriggerState,
   CoinLedgerRef,
   CoinLedgerType,
-} from "@zero65/track";
+} from "@shared/enums";
 
 import transaction from "../utils/transaction.js";
 import TriggerModel from "../models/Trigger.js";

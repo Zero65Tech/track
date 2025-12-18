@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ProfileState } from "@zero65/track";
+import { ProfileState } from "@shared/enums";
 
 const profileSchema = new mongoose.Schema(
   {

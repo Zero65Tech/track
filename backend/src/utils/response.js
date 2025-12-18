@@ -1,3 +1,10 @@
+function sendSuccess(res, message) {
+  res.status(200).json({
+    success: true,
+    message,
+  });
+}
+
 function sendData(res, data, message) {
   res.status(200).json({
     success: true,
@@ -28,6 +35,7 @@ function sendForbiddenError(res, message = "Forbidden") {
 }
 
 export {
+  sendSuccess,
   sendData,
   sendBadRequestError,
   sendUnauthorizedError,

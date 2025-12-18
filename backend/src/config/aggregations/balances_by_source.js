@@ -1,4 +1,4 @@
-import { EntryType } from "@zero65/track";
+import { EntryType } from "@shared/enums";
 
 export default (profileId) => [
   {

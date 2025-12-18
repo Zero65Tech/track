@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AggregationName } from "@zero65/track";
+import { AggregationName } from "@shared/enums";
 
 const aggregationSchema = new mongoose.Schema(
   {

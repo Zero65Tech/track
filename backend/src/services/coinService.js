@@ -1,5 +1,5 @@
 import { LRUCache } from "lru-cache";
-import { CoinLedgerType } from "@zero65/track";
+import { CoinLedgerType } from "@shared/enums";
 
 import { lruCacheConfig } from "../config/cache.js";
 import { signupBonusCoins } from "../config/coin.js";

@@ -1,5 +1,5 @@
 import apiClient from '@/service/apiClient';
-import { TriggerType } from '@zero65/track';
+import { TriggerType } from '@shared/enums';
 
 export const triggerService = {
     async createDataAggregationTrigger(profileId, aggregationName) {

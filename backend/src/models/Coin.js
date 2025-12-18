@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { CoinLedgerRef, CoinLedgerType } from "@zero65/track";
+import { CoinLedgerRef, CoinLedgerType } from "@shared/enums";
 
 const coinSchema = new mongoose.Schema(
   {

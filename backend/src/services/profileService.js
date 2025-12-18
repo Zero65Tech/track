@@ -1,5 +1,5 @@
 import { LRUCache } from "lru-cache";
-import { ProfileAccess, ProfileState, TriggerType } from "@zero65/track";
+import { ProfileAccess, ProfileState } from "@shared/enums";
 
 import transaction from "../utils/transaction.js";
 import ProfileModel from "../models/Profile.js";

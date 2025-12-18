@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { TriggerType, TriggerState } from "@zero65/track";
+import { TriggerType, TriggerState } from "@shared/enums";
 
 const triggerSchema = new mongoose.Schema(
   {

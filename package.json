@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "frontend",
-    "shared",
+    "shared/enums",
+    "shared/schemas",
     "backend"
   ],
   "scripts": {
