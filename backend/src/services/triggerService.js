@@ -13,10 +13,14 @@ import transaction from "../utils/transaction.js";
 
 import TriggerModel from "../models/Trigger.js";
 
-import { _getCachedProfile, _updateProfile } from "./profileService.js";
+import { _getCachedProfile } from "./profileService.js";
 import { aggregateEntries } from "./entryService.js";
 import { _setNamedAggregationResult } from "./aggregationService.js";
-import { _initCoinLedger, _deductCoin } from "./coinLedger.js";
+import {
+  _getCoinLedgerBalance,
+  _initialiseCoinLedger,
+  _deductCoinsFromLedger,
+} from "./coinLedger.js";
 import { _sendFcmNotification } from "./userService.js";
 
 async function _createTrigger({ profileId, data, userId }, session) {
@@ -68,7 +72,13 @@ async function processAll(limit = 1000) {
 async function _processTrigger(triggerData) {
   if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
     await transaction(async (session) => {
-      await _initCoinLedger({ profileId: triggerData.profileId }, session);
+      await _initialiseCoinLedger(
+        {
+          profileId: triggerData.profileId,
+          ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
+        },
+        session,
+      );
 
       const updateResult = await TriggerModel.updateOne(
         { _id: triggerData._id, state: TriggerState.RUNNING.id },
@@ -81,8 +91,9 @@ async function _processTrigger(triggerData) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
     const profile = await _getCachedProfile(triggerData.profileId);
+    const balance = await _getCoinLedgerBalance(triggerData.profileId);
 
-    if (profile.coins < 1) {
+    if (balance.total < 1) {
       const updateResult = await TriggerModel.updateOne(
         { _id: triggerData._id, state: TriggerState.RUNNING.id },
         {
@@ -133,18 +144,13 @@ async function _processNamedAggregation(triggerData, profile) {
       session,
     );
 
-    const coinsRemaining = await _deductCoin(
+    await _deductCoinsFromLedger(
       {
         profileId: triggerData.profileId,
         ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
         type: CoinLedgerType.DATA_AGGREGATION.id,
-        countDeduct: coinsToDeduct,
+        coinsToDeduct,
       },
-      session,
-    );
-
-    await _updateProfile(
-      { id: triggerData._id, updates: { coins: coinsRemaining } },
       session,
     );
 

@@ -1,13 +1,54 @@
-import CoinModel from "../models/Coin.js";
+import { LRUCache } from "lru-cache";
+import { CoinLedgerType } from "@zero65/track";
 
+import { lruCacheConfig } from "../config/cache.js";
 import { signupBonusCoins } from "../config/coin.js";
 
-async function _initCoinLedger({ profileId }, session) {
+import CoinModel from "../models/Coin.js";
+
+const coinLedgerBalanceCache = new LRUCache(lruCacheConfig);
+
+async function _getCoinLedgerBalance(profileId) {
+  if (typeof profileId !== "string") {
+    profileId = profileId.toString();
+  }
+
+  let balance = coinLedgerBalanceCache.get(profileId);
+  if (balance === undefined) {
+    const latestTxn = await CoinModel.findOne({
+      profileId,
+      latest: true,
+    });
+
+    coinLedgerBalanceCache.set(profileId, {
+      pulse: latestTxn.pulseTotal,
+      nova: latestTxn.novaTotal,
+      total: latestTxn.pulseTotal + latestTxn.novaTotal,
+    });
+  }
+
+  return balance;
+}
+
+async function _setCoinLedgerBalance(profileId, pulseTotal, novaTotal) {
+  if (typeof profileId !== "string") {
+    profileId = profileId.toString();
+  }
+
+  coinLedgerBalanceCache.set(profileId, {
+    pulse: pulseTotal,
+    nova: novaTotal,
+    total: pulseTotal + novaTotal,
+  });
+}
+
+async function _initialiseCoinLedger({ profileId, ref }, session) {
   await CoinModel.create(
     [
       {
         profileId,
-        type: "signup_bonus",
+        ref,
+        type: CoinLedgerType.SIGNUP_BONUS.id,
         pulse: 0,
         nova: signupBonusCoins.nova,
         pulseTotal: 0,
@@ -17,32 +58,37 @@ async function _initCoinLedger({ profileId }, session) {
     ],
     { session },
   );
+
+  _setCoinLedgerBalance(profileId, 0, signupBonusCoins.nova);
 }
 
-async function _deductCoin({ profileId, ref, type, countDeduct }, session) {
+async function _deductCoinsFromLedger(
+  { profileId, ref, type, coinsToDeduct },
+  session,
+) {
   let latestTxn = await CoinModel.findOne({ profileId, latest: true }).session(
     session,
   );
 
-  let novaTotal = latestTxn.novaTotal;
   let pulseTotal = latestTxn.pulseTotal;
+  let novaTotal = latestTxn.novaTotal;
 
-  let deductNova = 0;
-  let deductPulse = 0;
+  let pulseDeducted = 0;
+  let novaDeducted = 0;
 
   if (pulseTotal > 0) {
-    deductPulse = Math.min(pulseTotal, countDeduct);
-    countDeduct = countDeduct - deductPulse;
+    pulseDeducted = Math.min(pulseTotal, coinsToDeduct);
+    coinsToDeduct = coinsToDeduct - pulseDeducted;
   }
 
-  if (countDeduct && novaTotal) {
-    deductNova = Math.min(novaTotal, countDeduct);
-    countDeduct = countDeduct - deductNova;
+  if (coinsToDeduct && novaTotal) {
+    novaDeducted = Math.min(novaTotal, coinsToDeduct);
+    coinsToDeduct = coinsToDeduct - novaDeducted;
   }
 
-  if (countDeduct) {
-    deductPulse = deductPulse + countDeduct;
-    countDeduct = 0;
+  if (coinsToDeduct) {
+    pulseDeducted = pulseDeducted + coinsToDeduct;
+    coinsToDeduct = 0;
   }
 
   latestTxn.latest = false;
@@ -54,17 +100,17 @@ async function _deductCoin({ profileId, ref, type, countDeduct }, session) {
         profileId,
         ref,
         type,
-        nova: -deductNova,
-        pulse: -deductPulse,
-        novaTotal: novaTotal - deductNova,
-        pulseTotal: pulseTotal - deductPulse,
+        pulse: -pulseDeducted,
+        nova: -novaDeducted,
+        pulseTotal: pulseTotal - pulseDeducted,
+        novaTotal: novaTotal - novaDeducted,
         latest: true,
       },
     ],
     { session },
   );
 
-  return latestTxn.novaTotal + latestTxn.pulseTotal;
+  _setCoinLedgerBalance(profileId, latestTxn.pulseTotal, latestTxn.novaTotal);
 }
 
-export { _initCoinLedger, _deductCoin };
+export { _getCoinLedgerBalance, _initialiseCoinLedger, _deductCoinsFromLedger };

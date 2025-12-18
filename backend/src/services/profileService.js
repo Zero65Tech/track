@@ -8,17 +8,17 @@ import { lruCacheConfig } from "../config/cache.js";
 import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
 import { _createTrigger } from "./triggerService.js";
 
-const cache = new LRUCache(lruCacheConfig);
+const profileCache = new LRUCache(lruCacheConfig);
 
 async function _getCachedProfile(profileId) {
   if (typeof profileId !== "string") {
     profileId = profileId.toString();
   }
 
-  let data = cache.get(profileId);
-  if (!data) {
+  let data = profileCache.get(profileId);
+  if (data === undefined) {
     data = await ProfileModel.findById(profileId).lean();
-    cache.set(profileId, data);
+    profileCache.set(profileId, data);
   }
 
   return data;
@@ -30,7 +30,7 @@ async function getAccessibleProfiles(userId) {
   }).lean();
 
   for (let i = 0; i < dataArr.length; i++) {
-    cache.set(dataArr[i]._id.toString(), dataArr[i]);
+    profileCache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
       id: dataArr[i]._id.toString(),
       name: dataArr[i].name,
@@ -54,7 +54,7 @@ async function getTemplateProfiles() {
   }).lean();
 
   for (let i = 0; i < dataArr.length; i++) {
-    cache.set(dataArr[i]._id.toString(), dataArr[i]);
+    profileCache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
       id: dataArr[i]._id.toString(),
       name: dataArr[i].name,
@@ -91,7 +91,7 @@ async function createProfile(userId, name) {
     return data;
   });
 
-  cache.set(data._id.toString(), data);
+  profileCache.set(data._id.toString(), data);
 
   return {
     id: data._id.toString(),
@@ -107,7 +107,7 @@ async function _updateProfile({ profileId, updates }, session) {
     { $set: updates },
     { upsert: false },
   ).session(session);
-  cache.delete(profileId);
+  profileCache.delete(profileId);
 }
 
 async function updateProfile(userId, profileId, updates) {
@@ -133,7 +133,7 @@ async function updateProfile(userId, profileId, updates) {
     return newData;
   });
 
-  cache.set(data._id.toString(), data);
+  profileCache.set(data._id.toString(), data);
 
   return {
     id: data._id.toString(),

@@ -21,12 +21,6 @@ const profileSchema = new mongoose.Schema(
       required: true,
     },
 
-    coins: {
-      type: Number,
-      default: 0,
-      required: true,
-    },
-
     state: {
       type: String,
       enum: Object.values(ProfileState).map((s) => s.id),

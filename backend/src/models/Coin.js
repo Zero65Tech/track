@@ -26,22 +26,22 @@ const coinSchema = new mongoose.Schema(
       required: true,
     },
 
+    pulse: {
+      type: Number,
+      required: true,
+    },
     nova: {
+      type: Number,
+      required: true,
+    },
+
+    pulseTotal: {
       type: Number,
       required: true,
     },
     novaTotal: {
       type: Number,
       min: 0,
-      required: true,
-    },
-
-    pulse: {
-      type: Number,
-      required: true,
-    },
-    pulseTotal: {
-      type: Number,
       required: true,
     },
 

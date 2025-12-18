@@ -1,6 +1,6 @@
 import AuditLogModel from "../models/AuditLog.js";
 
-async function getAll(profileId, lastTimestamp, pageSize = 10) {
+async function getAuditLogs(profileId, lastTimestamp, pageSize = 10) {
   const query = { profileId };
   if (lastTimestamp) {
     query.timestamp = { $lt: new Date(lastTimestamp) };
@@ -75,4 +75,4 @@ async function _logDeleteAudit({ userId, docType, data }, session) {
   );
 }
 
-export { getAll, _logCreateAudit, _logUpdateAudit, _logDeleteAudit };
+export { getAuditLogs, _logCreateAudit, _logUpdateAudit, _logDeleteAudit };

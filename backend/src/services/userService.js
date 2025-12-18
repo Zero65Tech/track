@@ -3,13 +3,13 @@ import { lruCacheConfig } from "../config/cache.js";
 import { getFirebaseAuth, getFirebaseMessaging } from "../config/firebase.js";
 import { _getFcmTokens } from "./userFcmTokenService.js";
 
-const cache = new LRUCache(lruCacheConfig);
+const userCache = new LRUCache(lruCacheConfig);
 
 async function _getCachedUser(userId) {
-  let data = cache.get(userId);
+  let data = userCache.get(userId);
   if (!data) {
     data = await getFirebaseAuth().getUser(userId);
-    cache.set(userId, data);
+    userCache.set(userId, data);
   }
   return data;
 }

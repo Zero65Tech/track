@@ -1,8 +1,8 @@
 import { sendData } from "../utils/response.js";
-import { getAll as getAllAuditLogs } from "../services/auditLogService.js";
+import { getAuditLogs } from "../services/auditLogService.js";
 
 async function getAll(req, res) {
-  const auditLogs = await getAllAuditLogs(
+  const auditLogs = await getAuditLogs(
     req.params.profileId,
     req.query.lastTimestamp,
     req.query.pageSize,
