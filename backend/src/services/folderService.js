@@ -8,7 +8,7 @@ import {
   _logDeleteAudit,
 } from "./auditLogService.js";
 
-async function getAll(profileId) {
+async function getFolders(profileId) {
   const dataArr = await FolderModel.find({ profileId })
     .sort({ sortOrder: 1 })
     .lean();
@@ -22,7 +22,7 @@ async function getAll(profileId) {
   return dataArr;
 }
 
-async function create(profileId, data, userId) {
+async function createFolder(userId, profileId, data) {
   data["profileId"] = profileId;
   data = await transaction(async (session) => {
     const [doc] = await FolderModel.create([data], { session });
@@ -35,15 +35,17 @@ async function create(profileId, data, userId) {
 
     return data;
   });
+
   data.id = data._id.toString();
   delete data["_id"];
   delete data["profileId"];
+
   return data;
 }
 
-async function update(profileId, id, updates, userId) {
+async function updateFolder(userId, profileId, folderId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await FolderModel.findOne({ profileId, _id: id }).session(
+    const doc = await FolderModel.findOne({ profileId, _id: folderId }).session(
       session,
     );
     if (!doc) {
@@ -64,15 +66,17 @@ async function update(profileId, id, updates, userId) {
 
     return newData;
   });
+
   data.id = data._id.toString();
   delete data["_id"];
   delete data["profileId"];
+
   return data;
 }
 
-async function remove(profileId, id, userId) {
+async function deleteFolder(userId, profileId, folderId) {
   await transaction(async (session) => {
-    const doc = await FolderModel.findOne({ profileId, _id: id }).session(
+    const doc = await FolderModel.findOne({ profileId, _id: folderId }).session(
       session,
     );
     if (!doc) {
@@ -89,4 +93,4 @@ async function remove(profileId, id, userId) {
   });
 }
 
-export { getAll, create, update, remove };
+export { getFolders, createFolder, updateFolder, deleteFolder };
