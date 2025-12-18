@@ -3,6 +3,11 @@ import { TriggerType, TriggerState } from "@zero65/track";
 
 const triggerSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+    },
+
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",
@@ -19,11 +24,6 @@ const triggerSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(TriggerState).map((s) => s.id),
       required: false,
-    },
-
-    userId: {
-      type: String,
-      required: true,
     },
   },
   {

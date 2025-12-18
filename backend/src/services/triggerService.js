@@ -7,33 +7,31 @@ import {
   CoinLedgerType,
 } from "@zero65/track";
 
+import transaction from "../utils/transaction.js";
+import TriggerModel from "../models/Trigger.js";
 import { calculateAggregationCoins } from "../config/coin.js";
 
-import transaction from "../utils/transaction.js";
-
-import TriggerModel from "../models/Trigger.js";
-
+import { _sendFcmNotification } from "./userService.js";
 import { _getCachedProfile } from "./profileService.js";
-import { aggregateEntries } from "./entryService.js";
+import { _aggregateEntries } from "./entryService.js";
 import { _setNamedAggregationResult } from "./aggregationService.js";
 import {
   _getCoinLedgerBalance,
   _initialiseCoinLedger,
   _deductCoinsFromLedger,
 } from "./coinService.js";
-import { _sendFcmNotification } from "./userService.js";
 
-async function _createTrigger({ profileId, data, userId }, session) {
+async function _createTrigger({ profileId, data }, session) {
+  data["userId"] = process.env.SYSTEM_USER_ID;
   data["profileId"] = profileId;
   data["state"] = TriggerState.QUEUED.id;
-  data["userId"] = userId;
   await TriggerModel.create([data], { session });
 }
 
-async function create(profileId, data, userId) {
+async function createTrigger(userId, profileId, data) {
+  data["userId"] = userId;
   data["profileId"] = profileId;
   data["state"] = TriggerState.QUEUED.id;
-  data["userId"] = userId;
   const doc = await TriggerModel.create(data);
   return doc.toObject();
 }
@@ -71,28 +69,11 @@ async function processAll(limit = 1000) {
 
 async function _processTrigger(triggerData) {
   if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
-    await transaction(async (session) => {
-      await _initialiseCoinLedger(
-        {
-          profileId: triggerData.profileId,
-          ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
-        },
-        session,
-      );
-
-      const updateResult = await TriggerModel.updateOne(
-        { _id: triggerData._id, state: TriggerState.RUNNING.id },
-        { $set: { state: TriggerState.COMPLETED.id } },
-      ).session(session);
-
-      assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
-    });
+    await _processProfileCreated(triggerData);
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
-    const profile = await _getCachedProfile(triggerData.profileId);
     const balance = await _getCoinLedgerBalance(triggerData.profileId);
-
     if (balance.total < 1) {
       const updateResult = await TriggerModel.updateOne(
         { _id: triggerData._id, state: TriggerState.RUNNING.id },
@@ -107,10 +88,11 @@ async function _processTrigger(triggerData) {
       return;
     }
 
+    const profile = await _getCachedProfile(triggerData.profileId);
     if (triggerData.params.name === "custom") {
       // TODO: TriggerType.DATA_AGGREGATION, custom
     } else {
-      await _processNamedAggregation(triggerData, profile);
+      await _processNamedDataAggregation(triggerData, profile);
     }
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
     // TODO: TriggerType.DATA_EXPORT
@@ -119,19 +101,37 @@ async function _processTrigger(triggerData) {
   }
 }
 
-async function _processNamedAggregation(triggerData, profile) {
-  const { default: pipelineBuilder } = await import(
-    `../config/aggregations/${triggerData.params.name}.js`
-  );
-  const aggregationPipeline = pipelineBuilder(triggerData.profileId);
-  const aggregationResult = await aggregateEntries(
+async function _processProfileCreated(triggerData) {
+  await transaction(async (session) => {
+    await _initialiseCoinLedger(
+      {
+        profileId: triggerData.profileId,
+        ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
+      },
+      session,
+    );
+
+    const updateResult = await TriggerModel.updateOne(
+      { _id: triggerData._id, state: TriggerState.RUNNING.id },
+      { $set: { state: TriggerState.COMPLETED.id } },
+    ).session(session);
+
+    // If modifiedCount is 0, throw error to rollback the entire transaction.
+    assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+  });
+}
+
+async function _processNamedDataAggregation(triggerData, profile) {
+  const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
-    aggregationPipeline,
+    triggerData.params.name,
   );
+
   const entriesProcessed = aggregationResult.reduce(
     (sum, item) => sum + item.count,
     0,
   );
+
   const coinsToDeduct = calculateAggregationCoins(entriesProcessed);
 
   await transaction(async (session) => {
@@ -164,18 +164,16 @@ async function _processNamedAggregation(triggerData, profile) {
         $set: {
           state: TriggerState.COMPLETED.id,
           result: {
-            // TOOD: Move this to i18n
-            message: `Aggregated ${entriesProcessed} Entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed .`,
+            message: `Aggregated ${entriesProcessed} entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed .`,
           },
         },
       },
     ).session(session);
 
     // If modifiedCount is 0, throw error to rollback the entire transaction.
-    assert.notEqual(updateResult.modifiedCount, 0);
+    assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
   });
 
-  // Send FCM notification after successful completion
   await _sendFcmNotification([profile.owner, ...profile.editors], {
     triggerType: triggerData.type,
     triggerState: TriggerState.COMPLETED.id,
@@ -185,4 +183,4 @@ async function _processNamedAggregation(triggerData, profile) {
   });
 }
 
-export { create, _createTrigger, processAll };
+export { _createTrigger, createTrigger, processAll };

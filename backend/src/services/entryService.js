@@ -22,7 +22,11 @@ async function getEntries(profileId, filters) {
   return dataArr;
 }
 
-async function aggregateEntries(profileId, aggregationPipeline) {
+async function _aggregateEntries(profileId, aggregationName) {
+  const { default: pipelineBuilder } = await import(
+    `../config/aggregations/${aggregationName}.js`
+  );
+  const aggregationPipeline = pipelineBuilder(profileId);
   return await EntryModel.aggregate(aggregationPipeline);
 }
 
@@ -97,4 +101,4 @@ async function deleteEntry(userId, profileId, entryId) {
   });
 }
 
-export { getEntries, aggregateEntries, createEntry, updateEntry, deleteEntry };
+export { getEntries, _aggregateEntries, createEntry, updateEntry, deleteEntry };
