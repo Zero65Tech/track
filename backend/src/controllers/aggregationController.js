@@ -1,9 +1,9 @@
 import { sendData } from "../utils/response.js";
 
 import {
-  getNamed as getNamedAggregation,
-  createCustomPipeline as createAggregationPipeline,
-  getCustomResult as getAggregationCustomResult,
+  getNamedAggregation,
+  createCustomAggregation,
+  getCustomAggregation,
 } from "../services/aggregationService.js";
 
 // Named
@@ -16,16 +16,12 @@ async function getNamedResult(req, res) {
 // Custom
 
 async function createCustomPipeline(req, res) {
-  const result = await createAggregationPipeline(
-    req.params.profileId,
-    req.body,
-    req.user.uid,
-  );
+  const result = await createCustomAggregation(req.params.profileId, req.body);
   sendData(res, { result });
 }
 
 async function getCustomResult(req, res) {
-  const result = await getAggregationCustomResult(
+  const result = await getCustomAggregation(
     req.params.profileId,
     req.params.id,
   );

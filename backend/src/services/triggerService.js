@@ -43,7 +43,7 @@ async function createDataAggregationTrigger(
   let doc = await TriggerModel.findOne({
     profileId,
     type: TriggerType.DATA_AGGREGATION.id,
-    params: { name: aggregationName },
+    params: { aggregationName },
     state: { $in: [TriggerState.QUEUED.id, TriggerState.RUNNING.id] },
   });
 
@@ -52,7 +52,7 @@ async function createDataAggregationTrigger(
       userId,
       profileId,
       type: TriggerType.DATA_AGGREGATION.id,
-      params: { name: aggregationName },
+      params: { aggregationName },
       state: TriggerState.QUEUED.id,
     });
 
@@ -147,7 +147,7 @@ async function _processProfileCreatedTrigger(triggerData) {
 async function _processNamedDataAggregationTrigger(triggerData, profile) {
   const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
-    triggerData.params.name,
+    triggerData.params.aggregationName,
   );
 
   const entriesProcessed = aggregationResult.reduce(
@@ -161,7 +161,7 @@ async function _processNamedDataAggregationTrigger(triggerData, profile) {
     await _setNamedAggregationResult(
       {
         profileId: triggerData.profileId,
-        name: triggerData.params.name,
+        aggregationName: triggerData.params.aggregationName,
         result: aggregationResult,
       },
       session,

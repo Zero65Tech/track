@@ -38,7 +38,7 @@ triggerSchema.discriminator(
   TriggerType.DATA_AGGREGATION.id,
   new mongoose.Schema({
     params: {
-      name: {
+      aggregationName: {
         type: String,
         required: true,
       },

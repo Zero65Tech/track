@@ -4,55 +4,70 @@ import AggregationModel from "../models/Aggregation.js";
 
 // Named
 
-async function getNamed(profileId, name) {
-  return await AggregationModel.findOne({ profileId, name }).lean();
+async function getNamedAggregation(profileId, name) {
+  const data = await AggregationModel.findOne({ profileId, name }).lean();
+
+  data.id = data._id.toString();
+  delete data["_id"];
+
+  return data;
 }
 
 async function _setNamedAggregationResult(
-  { profileId, name, result },
+  { profileId, aggregationName, result },
   session,
 ) {
   await AggregationModel.updateOne(
-    { profileId, name },
+    { profileId, name: aggregationName },
     { $set: { result } },
     { upsert: true },
   ).session(session);
 }
 
-// TODO: Custom Aggregation Implementation
+// Custom
 
-async function createCustomPipeline(profileId, pipeline) {
-  // TODO
+async function createCustomAggregation(profileId, pipeline) {
   const doc = await AggregationModel.create({
     profileId,
-    name: "custom",
+    name: AggregationName.CUSTOM.id,
     pipeline,
   });
-  return doc._id;
+
+  const data = doc.toObject();
+  data.id = doc._id.toString();
+  delete data["_id"];
+
+  return data;
 }
 
-async function getCustomResult(profileId, id) {
-  const doc = await AggregationModel.findOne({
+async function getCustomAggregation(profileId, aggregationId) {
+  const data = await AggregationModel.findOne({
     profileId,
     name: AggregationName.CUSTOM.id,
-    _id: id,
-  }).select({ _id: 0, result: 1 });
+    _id: aggregationId,
+  }).lean();
 
-  return doc ? doc.result : null;
+  data.id = data._id.toString();
+  delete data["_id"];
+
+  return data;
 }
 
-async function _setCustomAggregationResult({ profileId, id, result }, session) {
+async function _setCustomAggregationResult(
+  { profileId, aggregationId, result },
+  session,
+) {
   await AggregationModel.updateOne(
-    { profileId, name: "custom", _id: id },
-    { $set: { result, timestamp: Date.now } },
+    { profileId, name: AggregationName.CUSTOM.id, _id: aggregationId },
+    { $set: { result } },
     { upsert: true },
   ).session(session);
 }
 
 export {
-  getNamed,
-  createCustomPipeline,
-  getCustomResult,
+  getNamedAggregation,
   _setNamedAggregationResult,
+  createCustomAggregation,
+  getCustomAggregation,
   _setCustomAggregationResult,
 };
