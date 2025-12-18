@@ -59,7 +59,7 @@ async function createDataAggregationTrigger(
   return doc.toObject();
 }
 
-async function processAll(limit = 1000) {
+async function processTriggers(limit = 1000) {
   // Concurrent execution safety: This function may be invoked repeatedly (e.g., via cron) while
   // a previous invocation is still processing triggers. Overlapping invocations may fetch the same
   // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on state
@@ -92,7 +92,7 @@ async function processAll(limit = 1000) {
 
 async function _processTrigger(triggerData) {
   if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
-    await _processProfileCreated(triggerData);
+    await _processProfileCreatedTrigger(triggerData);
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
@@ -115,7 +115,7 @@ async function _processTrigger(triggerData) {
     if (triggerData.params.name === "custom") {
       // TODO: TriggerType.DATA_AGGREGATION, custom
     } else {
-      await _processNamedDataAggregation(triggerData, profile);
+      await _processNamedDataAggregationTrigger(triggerData, profile);
     }
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
     // TODO: TriggerType.DATA_EXPORT
@@ -124,7 +124,7 @@ async function _processTrigger(triggerData) {
   }
 }
 
-async function _processProfileCreated(triggerData) {
+async function _processProfileCreatedTrigger(triggerData) {
   await transaction(async (session) => {
     await _initialiseCoinLedger(
       {
@@ -144,7 +144,7 @@ async function _processProfileCreated(triggerData) {
   });
 }
 
-async function _processNamedDataAggregation(triggerData, profile) {
+async function _processNamedDataAggregationTrigger(triggerData, profile) {
   const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
     triggerData.params.name,
@@ -209,5 +209,5 @@ async function _processNamedDataAggregation(triggerData, profile) {
 export {
   _createProfileCreatedTrigger,
   createDataAggregationTrigger,
-  processAll,
+  processTriggers,
 };
