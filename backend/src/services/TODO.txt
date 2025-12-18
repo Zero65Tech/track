@@ -1,0 +1,13 @@
+[x] UserFcmToken
+[x] User
+
+[x] Profile
+[] EntryFields
+[x] Entry
+[x] Group
+[x] Folder
+[x] AuditLog
+
+[] Trigger
+[] CoinLedger
+[] Aggregation

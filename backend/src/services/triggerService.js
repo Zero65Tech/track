@@ -20,7 +20,7 @@ import {
   _getCoinLedgerBalance,
   _initialiseCoinLedger,
   _deductCoinsFromLedger,
-} from "./coinLedger.js";
+} from "./coinService.js";
 import { _sendFcmNotification } from "./userService.js";
 
 async function _createTrigger({ profileId, data, userId }, session) {
