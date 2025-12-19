@@ -2,9 +2,13 @@ import transaction from "../utils/transaction.js";
 
 import GroupModel from "../models/Group.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
-async function getAll(profileId) {
+async function getGroups(profileId) {
   const dataArr = await GroupModel.find({ profileId }).lean();
 
   for (let data of dataArr) {
@@ -16,28 +20,30 @@ async function getAll(profileId) {
   return dataArr;
 }
 
-async function create(profileId, data, userId) {
+async function createGroup(userId, profileId, data) {
   data["profileId"] = profileId;
   data = await transaction(async (session) => {
     const [doc] = await GroupModel.create([data], { session });
 
     data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: GroupModel.collection.name, data },
       session,
     );
 
     return data;
   });
+
   data.id = data._id.toString();
   delete data["_id"];
   delete data["profileId"];
+
   return data;
 }
 
-async function update(profileId, id, updates, userId) {
+async function updateGroup(userId, profileId, groupId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await GroupModel.findOne({ profileId, _id: id }).session(
+    const doc = await GroupModel.findOne({ profileId, _id: groupId }).session(
       session,
     );
     if (!doc) {
@@ -51,22 +57,24 @@ async function update(profileId, id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: GroupModel.collection.name, oldData, newData },
       session,
     );
 
     return newData;
   });
+
   data.id = data._id.toString();
   delete data["_id"];
   delete data["profileId"];
+
   return data;
 }
 
-async function remove(profileId, id, userId) {
+async function deleteGroup(userId, profileId, groupId) {
   await transaction(async (session) => {
-    const doc = await GroupModel.findOne({ profileId, _id: id }).session(
+    const doc = await GroupModel.findOne({ profileId, _id: groupId }).session(
       session,
     );
     if (!doc) {
@@ -74,7 +82,7 @@ async function remove(profileId, id, userId) {
     }
 
     const data = doc.toObject();
-    await auditLogService._logDelete(
+    await _logDeleteAudit(
       { userId, docType: GroupModel.collection.name, data },
       session,
     );
@@ -83,9 +91,4 @@ async function remove(profileId, id, userId) {
   });
 }
 
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-};
+export default { getGroups, createGroup, updateGroup, deleteGroup };

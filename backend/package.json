@@ -8,17 +8,20 @@
   "scripts": {
     "dev": "STAGE=${STAGE:-alpha} nodemon src/index.js",
     "test": "jest --coverage --testPathPattern=test/",
-    "lint": "npx eslint src test"
+    "lint": "npx eslint src test",
+    "callgraph": "npx madge --exclude 'utils/(transaction|response)' --image callgraph.svg src/services"
   },
   "dependencies": {
-    "@zero65/track": "^5.0.0",
+    "@shared/enums": "^5.0.0",
+    "@shared/schemas": "^5.0.0",
     "cors": "^2.8.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "firebase-admin": "^13.4.0",
     "lodash": "^4.17.0",
     "lru-cache": "^11.2.2",
-    "mongoose": "^8.16.3"
+    "mongoose": "^8.16.3",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",

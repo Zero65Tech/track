@@ -1,7 +1,6 @@
 import AuditLogModel from "../models/AuditLog.js";
-import userService from "./userService.js";
 
-async function getAll(profileId, lastTimestamp, pageSize = 10) {
+async function getAuditLogs(profileId, lastTimestamp, pageSize = 10) {
   const query = { profileId };
   if (lastTimestamp) {
     query.timestamp = { $lt: new Date(lastTimestamp) };
@@ -12,17 +11,10 @@ async function getAll(profileId, lastTimestamp, pageSize = 10) {
     .limit(pageSize)
     .lean();
 
-  for (let data of dataArr) {
-    const userData = await userService._getCached(data.userId);
-    delete data["userId"];
-    data["userName"] =
-      userData.displayName || userData.phoneNumber || userData.email;
-  }
-
   return dataArr;
 }
 
-async function _logCreate({ userId, docType, data }, session) {
+async function _logCreateAudit({ userId, docType, data }, session) {
   const { _id, profileId, ...dataAfter } = data;
 
   await AuditLogModel.create(
@@ -41,7 +33,7 @@ async function _logCreate({ userId, docType, data }, session) {
   );
 }
 
-async function _logUpdate({ userId, docType, oldData, newData }, session) {
+async function _logUpdateAudit({ userId, docType, oldData, newData }, session) {
   const { _id, profileId, ...dataBefore } = oldData;
 
   const dataAfter = { ...newData };
@@ -64,7 +56,7 @@ async function _logUpdate({ userId, docType, oldData, newData }, session) {
   );
 }
 
-async function _logDelete({ userId, docType, data }, session) {
+async function _logDeleteAudit({ userId, docType, data }, session) {
   const { _id, profileId, ...dataBefore } = data;
 
   await AuditLogModel.create(
@@ -83,4 +75,6 @@ async function _logDelete({ userId, docType, data }, session) {
   );
 }
 
-export default { getAll, _logCreate, _logUpdate, _logDelete };
+export { _logCreateAudit, _logUpdateAudit, _logDeleteAudit };
+
+export default { getAuditLogs };

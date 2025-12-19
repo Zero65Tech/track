@@ -1,5 +1,10 @@
 FROM mcr.microsoft.com/devcontainers/javascript-node:22
 
+# Install Graphviz and Madge
+RUN apt update
+RUN apt install -y graphviz
+RUN npm -g install madge
+
 # Install Nodemon
 RUN npm install -g nodemon
 

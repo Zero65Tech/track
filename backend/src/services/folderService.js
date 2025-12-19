@@ -2,9 +2,13 @@ import transaction from "../utils/transaction.js";
 
 import FolderModel from "../models/Folder.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
-async function getAll(profileId) {
+async function getFolders(profileId) {
   const dataArr = await FolderModel.find({ profileId })
     .sort({ sortOrder: 1 })
     .lean();
@@ -18,28 +22,30 @@ async function getAll(profileId) {
   return dataArr;
 }
 
-async function create(profileId, data, userId) {
+async function createFolder(userId, profileId, data) {
   data["profileId"] = profileId;
   data = await transaction(async (session) => {
     const [doc] = await FolderModel.create([data], { session });
 
     data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: FolderModel.collection.name, data },
       session,
     );
 
     return data;
   });
+
   data.id = data._id.toString();
   delete data["_id"];
   delete data["profileId"];
+
   return data;
 }
 
-async function update(profileId, id, updates, userId) {
+async function updateFolder(userId, profileId, folderId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await FolderModel.findOne({ profileId, _id: id }).session(
+    const doc = await FolderModel.findOne({ profileId, _id: folderId }).session(
       session,
     );
     if (!doc) {
@@ -53,22 +59,24 @@ async function update(profileId, id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: FolderModel.collection.name, oldData, newData },
       session,
     );
 
     return newData;
   });
+
   data.id = data._id.toString();
   delete data["_id"];
   delete data["profileId"];
+
   return data;
 }
 
-async function remove(profileId, id, userId) {
+async function deleteFolder(userId, profileId, folderId) {
   await transaction(async (session) => {
-    const doc = await FolderModel.findOne({ profileId, _id: id }).session(
+    const doc = await FolderModel.findOne({ profileId, _id: folderId }).session(
       session,
     );
     if (!doc) {
@@ -76,7 +84,7 @@ async function remove(profileId, id, userId) {
     }
 
     const data = doc.toObject();
-    await auditLogService._logDelete(
+    await _logDeleteAudit(
       { userId, docType: FolderModel.collection.name, data },
       session,
     );
@@ -85,9 +93,4 @@ async function remove(profileId, id, userId) {
   });
 }
 
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-};
+export default { getFolders, createFolder, updateFolder, deleteFolder };

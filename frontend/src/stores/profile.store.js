@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { ProfileAccess, ProfileState } from '@zero65/track';
+import { ProfileAccess, ProfileState } from '@shared/enums';
 import { useAuthStore } from '@/stores/auth.store';
 import { profileService } from '@/service/profileService';
 

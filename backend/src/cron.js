@@ -1,10 +1,10 @@
-import triggerService from "./services/triggerService.js";
+import { _processTriggers } from "./services/triggerService.js";
 
 function start() {
-  console.log("Cron started ♻️");
-  triggerService.processAll().catch((err) => console.log(err));
+  console.log("🕐 Cron started (every 60 seconds)");
+  _processTriggers().catch((err) => console.log(err));
   setInterval(() => {
-    triggerService.processAll().catch((err) => console.log(err));
+    _processTriggers().catch((err) => console.log(err));
   }, 60 * 1000);
 }
 

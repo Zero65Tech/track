@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AggregationName } from "@zero65/track";
+import { AggregationName } from "@shared/enums";
 
 const aggregationSchema = new mongoose.Schema(
   {
@@ -15,20 +15,26 @@ const aggregationSchema = new mongoose.Schema(
       required: true,
     },
 
-    pipeline: {
-      // TODO
-      type: mongoose.Schema.Types.Mixed,
-    },
-
     result: {
       type: mongoose.Schema.Types.Mixed,
     },
   },
   {
     collection: "aggregations",
+    discriminatorKey: "name",
     versionKey: false,
     timestamps: true,
   },
+);
+
+aggregationSchema.discriminator(
+  AggregationName.CUSTOM.id,
+  new mongoose.Schema({
+    pipeline: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
+  }),
 );
 
 export default mongoose.model("Aggregation", aggregationSchema);

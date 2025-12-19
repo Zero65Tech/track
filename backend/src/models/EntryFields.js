@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EntryFieldState } from "@zero65/track";
+import { EntryFieldState } from "@shared/enums";
 
 function createSchema(collectionName) {
   const fields = {
@@ -42,7 +42,7 @@ function createSchema(collectionName) {
     },
   };
 
-  if (collectionName === "book") {
+  if (collectionName === "books") {
     delete fields["group"];
   }
 

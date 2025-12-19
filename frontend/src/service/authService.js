@@ -1,13 +1,10 @@
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/config/firebaseClient';
+import { getToken } from 'firebase/messaging';
+import { auth, messaging } from '@/config/firebaseClient';
 
 const googleProvider = new GoogleAuthProvider();
 
 export const authService = {
-    /**
-     * Get Firebase ID token for API requests
-     * @returns {Promise<string>} ID token string
-     */
     async getIdToken() {
         if (!auth.currentUser) {
             throw new Error('No user logged in');
@@ -15,10 +12,6 @@ export const authService = {
         return await auth.currentUser.getIdToken();
     },
 
-    /**
-     * Get current authenticated user
-     * @returns {object|null} User object or null if not authenticated
-     */
     getCurrentUser() {
         return auth.currentUser
             ? {
@@ -30,10 +23,6 @@ export const authService = {
             : null;
     },
 
-    /**
-     * Sign in with Google using popup
-     * @returns {Promise<object>} User object with uid, displayName, email, photoURL
-     */
     async loginWithGoogle() {
         try {
             const result = await signInWithPopup(auth, googleProvider);
@@ -49,10 +38,6 @@ export const authService = {
         }
     },
 
-    /**
-     * Sign out current user
-     * @returns {Promise<void>}
-     */
     async logout() {
         try {
             await signOut(auth);
@@ -61,11 +46,6 @@ export const authService = {
         }
     },
 
-    /**
-     * Listen to auth state changes
-     * @param {Function} callback Function to call with user when auth state changes
-     * @returns {Function} Unsubscribe function
-     */
     onAuthStateChanged(callback) {
         return onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -78,6 +58,12 @@ export const authService = {
             } else {
                 callback(null);
             }
+        });
+    },
+
+    async getFcmToken() {
+        return await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
         });
     }
 };

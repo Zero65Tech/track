@@ -127,6 +127,7 @@ const AggregationName = Object.freeze({
   BALANCES_BY_BOOK: Object.freeze({ id: "balances_by_book", name: "Balances by Book" }),
   BALANCES_BY_SOURCE: Object.freeze({ id: "balances_by_source", name: "Balances by Source" }),
   AMOUNTS_BY_TYPE: Object.freeze({ id: "amounts_by_type", name: "Amounts by Type" }),
+  CUSTOM: Object.freeze({ id: "custom", name: "Custom" }),
 });
 
 const CoinLedgerRef = Object.freeze({

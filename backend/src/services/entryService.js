@@ -2,43 +2,58 @@ import transaction from "../utils/transaction.js";
 
 import EntryModel from "../models/Entry.js";
 
-import auditLogService from "./auditLogService.js";
+import {
+  _logCreateAudit,
+  _logUpdateAudit,
+  _logDeleteAudit,
+} from "./auditLogService.js";
 
-async function getAll(profileId, filters) {
+async function getEntries(profileId, filters) {
   const dataArr = await EntryModel.find({ profileId, ...filters })
     .limit(1000)
     .lean();
 
   for (let data of dataArr) {
-    delete data["profileId"];
-    // DEPRECATE: _id in response
     data.id = data._id.toString();
+    delete data["_id"];
+    delete data["profileId"];
   }
 
   return dataArr;
 }
 
-async function create(profileId, data, userId) {
+async function _aggregateEntries(profileId, aggregationName) {
+  const { default: pipelineBuilder } = await import(
+    `../config/aggregations/${aggregationName}.js`
+  );
+  const aggregationPipeline = pipelineBuilder(profileId);
+  return await EntryModel.aggregate(aggregationPipeline);
+}
+
+async function createEntry(userId, profileId, data) {
   data["profileId"] = profileId;
   data = await transaction(async (session) => {
     const [doc] = await EntryModel.create([data], { session });
 
     data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: EntryModel.collection.name, data },
       session,
     );
 
     return data;
   });
-  delete data["profileId"];
-  // DEPRECATE: _id in response
+
   data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+
+  return data;
 }
 
-async function update(profileId, id, updates, userId) {
+async function updateEntry(userId, profileId, entryId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await EntryModel.findOne({ profileId, _id: id }).session(
+    const doc = await EntryModel.findOne({ profileId, _id: entryId }).session(
       session,
     );
     if (!doc) {
@@ -52,21 +67,24 @@ async function update(profileId, id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: EntryModel.collection.name, oldData, newData },
       session,
     );
 
     return newData;
   });
-  delete data["profileId"];
-  // DEPRECATE: _id in response
+
   data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+
+  return data;
 }
 
-async function remove(profileId, id, userId) {
+async function deleteEntry(userId, profileId, entryId) {
   await transaction(async (session) => {
-    const doc = await EntryModel.findOne({ profileId, _id: id }).session(
+    const doc = await EntryModel.findOne({ profileId, _id: entryId }).session(
       session,
     );
     if (!doc) {
@@ -74,7 +92,7 @@ async function remove(profileId, id, userId) {
     }
 
     const data = doc.toObject();
-    await auditLogService._logDelete(
+    await _logDeleteAudit(
       { userId, docType: EntryModel.collection.name, data },
       session,
     );
@@ -83,9 +101,6 @@ async function remove(profileId, id, userId) {
   });
 }
 
-export default {
-  getAll,
-  create,
-  update,
-  remove,
-};
+export { _aggregateEntries };
+  
+export default{ getEntries, createEntry, updateEntry, deleteEntry };

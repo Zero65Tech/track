@@ -1,18 +1,32 @@
 import { LRUCache } from "lru-cache";
-import { firebaseAdmin } from "../config/firebase.js";
+import { lruCacheConfig } from "../config/cache.js";
+import { getFirebaseAuth, getFirebaseMessaging } from "../config/firebase.js";
+import { _getFcmTokens } from "./userFcmTokenService.js";
 
-const cache = new LRUCache({
-  max: 1024,
-  ttl: 1000 * 60 * 60 * 3, // 3 hours
-});
+const userDataCache = new LRUCache(lruCacheConfig);
 
-async function _getCached(uid) {
-  let data = cache.get(uid);
+async function _getCachedUser(userId) {
+  let data = userDataCache.get(userId);
   if (!data) {
-    data = await firebaseAdmin.auth().getUser(uid);
-    cache.set(uid, data);
+    data = await getFirebaseAuth().getUser(userId);
+    userDataCache.set(userId, data);
   }
   return data;
 }
 
-export default { _getCached };
+async function _sendFcmNotification(userIds, messageData) {
+  const fcmTokens = await _getFcmTokens(...userIds);
+  if (fcmTokens.length === 0) {
+    return;
+  }
+
+  const messaging = getFirebaseMessaging();
+  for (const token of fcmTokens) {
+    await messaging.send({
+      token,
+      data: messageData,
+    });
+  }
+}
+
+export { _getCachedUser, _sendFcmNotification };

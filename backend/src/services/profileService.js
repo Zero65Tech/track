@@ -1,37 +1,36 @@
 import { LRUCache } from "lru-cache";
-import { ProfileAccess, ProfileState } from "@zero65/track";
+import { ProfileAccess, ProfileState } from "@shared/enums";
 
 import transaction from "../utils/transaction.js";
-
 import ProfileModel from "../models/Profile.js";
+import { lruCacheConfig } from "../config/cache.js";
 
-import auditLogService from "./auditLogService.js";
-import coinLedger from "./coinLedger.js";
+import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
+import { _createProfileCreatedTrigger } from "./triggerService.js";
 
-const cache = new LRUCache({
-  max: 1024,
-  ttl: 1000 * 60 * 60 * 3, // 3 hours
-});
+const profileDataCache = new LRUCache(lruCacheConfig);
 
-async function _getCached(id) {
-  id = typeof id === "string" ? id : id.toString();
-  let data = cache.get(id);
-  if (!data) {
-    data = await ProfileModel.findById(id).lean();
-    cache.set(id, data);
+async function _getCachedProfile(profileId) {
+  if (typeof profileId !== "string") {
+    profileId = profileId.toString();
   }
+
+  let data = profileDataCache.get(profileId);
+  if (data === undefined) {
+    data = await ProfileModel.findById(profileId).lean();
+    profileDataCache.set(profileId, data);
+  }
+
   return data;
 }
 
-async function getAllAccessible(userId) {
+async function getAccessibleProfiles(userId) {
   const dataArr = await ProfileModel.find({
     $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
-  })
-    .sort({ createdAt: 1 })
-    .lean();
+  }).lean();
 
   for (let i = 0; i < dataArr.length; i++) {
-    cache.set(dataArr[i]._id.toString(), dataArr[i]);
+    profileDataCache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
       id: dataArr[i]._id.toString(),
       name: dataArr[i].name,
@@ -48,45 +47,44 @@ async function getAllAccessible(userId) {
   return dataArr;
 }
 
-async function getTemplatesBySystem() {
+async function getTemplateProfiles() {
   const dataArr = await ProfileModel.find({
     owner: process.env.SYSTEM_USER_ID,
     state: ProfileState.TEMPLATE.id,
   }).lean();
 
   for (let i = 0; i < dataArr.length; i++) {
-    cache.set(dataArr[i]._id.toString(), dataArr[i]);
+    profileDataCache.set(dataArr[i]._id.toString(), dataArr[i]);
     dataArr[i] = {
       id: dataArr[i]._id.toString(),
+      name: dataArr[i].name,
       access: ProfileAccess.VIEWER.id,
       state: ProfileState.TEMPLATE.id,
-      name: dataArr[i].name,
     };
   }
 
   return dataArr;
 }
 
-async function create(name, userId) {
+async function createProfile(userId, name) {
   const data = await transaction(async (session) => {
     const [doc] = await ProfileModel.create(
-      [{ name, owner: userId, state: ProfileState.INACTIVE.id }],
+      [{ owner: userId, name, state: ProfileState.INACTIVE.id }],
       { session },
     );
 
     const data = doc.toObject();
-    await auditLogService._logCreate(
+    await _logCreateAudit(
       { userId, docType: ProfileModel.collection.name, data },
       session,
     );
 
-    // TODO: Remove dependency on coinLedger
-    await coinLedger._init({ profileId: doc._id }, session);
+    await _createProfileCreatedTrigger({ profileId: doc._id }, session);
 
     return data;
   });
 
-  cache.set(data._id.toString(), data);
+  profileDataCache.set(data._id.toString(), data);
 
   return {
     id: data._id.toString(),
@@ -96,9 +94,18 @@ async function create(name, userId) {
   };
 }
 
-async function update(id, updates, userId) {
+async function _updateProfile({ profileId, updates }, session) {
+  await ProfileModel.updateOne(
+    { _id: profileId },
+    { $set: updates },
+    { upsert: false },
+  ).session(session);
+  profileDataCache.delete(profileId);
+}
+
+async function updateProfile(userId, profileId, updates) {
   const data = await transaction(async (session) => {
-    const doc = await ProfileModel.findById(id).session(session);
+    const doc = await ProfileModel.findById(profileId).session(session);
     if (!doc) {
       throw new Error(`${ProfileModel.modelName} not found !`);
     }
@@ -111,7 +118,7 @@ async function update(id, updates, userId) {
 
     const newData = doc.toObject();
 
-    await auditLogService._logUpdate(
+    await _logUpdateAudit(
       { userId, docType: ProfileModel.collection.name, oldData, newData },
       session,
     );
@@ -119,7 +126,7 @@ async function update(id, updates, userId) {
     return newData;
   });
 
-  cache.set(data._id.toString(), data);
+  profileDataCache.set(data._id.toString(), data);
 
   return {
     id: data._id.toString(),
@@ -129,20 +136,11 @@ async function update(id, updates, userId) {
   };
 }
 
-async function _update({ id, updates }, session) {
-  await ProfileModel.updateOne(
-    { _id: id },
-    { $set: updates },
-    { upsert: false },
-  ).session(session);
-  cache.delete(id);
-}
+export { _getCachedProfile, _updateProfile };
 
 export default {
-  _getCached,
-  getAllAccessible,
-  getTemplatesBySystem,
-  create,
-  update,
-  _update,
+  getAccessibleProfiles,
+  getTemplateProfiles,
+  createProfile,
+  updateProfile,
 };

@@ -1,11 +1,11 @@
-import { sendData } from "../utils/response.js";
-
+import { createCustomAggregationSchema } from "@shared/schemas";
+import { sendData, sendBadRequestError } from "../utils/response.js";
 import aggregationService from "../services/aggregationService.js";
 
 // Named
 
-async function getNamedResult(req, res) {
-  const data = await aggregationService.getNamed(
+async function getNamedAggregationResult(req, res) {
+  const data = await aggregationService.getNamedAggregation(
     req.params.profileId,
     req.params.name,
   );
@@ -14,21 +14,29 @@ async function getNamedResult(req, res) {
 
 // Custom
 
-async function createCustomPipeline(req, res) {
-  const result = await aggregationService.createCustomPipeline(
-    req.params.profileId,
-    req.body,
-    req.user.uid,
-  );
-  sendData(res, { result });
-}
-
-async function getCustomResult(req, res) {
-  const result = await aggregationService.getCustomResult(
+async function getCustomAggregationResult(req, res) {
+  const result = await aggregationService.getCustomAggregation(
     req.params.profileId,
     req.params.id,
   );
   sendData(res, { result });
 }
 
-export default { getNamedResult, createCustomPipeline, getCustomResult };
+async function createCustomAggregation(req, res) {
+  const { success, error } = createCustomAggregationSchema.safeParse(req.body);
+  if (!success) {
+    return sendBadRequestError(res, error);
+  }
+
+  const result = await aggregationService.createCustomAggregation(
+    req.params.profileId,
+    req.body,
+  );
+  sendData(res, { result });
+}
+
+export default {
+  getNamedAggregationResult,
+  getCustomAggregationResult,
+  createCustomAggregation,
+};

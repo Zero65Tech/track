@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
-import { TriggerType, TriggerState } from "@zero65/track";
+import { TriggerType, TriggerState } from "@shared/enums";
 
 const triggerSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+    },
+
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",
@@ -20,11 +25,6 @@ const triggerSchema = new mongoose.Schema(
       enum: Object.values(TriggerState).map((s) => s.id),
       required: false,
     },
-
-    userId: {
-      type: String,
-      required: true,
-    },
   },
   {
     collection: "triggers",
@@ -38,7 +38,7 @@ triggerSchema.discriminator(
   TriggerType.DATA_AGGREGATION.id,
   new mongoose.Schema({
     params: {
-      name: {
+      aggregationName: {
         type: String,
         required: true,
       },

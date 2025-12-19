@@ -1,51 +1,76 @@
-import { AggregationName } from "@zero65/track";
+import { AggregationName } from "@shared/enums";
 
-import Aggregation from "../models/Aggregation.js";
+import AggregationModel from "../models/Aggregation.js";
 
 // Named
 
-async function getNamed(profileId, name) {
-  return await Aggregation.findOne({ profileId, name }).lean();
+async function getNamedAggregation(profileId, aggregationName) {
+  const data = await AggregationModel.findOne({
+    profileId,
+    name: aggregationName,
+  }).lean();
+
+  data.id = data._id.toString();
+  delete data["_id"];
+
+  return data;
 }
 
-async function _setNamedResult({ profileId, name, result }, session) {
-  await Aggregation.updateOne(
-    { profileId, name },
-    { $set: { result } },
+async function _setNamedAggregationResult(
+  { profileId, aggregationName, aggregationResult },
+  session,
+) {
+  await AggregationModel.updateOne(
+    { profileId, name: aggregationName },
+    { $set: { result: aggregationResult } },
     { upsert: true },
   ).session(session);
 }
 
-// TODO: Custom Aggregation Implementation
+// Custom
 
-async function createCustomPipeline(profileId, pipeline) {
-  // TODO
-  const doc = await Aggregation.create({ profileId, name: "custom", pipeline });
-  return doc._id;
-}
-
-async function getCustomResult(profileId, id) {
-  const doc = await Aggregation.findOne({
+async function createCustomAggregation(profileId, aggregationPipeline) {
+  const doc = await AggregationModel.create({
     profileId,
     name: AggregationName.CUSTOM.id,
-    _id: id,
-  }).select({ _id: 0, result: 1 });
+    pipeline: aggregationPipeline,
+  });
 
-  return doc ? doc.result : null;
+  const data = doc.toObject();
+  data.id = doc._id.toString();
+  delete data["_id"];
+
+  return data;
 }
 
-async function _setCustomResult({ profileId, id, result }, session) {
-  await Aggregation.updateOne(
-    { profileId, name: "custom", _id: id },
-    { $set: { result, timestamp: Date.now } },
+async function getCustomAggregation(profileId, aggregationId) {
+  const data = await AggregationModel.findOne({
+    profileId,
+    name: AggregationName.CUSTOM.id,
+    _id: aggregationId,
+  }).lean();
+
+  data.id = data._id.toString();
+  delete data["_id"];
+
+  return data;
+}
+
+async function _setCustomAggregationResult(
+  { profileId, aggregationId, aggregationResult },
+  session,
+) {
+  await AggregationModel.updateOne(
+    { profileId, name: AggregationName.CUSTOM.id, _id: aggregationId },
+    { $set: { result: aggregationResult } },
     { upsert: true },
   ).session(session);
 }
 
+export { _setNamedAggregationResult, _setCustomAggregationResult };
+
 export default {
-  getNamed,
-  createCustomPipeline,
-  getCustomResult,
-  _setNamedResult,
-  _setCustomResult,
+  getNamedAggregation,
+  createCustomAggregation,
+  getCustomAggregation,
 };

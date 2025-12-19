@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
-import { initialiseFirebaseAdmin } from "./config/firebase.js";
-import { initialiseDbConnection } from "./config/db.js";
+import { initialiseFirebase } from "./config/firebase.js";
+import { connectToDatabase } from "./config/db.js";
 import cron from "./cron.js";
 import app from "./app.js";
 
@@ -13,12 +13,12 @@ import app from "./app.js";
       `.env.${process.env.STAGE}.local`,
     ],
   });
-  initialiseFirebaseAdmin();
-  await initialiseDbConnection();
+  initialiseFirebase();
+  await connectToDatabase();
   cron.start();
   app.listen(process.env.PORT, () =>
     console.log(
-      `Server (${process.env.STAGE}) is up and listening at ${process.env.PORT} port 🎉`,
+      `🎉 Server (${process.env.STAGE}) is listening on port ${process.env.PORT}`,
     ),
   );
 })();

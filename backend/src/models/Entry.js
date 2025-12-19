@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EntryType } from "@zero65/track";
+import { EntryType } from "@shared/enums";
 
 const entrySchema = new mongoose.Schema(
   {
@@ -29,6 +29,7 @@ const entrySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+
     note: {
       type: String,
     },

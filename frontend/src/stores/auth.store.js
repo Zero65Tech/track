@@ -2,19 +2,22 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { authService } from '@/service/authService';
+import { userFcmTokenService } from '@/service/userFcmTokenService';
 
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
     const localStorageKeys = {
         user: 'auth.user',
-        token: 'auth.token'
+        token: 'auth.token',
+        deviceId: 'auth.deviceId'
     };
 
     // States
     const isLoading = ref(false);
     const user = ref(null);
     const token = ref(null);
+    const deviceId = ref(null);
     const unsubscribe = ref(null);
     const error = ref(null);
 
@@ -27,10 +30,18 @@ export const useAuthStore = defineStore('auth', () => {
         // Restore user from localStorage if available
         const savedUser = localStorage.getItem(localStorageKeys.user);
         const savedToken = localStorage.getItem(localStorageKeys.token);
+        const savedDeviceId = localStorage.getItem(localStorageKeys.deviceId);
 
         if (savedUser && savedToken) {
             user.value = JSON.parse(savedUser);
             token.value = savedToken;
+        }
+
+        if (savedDeviceId) {
+            deviceId.value = savedDeviceId;
+        } else {
+            deviceId.value = `${navigator.userAgent.substring(0, 20)}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            localStorage.setItem(localStorageKeys.deviceId, deviceId.value);
         }
 
         // Set up auth state listener
@@ -42,6 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
                 authService.getIdToken().then((newToken) => {
                     token.value = newToken;
                     localStorage.setItem(localStorageKeys.token, newToken);
+                    updateFcmToken();
                 });
             } else {
                 user.value = null;
@@ -52,11 +64,24 @@ export const useAuthStore = defineStore('auth', () => {
         });
     }
 
+    async function updateFcmToken() {
+        try {
+            const fcmToken = await authService.getFcmToken();
+            if (fcmToken && deviceId.value) {
+                await userFcmTokenService.updateToken(fcmToken, deviceId.value);
+            }
+        } catch (err) {
+            // Log silently, don't block other operations
+            console.error('Failed to update FCM token:', err);
+        }
+    }
+
     async function refreshToken() {
         try {
             const newToken = await authService.getIdToken();
             token.value = newToken;
             localStorage.setItem(localStorageKeys.token, newToken);
+            await updateFcmToken();
         } catch (err) {
             error.value = err.message;
             throw err;
@@ -110,8 +135,10 @@ export const useAuthStore = defineStore('auth', () => {
 
             user.value = null;
             token.value = null;
+            deviceId.value = null;
             localStorage.removeItem(localStorageKeys.user);
             localStorage.removeItem(localStorageKeys.token);
+            localStorage.removeItem(localStorageKeys.deviceId);
 
             toast.add({
                 // TODO: Consolidate toast handling
@@ -140,6 +167,7 @@ export const useAuthStore = defineStore('auth', () => {
         isLoading,
         user,
         token,
+        deviceId,
         error,
 
         // Getters
@@ -149,6 +177,7 @@ export const useAuthStore = defineStore('auth', () => {
         // Actions
         initialize,
         refreshToken,
+        updateFcmToken,
         loginWithGoogle,
         logout
     };
