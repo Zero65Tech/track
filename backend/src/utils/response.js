@@ -1,42 +1,38 @@
-function sendSuccess(res, message) {
+function sendData(res, data, message = null) {
   res.status(200).json({
-    success: true,
-    message,
-  });
-}
-
-function sendData(res, data, message) {
-  res.status(200).json({
-    success: true,
     data,
     message,
   });
 }
 
-function sendBadRequestError(res, message = "Bad Request") {
+function sendSuccess(res, message = null) {
+  res.status(200).json({
+    message,
+  });
+}
+
+function sendBadRequestError(res, error, message = "Validation Error") {
   res.status(400).json({
-    success: false,
+    error,
     message,
   });
 }
 
-function sendUnauthorizedError(res, message = "Unauthorized") {
+function sendUnauthorizedError(res, message = "Unauthorized Access") {
   res.status(401).json({
-    success: false,
     message,
   });
 }
 
-function sendForbiddenError(res, message = "Forbidden") {
+function sendForbiddenError(res, message = "Forbidden Resource") {
   res.status(403).json({
-    success: false,
     message,
   });
 }
 
 export {
-  sendSuccess,
   sendData,
+  sendSuccess,
   sendBadRequestError,
   sendUnauthorizedError,
   sendForbiddenError,

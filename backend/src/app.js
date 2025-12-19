@@ -31,20 +31,17 @@ app.use((req, res, next) => {
 
 let API_PREFIX = "/api";
 
-app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplatesBySystem); // prettier-ignore
+app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplateProfiles); // prettier-ignore
 
 // NOTE: User must be loggedin for following routes
 
 app.use(authMiddleware);
 
-app.post(
-  `${API_PREFIX}/users/fcm-tokens`,
-  userFcmTokenController.storeFcmToken,
-);
+app.post(`${API_PREFIX}/users/fcm-tokens`, userFcmTokenController.store);
 
-app.get(`${API_PREFIX}/profiles`, profileController.getAllAccessible);
-app.post(`${API_PREFIX}/profiles`, profileController.create);
-app.patch(`${API_PREFIX}/profiles/:id`, profileController.update);
+app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
+app.post(`${API_PREFIX}/profiles`, profileController.createProfile);
+app.patch(`${API_PREFIX}/profiles/:id`, profileController.updateProfile);
 
 // NOTE: Loggedin User must have access to the Profile for following routes
 
@@ -59,19 +56,16 @@ app.delete(`${API_PREFIX}/books/:id`, bookController.remove);
 
 app.get(`${API_PREFIX}/heads`, headController.getAll);
 app.post(`${API_PREFIX}/heads`, headController.create);
-app.patch(`${API_PREFIX}/heads/sortOrder`, headController.bulkUpdateSortOrder);
 app.patch(`${API_PREFIX}/heads/:id`, headController.update);
 app.delete(`${API_PREFIX}/heads/:id`, headController.remove);
 
 app.get(`${API_PREFIX}/tags`, tagController.getAll);
 app.post(`${API_PREFIX}/tags`, tagController.create);
-app.patch(`${API_PREFIX}/tags/sortOrder`, tagController.bulkUpdateSortOrder);
 app.patch(`${API_PREFIX}/tags/:id`, tagController.update);
 app.delete(`${API_PREFIX}/tags/:id`, tagController.remove);
 
 app.get(`${API_PREFIX}/sources`, sourceController.getAll);
 app.post(`${API_PREFIX}/sources`, sourceController.create);
-app.patch(`${API_PREFIX}/sources/sortOrder`, sourceController.bulkUpdateSortOrder); // prettier-ignore
 app.patch(`${API_PREFIX}/sources/:id`, sourceController.update);
 app.delete(`${API_PREFIX}/sources/:id`, sourceController.remove);
 

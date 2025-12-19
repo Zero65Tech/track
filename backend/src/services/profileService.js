@@ -136,11 +136,11 @@ async function updateProfile(userId, profileId, updates) {
   };
 }
 
-export {
-  _getCachedProfile,
+export { _getCachedProfile, _updateProfile };
+
+export default {
   getAccessibleProfiles,
   getTemplateProfiles,
   createProfile,
-  _updateProfile,
   updateProfile,
 };
