@@ -20,11 +20,13 @@ async function _getCoinLedgerBalance(profileId) {
       latest: true,
     });
 
-    coinLedgerBalanceCache.set(profileId, {
+    balance = {
       pulse: latestTxn.pulseTotal,
       nova: latestTxn.novaTotal,
       total: latestTxn.pulseTotal + latestTxn.novaTotal,
-    });
+    };
+
+    coinLedgerBalanceCache.set(profileId, balance);
   }
 
   return balance;

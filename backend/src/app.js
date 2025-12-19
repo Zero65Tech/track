@@ -89,7 +89,10 @@ app.delete(`${API_PREFIX}/entries/:id`, entryController.deleteEntry);
 
 app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAuditLogs);
 
-app.post(`${API_PREFIX}/triggers`, triggerController.create);
+app.post(
+  `${API_PREFIX}/triggers/data-aggregation`,
+  triggerController.createDataAggregationTrigger,
+);
 
 app.get(`${API_PREFIX}/aggregations/named/:name/result`, aggregationController.getNamedAggregationResult); // prettier-ignore
 app.get(`${API_PREFIX}/aggregations/custom/:id/result`, aggregationController.getCustomAggregationResult); // prettier-ignore
