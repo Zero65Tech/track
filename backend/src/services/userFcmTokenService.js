@@ -19,4 +19,6 @@ async function deleteFcmToken(userId, deviceId) {
   await UserFcmTokenModel.deleteOne({ userId, deviceId });
 }
 
-export { storeFcmToken, _getFcmTokens, deleteFcmToken };
+export { _getFcmTokens, deleteFcmToken };
+
+export default { storeFcmToken };

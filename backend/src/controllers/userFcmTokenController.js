@@ -1,21 +1,18 @@
-import { sendData, sendBadRequestError } from "../utils/response.js";
-import { storeFcmToken as storeUserFcmToken } from "../services/userFcmTokenService.js";
+import { storeFcmTokenSchema } from "@shared/schemas";
+import { sendSuccess, sendBadRequestError } from "../utils/response.js";
+import userFcmTokenService from "../services/userFcmTokenService.js";
 
 async function storeFcmToken(req, res) {
-  const { deviceId, fmcToken } = req.body;
   const userId = req.user.uid;
 
-  if (!fmcToken) {
-    return sendBadRequestError(res, "'fmcToken' is required");
+  const { success, error, data } = storeFcmTokenSchema.safeParse(req.body);
+  if (!success) {
+    return sendBadRequestError(res, error);
   }
 
-  if (!deviceId) {
-    return sendBadRequestError(res, "'deviceId' is required");
-  }
+  await userFcmTokenService.storeFcmToken(userId, data.deviceId, data.fcmToken);
 
-  await storeUserFcmToken(userId, deviceId, fmcToken);
-
-  return sendData(res);
+  return sendSuccess(res);
 }
 
 export default { storeFcmToken };

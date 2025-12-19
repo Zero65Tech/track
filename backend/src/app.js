@@ -37,7 +37,7 @@ app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplate
 
 app.use(authMiddleware);
 
-app.post(`${API_PREFIX}/users/fcm-tokens`, userFcmTokenController.store);
+app.post(`${API_PREFIX}/users/fcm-tokens`, userFcmTokenController.storeFcmToken);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
 app.post(`${API_PREFIX}/profiles`, profileController.createProfile);

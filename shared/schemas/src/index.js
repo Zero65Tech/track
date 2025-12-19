@@ -1,1 +1,2 @@
-export { profileNameSchema, createProfileSchema, updateProfileSchema } from './profile.js';
+export { storeFcmTokenSchema } from './userFcmToken.js';
+export { createProfileSchema, updateProfileSchema } from './profile.js';

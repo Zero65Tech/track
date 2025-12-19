@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ProfileState } from "@shared/enums";
 
-export const profileNameSchema = z
+const profileNameSchema = z
   .string()
   .trim()
   .min(1, "'name' is required")
@@ -15,7 +15,7 @@ export const createProfileSchema = z.object({
 
 export const updateProfileSchema = z.object({
   name: profileNameSchema.optional(),
-  state: z.enum(profileStateEnum).optional(),
+  state: z.string().trim().pipe(z.enum(profileStateEnum)).optional(),
 }).strict().refine(
   (data) => data.name !== undefined || data.state !== undefined,
   {
