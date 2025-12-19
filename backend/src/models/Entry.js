@@ -29,6 +29,7 @@ const entrySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+
     note: {
       type: String,
     },

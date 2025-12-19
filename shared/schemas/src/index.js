@@ -12,3 +12,4 @@ export {
 } from './entryFields.js';
 export { createFolderSchema, updateFolderSchema } from './folder.js';
 export { createGroupSchema, updateGroupSchema } from './group.js';
+export { createEntrySchema, updateEntrySchema } from './entry.js';

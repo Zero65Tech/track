@@ -1,34 +1,59 @@
+import { createEntrySchema, updateEntrySchema } from "@shared/schemas";
 import {
-  getEntries,
-  createEntry,
-  updateEntry,
-  deleteEntry,
-} from "../services/entryService.js";
-import { sendData } from "../utils/response.js";
+  sendData,
+  sendSuccess,
+  sendBadRequestError,
+} from "../utils/response.js";
+import entryService from "../services/entryService.js";
 
-async function getAll(req, res) {
-  const entries = await getEntries(req.params.profileId, req.query);
+async function getEntries(req, res) {
+  const entries = await entryService.getEntries(
+    req.params.profileId,
+    req.query,
+  );
   sendData(res, { entries });
 }
 
-async function create(req, res) {
-  const entry = await createEntry(req.user.uid, req.params.profileId, req.body);
+async function createEntry(req, res) {
+  const { success, error, data } = createEntrySchema.safeParse(req.body);
+  if (!success) {
+    return sendBadRequestError(res, error);
+  }
+
+  const entry = await entryService.createEntry(
+    req.user.uid,
+    req.params.profileId,
+    data,
+  );
   sendData(res, { entry }, "Entry created successfully.");
 }
 
-async function update(req, res) {
-  const entry = await updateEntry(
+async function updateEntry(req, res) {
+  const {
+    success,
+    error,
+    data: updates,
+  } = updateEntrySchema.safeParse(req.body);
+  if (!success) {
+    return sendBadRequestError(res, error);
+  }
+
+  const entry = await entryService.updateEntry(
     req.user.uid,
     req.params.profileId,
     req.params.id,
-    req.body,
+    updates,
   );
   sendData(res, { entry }, "Entry updated successfully.");
 }
 
-async function remove(req, res) {
-  await deleteEntry(req.user.uid, req.params.profileId, req.params.id);
-  sendData(res, null, "Entry deleted successfully");
+async function deleteEntry(req, res) {
+  await entryService.deleteEntry(
+    req.user.uid,
+    req.params.profileId,
+    req.params.id,
+  );
+  sendSuccess(res, "Entry deleted successfully");
 }
 
-export default { getAll, create, update, remove };
+export default { getEntries, createEntry, updateEntry, deleteEntry };

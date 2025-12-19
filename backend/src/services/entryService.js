@@ -101,4 +101,6 @@ async function deleteEntry(userId, profileId, entryId) {
   });
 }
 
-export { getEntries, _aggregateEntries, createEntry, updateEntry, deleteEntry };
+export { _aggregateEntries };
+  
+export default{ getEntries, createEntry, updateEntry, deleteEntry };
