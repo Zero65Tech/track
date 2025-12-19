@@ -40,23 +40,28 @@ async function createDataAggregationTrigger(
   profileId,
   aggregationName,
 ) {
-  let doc = await TriggerModel.findOne({
+  let data = await TriggerModel.findOne({
     profileId,
     type: TriggerType.DATA_AGGREGATION.id,
     params: { aggregationName },
     state: { $in: [TriggerState.QUEUED.id, TriggerState.RUNNING.id] },
-  });
+  }).lean();
 
-  if (!doc)
-    doc = await TriggerModel.create({
+  if (!data) {
+    const doc = await TriggerModel.create({
       userId,
       profileId,
       type: TriggerType.DATA_AGGREGATION.id,
       params: { aggregationName },
       state: TriggerState.QUEUED.id,
     });
+    data = doc.toObject();
+  }
 
-  return doc.toObject();
+  data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+  return data;
 }
 
 async function _processTriggers(limit = 1000) {

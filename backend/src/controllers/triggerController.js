@@ -2,7 +2,7 @@ import { createDataAggregationTriggerSchema } from "@shared/schemas";
 import { sendData, sendBadRequestError } from "../utils/response.js";
 import triggerService from "../services/triggerService.js";
 
-async function create(req, res) {
+async function createDataAggregationTrigger(req, res) {
   const { success, error, data } = createDataAggregationTriggerSchema.safeParse(
     req.body,
   );
@@ -15,7 +15,8 @@ async function create(req, res) {
     req.params.profileId,
     data.aggregationName,
   );
+
   sendData(res, result, "Trigger created successfully");
 }
 
-export default { create };
+export default { createDataAggregationTrigger };
