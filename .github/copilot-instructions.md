@@ -143,10 +143,12 @@ npm test  # Jest, covers test/ folder
 4. **Error Handling**: Express error middleware logs full stack, returns 500 + message
 5. **Frontend API Calls**: Use service layer (not raw axios), handle errors with Toast
 6. **State Persistence**: No Redux/Vuex, Pinia stores are runtime-only; reload on refresh
+7. **Validation Rule**: Avoid adding validation rules at the service level—parameters are already validated at the controller level. For private methods (prefixed with `_`), assume code is well-tested and well-written; validation is not needed.
 
 ## Notes
 
 - **Feature Checklist** in `README.md` documents incomplete work (delete after 30 days, disabled/deleted profile restrictions, etc.)
 - **Coin Ledger** uses optimistic concurrency control; see `README.md` sequence diagrams for trigger flows
 - **Profile State Machine**: inactive → active (one-way); can disable/delete but not auto-recover deleted profiles after 30 days
+- **Template Sharing**: Only template profiles created by system users are shared. No plans yet to make other users' templates sharable.
 - Avoid direct `_id` in API responses; always provide string `id` field instead
