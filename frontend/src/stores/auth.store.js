@@ -37,11 +37,12 @@ export const useAuthStore = defineStore('auth', () => {
             token.value = savedToken;
         }
 
-        if (!savedDeviceId) {
-            savedDeviceId = `${navigator.userAgent.substring(0, 20)}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-            localStorage.setItem(localStorageKeys.deviceId, savedDeviceId);
+        if (savedDeviceId) {
+            deviceId.value = savedDeviceId;
+        } else {
+            deviceId.value = `${navigator.userAgent.substring(0, 20)}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            localStorage.setItem(localStorageKeys.deviceId, deviceId.value);
         }
-        deviceId.value = savedDeviceId;
 
         // Set up auth state listener
         unsubscribe.value = authService.onAuthStateChanged((currentUser) => {
