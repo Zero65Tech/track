@@ -75,4 +75,6 @@ async function _logDeleteAudit({ userId, docType, data }, session) {
   );
 }
 
-export { getAuditLogs, _logCreateAudit, _logUpdateAudit, _logDeleteAudit };
+export { _logCreateAudit, _logUpdateAudit, _logDeleteAudit };
+
+export default { getAuditLogs };

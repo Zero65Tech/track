@@ -67,10 +67,10 @@ async function _setCustomAggregationResult(
   ).session(session);
 }
 
-export {
+export { _setNamedAggregationResult, _setCustomAggregationResult };
+
+export default {
   getNamedAggregation,
-  _setNamedAggregationResult,
   createCustomAggregation,
   getCustomAggregation,
-  _setCustomAggregationResult,
 };

@@ -82,18 +82,18 @@ app.post(`${API_PREFIX}/groups`, groupController.createGroup);
 app.patch(`${API_PREFIX}/groups/:id`, groupController.updateGroup);
 app.delete(`${API_PREFIX}/groups/:id`, groupController.deleteGroup);
 
-app.get(`${API_PREFIX}/entries`, entryController.getAll);
-app.post(`${API_PREFIX}/entries`, entryController.create);
-app.patch(`${API_PREFIX}/entries/:id`, entryController.update);
-app.delete(`${API_PREFIX}/entries/:id`, entryController.remove);
+app.get(`${API_PREFIX}/entries`, entryController.getEntries);
+app.post(`${API_PREFIX}/entries`, entryController.createEntry);
+app.patch(`${API_PREFIX}/entries/:id`, entryController.updateEntry);
+app.delete(`${API_PREFIX}/entries/:id`, entryController.deleteEntry);
 
-app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAll);
+app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAuditLogs);
 
 app.post(`${API_PREFIX}/triggers`, triggerController.create);
 
-app.get(`${API_PREFIX}/aggregations/named/:name/result`, aggregationController.getNamedResult); // prettier-ignore
-app.get(`${API_PREFIX}/aggregations/custom/:id/result`, aggregationController.getCustomResult); // prettier-ignore
-app.post(`${API_PREFIX}/aggregations/custom/pipeline`, aggregationController.createCustomPipeline); // prettier-ignore
+app.get(`${API_PREFIX}/aggregations/named/:name/result`, aggregationController.getNamedAggregationResult); // prettier-ignore
+app.get(`${API_PREFIX}/aggregations/custom/:id/result`, aggregationController.getCustomAggregationResult); // prettier-ignore
+app.post(`${API_PREFIX}/aggregations/custom/pipeline`, aggregationController.createCustomAggregation); // prettier-ignore
 
 app.use((err, req, res, next) => {
   console.log(err);

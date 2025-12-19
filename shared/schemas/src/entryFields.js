@@ -71,7 +71,9 @@ const updateBaseSchema = z.object({
   color: colorSchema.optional(),
   sortOrder: sortOrderSchema.optional(),
   state: z.string().trim().pipe(z.enum(stateEnum)).optional(),
-}).strict().refine(
+}).strict();
+
+const updateBaseSchemaWithValidation = updateBaseSchema.refine(
   (data) => Object.keys(data).length > 0 && Object.values(data).some(val => val !== undefined),
   {
     message: "At least one field must be provided for update",
@@ -79,16 +81,34 @@ const updateBaseSchema = z.object({
   }
 );
 
-export const updateBookSchema = updateBaseSchema;
+export const updateBookSchema = updateBaseSchemaWithValidation;
 
 export const updateHeadSchema = updateBaseSchema.extend({
   group: groupSchema.optional(),
-});
+}).refine(
+  (data) => Object.keys(data).length > 0 && Object.values(data).some(val => val !== undefined),
+  {
+    message: "At least one field must be provided for update",
+    path: [],
+  }
+);
 
 export const updateTagSchema = updateBaseSchema.extend({
   group: groupSchema.optional(),
-});
+}).refine(
+  (data) => Object.keys(data).length > 0 && Object.values(data).some(val => val !== undefined),
+  {
+    message: "At least one field must be provided for update",
+    path: [],
+  }
+);
 
 export const updateSourceSchema = updateBaseSchema.extend({
   group: groupSchema.optional(),
-});
+}).refine(
+  (data) => Object.keys(data).length > 0 && Object.values(data).some(val => val !== undefined),
+  {
+    message: "At least one field must be provided for update",
+    path: [],
+  }
+);

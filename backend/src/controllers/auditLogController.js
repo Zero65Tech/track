@@ -1,12 +1,19 @@
-import { sendData } from "../utils/response.js";
-import { getAuditLogs } from "../services/auditLogService.js";
+import { getAuditLogsSchema } from "@shared/schemas";
+import { sendData, sendBadRequestError } from "../utils/response.js";
+import auditLogService from "../services/auditLogService.js";
 
-async function getAll(req, res) {
-  const auditLogs = await getAuditLogs(
+async function getAuditLogs(req, res) {
+  const { success, error, data } = getAuditLogsSchema.safeParse(req.query);
+  if (!success) {
+    return sendBadRequestError(res, error);
+  }
+
+  const auditLogs = await auditLogService.getAuditLogs(
     req.params.profileId,
-    req.query.lastTimestamp,
-    req.query.pageSize,
+    data.lastTimestamp,
+    data.pageSize,
   );
+
   sendData(res, {
     auditLogs,
     lastTimestamp: auditLogs.length
@@ -15,4 +22,4 @@ async function getAll(req, res) {
   });
 }
 
-export default { getAll };
+export default { getAuditLogs };

@@ -59,7 +59,7 @@ async function createDataAggregationTrigger(
   return doc.toObject();
 }
 
-async function processTriggers(limit = 1000) {
+async function _processTriggers(limit = 1000) {
   // Concurrent execution safety: This function may be invoked repeatedly (e.g., via cron) while
   // a previous invocation is still processing triggers. Overlapping invocations may fetch the same
   // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on state
@@ -206,8 +206,6 @@ async function _processNamedDataAggregationTrigger(triggerData, profile) {
   });
 }
 
-export {
-  _createProfileCreatedTrigger,
-  createDataAggregationTrigger,
-  processTriggers,
-};
+export { _createProfileCreatedTrigger, _processTriggers };
+
+export default { createDataAggregationTrigger };

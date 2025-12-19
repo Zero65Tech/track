@@ -15,10 +15,10 @@ async function _getFcmTokens(...userIds) {
   return results.map((result) => result.fcmToken);
 }
 
-async function deleteFcmToken(userId, deviceId) {
+async function _deleteFcmToken(userId, deviceId) {
   await UserFcmTokenModel.deleteOne({ userId, deviceId });
 }
 
-export { _getFcmTokens, deleteFcmToken };
+export { _getFcmTokens, _deleteFcmToken };
 
 export default { storeFcmToken };
