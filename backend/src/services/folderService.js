@@ -93,4 +93,4 @@ async function deleteFolder(userId, profileId, folderId) {
   });
 }
 
-export { getFolders, createFolder, updateFolder, deleteFolder };
+export default { getFolders, createFolder, updateFolder, deleteFolder };

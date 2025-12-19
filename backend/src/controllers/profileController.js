@@ -13,21 +13,16 @@ async function getTemplateProfiles(req, res) {
 }
 
 async function createProfile(req, res) {
-  const userId = req.user.uid;
-
   const { success, error, data } = createProfileSchema.safeParse(req.body);
   if (!success) {
     return sendBadRequestError(res, error);
   }
 
-  const profile = await profileService.createProfile(userId, data.name);
+  const profile = await profileService.createProfile(req.user.uid, data.name);
   sendData(res, { profile }, "Profile created successfully.");
 }
 
 async function updateProfile(req, res) {
-  const userId = req.user.uid;
-  const profileId = req.params.id;
-
   const {
     success,
     error,
@@ -38,8 +33,8 @@ async function updateProfile(req, res) {
   }
 
   const profile = await profileService.updateProfile(
-    userId,
-    profileId,
+    req.user.uid,
+    req.params.id,
     updates,
   );
   sendData(res, { profile }, "Profile updated successfully.");

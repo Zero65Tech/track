@@ -1,34 +1,52 @@
-import { sendData } from "../utils/response.js";
-import {
-  getGroups,
-  createGroup,
-  updateGroup,
-  deleteGroup,
-} from "../services/groupService.js";
+import { createGroupSchema, updateGroupSchema } from "@shared/schemas";
+import { sendData, sendBadRequestError } from "../utils/response.js";
+import groupService from "../services/groupService.js";
 
-async function getAll(req, res) {
-  const groups = await getGroups(req.params.profileId);
+async function getGroups(req, res) {
+  const groups = await groupService.getGroups(req.params.profileId);
   sendData(res, { groups });
 }
 
-async function create(req, res) {
-  const group = await createGroup(req.user.uid, req.params.profileId, req.body);
+async function createGroup(req, res) {
+  const { success, error, data } = createGroupSchema.safeParse(req.body);
+  if (!success) {
+    return sendBadRequestError(res, error);
+  }
+
+  const group = await groupService.createGroup(
+    req.user.uid,
+    req.params.profileId,
+    data,
+  );
   sendData(res, { group }, "Group created successfully.");
 }
 
-async function update(req, res) {
-  const group = await updateGroup(
+async function updateGroup(req, res) {
+  const {
+    success,
+    error,
+    data: updates,
+  } = updateGroupSchema.safeParse(req.body);
+  if (!success) {
+    return sendBadRequestError(res, error);
+  }
+
+  const group = await groupService.updateGroup(
     req.user.uid,
     req.params.profileId,
     req.params.id,
-    req.body,
+    updates,
   );
   sendData(res, { group }, "Group updated successfully.");
 }
 
-async function remove(req, res) {
-  await deleteGroup(req.user.uid, req.params.profileId, req.params.id);
+async function deleteGroup(req, res) {
+  await groupService.deleteGroup(
+    req.user.uid,
+    req.params.profileId,
+    req.params.id,
+  );
   sendData(res, null, "Group deleted successfully");
 }
 
-export default { getAll, create, update, remove };
+export default { getGroups, createGroup, updateGroup, deleteGroup };

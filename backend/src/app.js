@@ -37,7 +37,10 @@ app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplate
 
 app.use(authMiddleware);
 
-app.post(`${API_PREFIX}/users/fcm-tokens`, userFcmTokenController.storeFcmToken);
+app.post(
+  `${API_PREFIX}/users/fcm-tokens`,
+  userFcmTokenController.storeFcmToken,
+);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
 app.post(`${API_PREFIX}/profiles`, profileController.createProfile);
@@ -69,15 +72,15 @@ app.post(`${API_PREFIX}/sources`, sourceController.create);
 app.patch(`${API_PREFIX}/sources/:id`, sourceController.update);
 app.delete(`${API_PREFIX}/sources/:id`, sourceController.remove);
 
-app.get(`${API_PREFIX}/folders`, folderController.getAll);
-app.post(`${API_PREFIX}/folders`, folderController.create);
-app.patch(`${API_PREFIX}/folders/:id`, folderController.update);
-app.delete(`${API_PREFIX}/folders/:id`, folderController.remove);
+app.get(`${API_PREFIX}/folders`, folderController.getFolders);
+app.post(`${API_PREFIX}/folders`, folderController.createFolder);
+app.patch(`${API_PREFIX}/folders/:id`, folderController.updateFolder);
+app.delete(`${API_PREFIX}/folders/:id`, folderController.deleteFolder);
 
-app.get(`${API_PREFIX}/groups`, groupController.getAll);
-app.post(`${API_PREFIX}/groups`, groupController.create);
-app.patch(`${API_PREFIX}/groups/:id`, groupController.update);
-app.delete(`${API_PREFIX}/groups/:id`, groupController.remove);
+app.get(`${API_PREFIX}/groups`, groupController.getGroups);
+app.post(`${API_PREFIX}/groups`, groupController.createGroup);
+app.patch(`${API_PREFIX}/groups/:id`, groupController.updateGroup);
+app.delete(`${API_PREFIX}/groups/:id`, groupController.deleteGroup);
 
 app.get(`${API_PREFIX}/entries`, entryController.getAll);
 app.post(`${API_PREFIX}/entries`, entryController.create);

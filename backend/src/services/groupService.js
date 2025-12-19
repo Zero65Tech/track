@@ -91,4 +91,4 @@ async function deleteGroup(userId, profileId, groupId) {
   });
 }
 
-export { getGroups, createGroup, updateGroup, deleteGroup };
+export default { getGroups, createGroup, updateGroup, deleteGroup };
