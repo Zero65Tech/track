@@ -33,6 +33,7 @@ async function _sendFcmNotification(userIds, messageData) {
       });
     } catch (error) {
       if (error.code === "messaging/registration-token-not-registered") {
+        console.log(`Deactivating devices with fcmToken ${fcmToken}`);
         await _deactivateDevicesByFcmToken(fcmToken);
       } else {
         throw error;

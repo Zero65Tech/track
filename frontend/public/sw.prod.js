@@ -20,16 +20,12 @@ const messaging = firebase.messaging();
 
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
-    const notificationTitle = payload.data?.message || 'Track Notification';
-    const notificationOptions = {
-        body: `Trigger completed: ${payload.data?.message || 'No additional details'}`,
-        icon: '/favicon.ico',
-        data: payload.data,
-        tag: 'trigger-notification',
-        badge: '/favicon.ico'
-    };
-
-    return self.registration.showNotification(notificationTitle, notificationOptions);
+    // Forward message to open windows in foreground
+    clients.matchAll({ includeUncontrolled: true }).then((clientList) => {
+        clientList.forEach((client) => {
+            client.postMessage(payload);
+        });
+    });
 });
 
 // Handle notification click
@@ -53,6 +49,6 @@ self.addEventListener('activate', (event) => {
 });
 
 // Handle service worker installation
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
     self.skipWaiting();
 });

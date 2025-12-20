@@ -9,6 +9,9 @@ const swRegistration = await navigator.serviceWorker.register(swFile, {
 export const fcmService = {
     onMessage(callback) {
         onMessage(messaging, callback);
+        navigator.serviceWorker.onmessage = (event) => {
+            callback(event.data);
+        };
     },
 
     async getFcmToken() {
