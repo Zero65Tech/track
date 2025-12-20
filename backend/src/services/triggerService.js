@@ -11,7 +11,7 @@ import transaction from "../utils/transaction.js";
 import TriggerModel from "../models/Trigger.js";
 import { calculateAggregationCoins } from "../config/coin.js";
 
-import { _sendFcmNotification } from "./userService.js";
+import { _sendFirebaseMessage } from "./userService.js";
 import { _getCachedProfile } from "./profileService.js";
 import { _aggregateEntries } from "./entryService.js";
 import { _setNamedAggregationResult } from "./aggregationService.js";
@@ -101,6 +101,7 @@ async function _processTrigger(triggerData) {
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
+    const profile = await _getCachedProfile(triggerData.profileId);
     const balance = await _getCoinLedgerBalance(triggerData.profileId);
     if (balance.total < 1) {
       const updateResult = await TriggerModel.updateOne(
@@ -113,15 +114,43 @@ async function _processTrigger(triggerData) {
         },
       );
       assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+
+      await _sendFirebaseMessage(
+        [profile.owner, ...profile.editors],
+        {
+          title: "Trigger Failed",
+          body: "Insufficient Coins.",
+        },
+        {
+          profileId: triggerData.profileId.toString(),
+          triggerId: triggerData._id.toString(),
+          triggerType: triggerData.type,
+          triggerState: TriggerState.FAILED.id,
+        },
+      );
+
       return;
     }
 
-    const profile = await _getCachedProfile(triggerData.profileId);
     if (triggerData.params.name === "custom") {
       // TODO: TriggerType.DATA_AGGREGATION, custom
     } else {
       await _processNamedDataAggregationTrigger(triggerData, profile);
     }
+
+    await _sendFirebaseMessage(
+      [profile.owner, ...profile.editors],
+      {
+        title: "Trigger Completed",
+        body: "Your data aggregation trigger has completed successfully.",
+      },
+      {
+        profileId: triggerData.profileId.toString(),
+        triggerId: triggerData._id.toString(),
+        triggerType: triggerData.type,
+        triggerState: TriggerState.COMPLETED.id,
+      },
+    );
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
     // TODO: TriggerType.DATA_EXPORT
   } else {
@@ -149,7 +178,7 @@ async function _processProfileCreatedTrigger(triggerData) {
   });
 }
 
-async function _processNamedDataAggregationTrigger(triggerData, profile) {
+async function _processNamedDataAggregationTrigger(triggerData) {
   const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
     triggerData.params.aggregationName,
@@ -200,14 +229,6 @@ async function _processNamedDataAggregationTrigger(triggerData, profile) {
 
     // If modifiedCount is 0, throw error to rollback the entire transaction.
     assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
-  });
-
-  await _sendFcmNotification([profile.owner, ...profile.editors], {
-    triggerType: triggerData.type,
-    triggerState: TriggerState.COMPLETED.id,
-    profileId: triggerData.profileId.toString(),
-    triggerId: triggerData._id.toString(),
-    message: triggerData.result?.message || "Trigger completed successfully",
   });
 }
 

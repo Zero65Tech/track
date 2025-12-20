@@ -18,7 +18,7 @@ async function _getCachedUser(userId) {
   return data;
 }
 
-async function _sendFcmNotification(userIds, messageData) {
+async function _sendFirebaseMessage(userIds, notification, data) {
   const fcmTokens = await _getActiveDeviceFcmTokens(...userIds);
   if (fcmTokens.length === 0) {
     return;
@@ -27,10 +27,7 @@ async function _sendFcmNotification(userIds, messageData) {
   const messaging = getFirebaseMessaging();
   for (const fcmToken of _.uniq(fcmTokens)) {
     try {
-      await messaging.send({
-        token: fcmToken,
-        data: messageData,
-      });
+      await messaging.send({ token: fcmToken, notification, data });
     } catch (error) {
       if (error.code === "messaging/registration-token-not-registered") {
         console.log(`Deactivating devices with fcmToken ${fcmToken}`);
@@ -42,4 +39,4 @@ async function _sendFcmNotification(userIds, messageData) {
   }
 }
 
-export { _getCachedUser, _sendFcmNotification };
+export { _getCachedUser, _sendFirebaseMessage };
