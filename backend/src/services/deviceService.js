@@ -19,7 +19,7 @@ async function createDevice(fcmToken) {
 }
 
 async function updateDevice(deviceId, fcmToken) {
-  await DeviceModel.updateOne({ _id: deviceId }, { fcmToken });
+  await DeviceModel.updateOne({ _id: deviceId }, { fcmToken, active: true });
 }
 
 async function claimDevice(deviceId, userId) {

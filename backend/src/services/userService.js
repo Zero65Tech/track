@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { LRUCache } from "lru-cache";
 import { lruCacheConfig } from "../config/cache.js";
 import { getFirebaseAuth, getFirebaseMessaging } from "../config/firebase.js";
@@ -24,7 +25,7 @@ async function _sendFcmNotification(userIds, messageData) {
   }
 
   const messaging = getFirebaseMessaging();
-  for (const fcmToken of fcmTokens) {
+  for (const fcmToken of _.uniq(fcmTokens)) {
     try {
       await messaging.send({
         token: fcmToken,

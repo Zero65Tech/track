@@ -6,7 +6,7 @@ import { deviceService } from '@/service/deviceService';
 
 export const useFcmStore = defineStore('fcm', () => {
     const authStore = useAuthStore();
-    const localStorageKey = 'fcm.deviceId';
+    const localStorageKey = `fcm.deviceId.${import.meta.env.MODE}`;
 
     // States
     const deviceId = ref(null);
@@ -15,10 +15,11 @@ export const useFcmStore = defineStore('fcm', () => {
     async function initialize() {
         const savedDeviceId = localStorage.getItem(localStorageKey);
 
+        const fcmToken = await fcmService.getFcmToken();
         if (savedDeviceId) {
+            await deviceService.updateDevice(savedDeviceId, fcmToken);
             deviceId.value = savedDeviceId;
         } else {
-            const fcmToken = await fcmService.getFcmToken();
             const device = await deviceService.createDevice(fcmToken);
             deviceId.value = device.id;
             localStorage.setItem(localStorageKey, device.id);

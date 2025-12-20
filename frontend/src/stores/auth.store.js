@@ -7,8 +7,8 @@ export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
     const localStorageKeys = {
-        user: 'auth.user',
-        token: 'auth.token'
+        user: `auth.user.${import.meta.env.MODE}`,
+        token: `auth.token.${import.meta.env.MODE}`
     };
 
     // States

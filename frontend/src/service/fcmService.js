@@ -3,7 +3,7 @@ import { messaging } from '@/config/firebaseClient';
 
 const swFile = import.meta.env.MODE === 'prod' || import.meta.env.MODE === 'gamma' ? '/sw.prod.js' : '/sw.test.js';
 const swRegistration = await navigator.serviceWorker.register(swFile, {
-    scope: '/firebase-cloud-messaging-push-scope'
+    scope: '/'
 });
 
 export const fcmService = {
