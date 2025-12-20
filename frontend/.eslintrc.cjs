@@ -19,5 +19,17 @@ module.exports = {
                 order: ['script', 'template', 'style']
             }
         ]
-    }
+    },
+    overrides: [
+        {
+            files: ['public/sw.*.js'],
+            env: {
+                worker: true
+            },
+            globals: {
+                firebase: 'readonly',
+                clients: 'readonly'
+            }
+        }
+    ]
 };

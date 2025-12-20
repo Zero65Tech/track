@@ -26,6 +26,10 @@ async function claimDevice(deviceId, userId) {
   await DeviceModel.updateOne({ _id: deviceId }, { userId });
 }
 
+async function _deactivateDevicesByFcmToken(fcmToken) {
+  await DeviceModel.updateMany({ fcmToken }, { active: false });
+}
+
 export default { createDevice, updateDevice, claimDevice };
 
-export { _getActiveDeviceFcmTokens };
+export { _getActiveDeviceFcmTokens, _deactivateDevicesByFcmToken };

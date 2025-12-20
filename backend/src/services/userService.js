@@ -1,7 +1,10 @@
 import { LRUCache } from "lru-cache";
 import { lruCacheConfig } from "../config/cache.js";
 import { getFirebaseAuth, getFirebaseMessaging } from "../config/firebase.js";
-import { _getActiveDeviceFcmTokens } from "./deviceService.js";
+import {
+  _getActiveDeviceFcmTokens,
+  _deactivateDevicesByFcmToken,
+} from "./deviceService.js";
 
 const userDataCache = new LRUCache(lruCacheConfig);
 
@@ -21,11 +24,19 @@ async function _sendFcmNotification(userIds, messageData) {
   }
 
   const messaging = getFirebaseMessaging();
-  for (const token of fcmTokens) {
-    await messaging.send({
-      token,
-      data: messageData,
-    });
+  for (const fcmToken of fcmTokens) {
+    try {
+      await messaging.send({
+        token: fcmToken,
+        data: messageData,
+      });
+    } catch (error) {
+      if (error.code === "messaging/registration-token-not-registered") {
+        await _deactivateDevicesByFcmToken(fcmToken);
+      } else {
+        throw error;
+      }
+    }
   }
 }
 
