@@ -1,4 +1,4 @@
-export { storeFcmTokenSchema } from './userFcmToken.js';
+export { createDeviceSchema, updateDeviceSchema } from './device.js';
 export { createProfileSchema, updateProfileSchema } from './profile.js';
 export {
   createBookSchema,
