@@ -3,6 +3,7 @@ import DeviceModel from "../models/Device.js";
 async function _getActiveDeviceFcmTokens(...userIds) {
   const results = await DeviceModel.find({
     userId: { $in: userIds },
+    active: true,
   }).lean();
   return results.map((result) => result.fcmToken);
 }
