@@ -12,7 +12,7 @@ async function createDevice(req, res) {
     return sendBadRequestError(res, error);
   }
 
-  const device = await deviceService.createDevice(req.user.uid, data.fcmToken);
+  const device = await deviceService.createDevice(data.fcmToken);
 
   return sendData(res, device);
 }
@@ -23,12 +23,18 @@ async function updateDevice(req, res) {
     return sendBadRequestError(res, error);
   }
 
-  await deviceService.updateDevice(req.user.uid, req.params.id, data.fcmToken);
+  await deviceService.updateDevice(req.params.id, data.fcmToken);
 
+  return sendSuccess(res);
+}
+
+async function claimDevice(req, res) {
+  await deviceService.claimDevice(req.params.id, req.user.uid);
   return sendSuccess(res);
 }
 
 export default {
   createDevice,
   updateDevice,
+  claimDevice,
 };

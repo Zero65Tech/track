@@ -31,14 +31,16 @@ app.use((req, res, next) => {
 
 let API_PREFIX = "/api";
 
+app.post(`${API_PREFIX}/devices`, deviceController.createDevice);
+app.patch(`${API_PREFIX}/devices/:id`, deviceController.updateDevice);
+
 app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplateProfiles); // prettier-ignore
 
 // NOTE: User must be loggedin for following routes
 
 app.use(authMiddleware);
 
-app.post(`${API_PREFIX}/devices`, deviceController.createDevice);
-app.patch(`${API_PREFIX}/devices/:id`, deviceController.updateDevice);
+app.patch(`${API_PREFIX}/devices/:id/claim`, deviceController.claimDevice);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
 app.post(`${API_PREFIX}/profiles`, profileController.createProfile);

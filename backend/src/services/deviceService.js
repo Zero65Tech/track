@@ -8,8 +8,8 @@ async function _getActiveDeviceFcmTokens(...userIds) {
   return results.map((result) => result.fcmToken);
 }
 
-async function createDevice(userId, fcmToken) {
-  const doc = await DeviceModel.create({ userId, fcmToken, active: true });
+async function createDevice(fcmToken) {
+  const doc = await DeviceModel.create({ fcmToken, active: true });
 
   const data = doc.toObject();
   data.id = doc._id.toString();
@@ -18,10 +18,14 @@ async function createDevice(userId, fcmToken) {
   return data;
 }
 
-async function updateDevice(userId, deviceId, fcmToken) {
-  await DeviceModel.updateOne({ userId, _id: deviceId }, { fcmToken });
+async function updateDevice(deviceId, fcmToken) {
+  await DeviceModel.updateOne({ _id: deviceId }, { fcmToken });
 }
 
-export default { createDevice, updateDevice };
+async function claimDevice(deviceId, userId) {
+  await DeviceModel.updateOne({ _id: deviceId }, { userId });
+}
+
+export default { createDevice, updateDevice, claimDevice };
 
 export { _getActiveDeviceFcmTokens };
