@@ -10,7 +10,12 @@ async function _getActiveDeviceFcmTokens(...userIds) {
 
 async function createDevice(userId, fcmToken) {
   const doc = await DeviceModel.create({ userId, fcmToken });
-  return doc.toObject();
+
+  const data = doc.toObject();
+  data.id = doc._id.toString();
+  delete data._id;
+
+  return data;
 }
 
 async function updateDevice(userId, deviceId, fcmToken) {

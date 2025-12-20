@@ -1,7 +1,7 @@
 import { LRUCache } from "lru-cache";
 import { lruCacheConfig } from "../config/cache.js";
 import { getFirebaseAuth, getFirebaseMessaging } from "../config/firebase.js";
-import { _getFcmTokens } from "./userFcmTokenService.js";
+import { _getActiveDeviceFcmTokens } from "./deviceService.js";
 
 const userDataCache = new LRUCache(lruCacheConfig);
 
@@ -15,7 +15,7 @@ async function _getCachedUser(userId) {
 }
 
 async function _sendFcmNotification(userIds, messageData) {
-  const fcmTokens = await _getFcmTokens(...userIds);
+  const fcmTokens = await _getActiveDeviceFcmTokens(...userIds);
   if (fcmTokens.length === 0) {
     return;
   }
