@@ -3,7 +3,7 @@ import express from "express";
 import authMiddleware from "./middlewares/auth.js";
 import accessMiddleware from "./middlewares/access.js";
 
-import userFcmTokenController from "./controllers/userFcmTokenController.js";
+import deviceController from "./controllers/deviceController.js";
 import profileController from "./controllers/profileController.js";
 import {
   bookController,
@@ -37,10 +37,8 @@ app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplate
 
 app.use(authMiddleware);
 
-app.post(
-  `${API_PREFIX}/users/fcm-tokens`,
-  userFcmTokenController.storeFcmToken,
-);
+app.post(`${API_PREFIX}/devices`, deviceController.createDevice);
+app.patch(`${API_PREFIX}/devices/:id`, deviceController.updateDevice);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
 app.post(`${API_PREFIX}/profiles`, profileController.createProfile);
