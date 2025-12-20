@@ -23,6 +23,7 @@ messaging.onBackgroundMessage((payload) => {
     // Forward message to open windows in foreground
     clients.matchAll({ includeUncontrolled: true }).then((clientList) => {
         clientList.forEach((client) => {
+            payload.data.type = 'FCM_BACKGROUND_MESSAGE';
             client.postMessage(payload);
         });
     });

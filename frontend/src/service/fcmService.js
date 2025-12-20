@@ -10,7 +10,9 @@ export const fcmService = {
     onMessage(callback) {
         onMessage(messaging, callback);
         navigator.serviceWorker.onmessage = (event) => {
-            callback(event.data);
+            if (event.data.data.type === 'FCM_BACKGROUND_MESSAGE') {
+                callback(event.data);
+            }
         };
     },
 
