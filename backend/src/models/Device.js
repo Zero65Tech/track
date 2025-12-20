@@ -23,6 +23,4 @@ const deviceSchema = new mongoose.Schema(
   },
 );
 
-deviceSchema.index({ userId: 1 });
-
 export default mongoose.model("Device", deviceSchema);
