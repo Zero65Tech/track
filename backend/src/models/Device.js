@@ -5,7 +5,6 @@ const deviceSchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true,
-      index: true,
     },
     fcmToken: {
       type: String,
@@ -22,5 +21,7 @@ const deviceSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+deviceSchema.index({ userId: 1 });
 
 export default mongoose.model("Device", deviceSchema);
