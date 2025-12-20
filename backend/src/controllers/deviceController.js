@@ -23,13 +23,9 @@ async function updateDevice(req, res) {
     return sendBadRequestError(res, error);
   }
 
-  const device = await deviceService.updateDevice(
-    req.user.uid,
-    req.params.id,
-    data.fcmToken,
-  );
+  await deviceService.updateDevice(req.user.uid, req.params.id, data.fcmToken);
 
-  return sendSuccess(res, device);
+  return sendSuccess(res);
 }
 
 export default {
