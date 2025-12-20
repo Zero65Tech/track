@@ -1,10 +1,24 @@
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getToken } from 'firebase/messaging';
-import { auth, messaging } from '@/config/firebaseClient';
+import { auth } from '@/config/firebaseClient';
 
 const googleProvider = new GoogleAuthProvider();
 
 export const authService = {
+    onAuthStateChanged(callback) {
+        return onAuthStateChanged(auth, (user) => {
+            if (user) {
+                callback({
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL
+                });
+            } else {
+                callback(null);
+            }
+        });
+    },
+
     async getIdToken() {
         if (!auth.currentUser) {
             throw new Error('No user logged in');
@@ -44,26 +58,5 @@ export const authService = {
         } catch (error) {
             throw new Error(`Sign out failed: ${error.message}`);
         }
-    },
-
-    onAuthStateChanged(callback) {
-        return onAuthStateChanged(auth, (user) => {
-            if (user) {
-                callback({
-                    uid: user.uid,
-                    displayName: user.displayName,
-                    email: user.email,
-                    photoURL: user.photoURL
-                });
-            } else {
-                callback(null);
-            }
-        });
-    },
-
-    async getFcmToken() {
-        return await getToken(messaging, {
-            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
-        });
     }
 };

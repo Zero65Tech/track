@@ -61,7 +61,6 @@ export const useAuthStore = defineStore('auth', () => {
                 authService.getIdToken().then(async (newToken) => {
                     token.value = newToken;
                     localStorage.setItem(localStorageKeys.token, newToken);
-                    await deviceService.claimDevice(deviceId.value);
                 });
             } else {
                 user.value = null;

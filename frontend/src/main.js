@@ -13,6 +13,7 @@ import '@/assets/tailwind.css';
 import '@/assets/styles.scss';
 
 import { useAuthStore } from '@/stores/auth.store';
+import { useFcmStore } from '@/stores/fcm.store';
 import { useProfileStore } from '@/stores/profile.store';
 
 const app = createApp(App);
@@ -35,6 +36,10 @@ app.use(ToastService);
 // Initialize auth store
 const authStore = useAuthStore();
 authStore.initialize();
+
+// Initialize fcm store
+const fcmStore = useFcmStore();
+fcmStore.initialize();
 
 // Initialize profile store
 const profileStore = useProfileStore();

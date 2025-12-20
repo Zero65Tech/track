@@ -9,7 +9,7 @@ firebase.initializeApp({
     apiKey: 'AIzaSyCkeRuvNUrDpn_azlDyYVBHQ_-QsLQGje8',
     authDomain: 'zero65.firebaseapp.com',
     projectId: 'zero65',
-    storageBucket: 'zero65.appspot.com',
+    storageBucket: 'zero65.firebasestorage.app',
     messagingSenderId: '220251834863',
     appId: '1:220251834863:web:f7205d590d82a067a20e1a',
     measurementId: ''
