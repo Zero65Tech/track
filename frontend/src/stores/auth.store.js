@@ -2,22 +2,19 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { authService } from '@/service/authService';
-import { deviceService } from '@/service/deviceService';
 
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
     const localStorageKeys = {
         user: 'auth.user',
-        token: 'auth.token',
-        deviceId: 'auth.deviceId'
+        token: 'auth.token'
     };
 
     // States
     const isLoading = ref(false);
     const user = ref(null);
     const token = ref(null);
-    const deviceId = ref(null);
     const error = ref(null);
 
     // Getters
@@ -29,29 +26,10 @@ export const useAuthStore = defineStore('auth', () => {
         // Restore user from localStorage if available
         const savedUser = localStorage.getItem(localStorageKeys.user);
         const savedToken = localStorage.getItem(localStorageKeys.token);
-        const savedDeviceId = localStorage.getItem(localStorageKeys.deviceId);
 
         if (savedUser && savedToken) {
             user.value = JSON.parse(savedUser);
             token.value = savedToken;
-        }
-
-        if (savedDeviceId) {
-            deviceId.value = savedDeviceId;
-        } else {
-            const fcmToken = await authService.getFcmToken();
-            const device = await deviceService.createDevice(fcmToken);
-            deviceId.value = device.id;
-            localStorage.setItem(localStorageKeys.deviceId, device.id);
-        }
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.addEventListener('message', async (event) => {
-                if (event.data?.type === 'FCM_TOKEN_REFRESH') {
-                    const fcmToken = await authService.getFcmToken();
-                    await deviceService.updateDevice(deviceId.value, fcmToken);
-                }
-            });
         }
 
         authService.onAuthStateChanged((currentUser) => {
@@ -94,7 +72,6 @@ export const useAuthStore = defineStore('auth', () => {
             localStorage.setItem(localStorageKeys.token, idToken);
 
             toast.add({
-                // TODO: Consolidate toast handling
                 severity: 'success',
                 summary: 'Success',
                 detail: `Welcome, ${currentUser.displayName || 'User'}!`,
@@ -103,7 +80,6 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (err) {
             error.value = err.message;
             toast.add({
-                // TODO: Consolidate toast handling
                 severity: 'error',
                 summary: 'Sign in failed',
                 detail: error.value,
@@ -129,7 +105,6 @@ export const useAuthStore = defineStore('auth', () => {
             localStorage.removeItem(localStorageKeys.token);
 
             toast.add({
-                // TODO: Consolidate toast handling
                 severity: 'success',
                 summary: 'Signed out',
                 detail: 'You have been successfully signed out.',
@@ -138,7 +113,6 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (err) {
             error.value = err.message;
             toast.add({
-                // TODO: Consolidate toast handling
                 severity: 'error',
                 summary: 'Sign out failed',
                 detail: error.value,
@@ -155,7 +129,6 @@ export const useAuthStore = defineStore('auth', () => {
         isLoading,
         user,
         token,
-        deviceId,
         error,
 
         // Getters
