@@ -202,6 +202,7 @@ async function _processNamedDataAggregationTrigger(triggerData, profile) {
     assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
   });
 
+  await new Promise((resolve) => setTimeout(resolve, 5000));
   await _sendFcmNotification([profile.owner, ...profile.editors], {
     triggerType: triggerData.type,
     triggerState: TriggerState.COMPLETED.id,
@@ -209,6 +210,7 @@ async function _processNamedDataAggregationTrigger(triggerData, profile) {
     triggerId: triggerData._id.toString(),
     message: triggerData.result?.message || "Trigger completed successfully",
   });
+  console.log("Message sent ...");
 }
 
 export { _createProfileCreatedTrigger, _processTriggers };

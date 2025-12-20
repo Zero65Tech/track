@@ -19,10 +19,11 @@ async function _getCachedUser(userId) {
 
 async function _sendFcmNotification(userIds, messageData) {
   const fcmTokens = await _getActiveDeviceFcmTokens(...userIds);
+  console.log(userIds, fcmTokens);
   if (fcmTokens.length === 0) {
     return;
   }
-
+  // TODO: filter out invalid tokens before sending
   const messaging = getFirebaseMessaging();
   for (const fcmToken of fcmTokens) {
     try {

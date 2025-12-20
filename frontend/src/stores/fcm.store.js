@@ -25,6 +25,7 @@ export const useFcmStore = defineStore('fcm', () => {
         }
 
         fcmService.onMessage(async (message) => {
+            console.log(message);
             if (message.data?.type === 'FCM_TOKEN_REFRESH') {
                 const fcmToken = await fcmService.getFcmToken();
                 await deviceService.updateDevice(deviceId.value, fcmToken);
