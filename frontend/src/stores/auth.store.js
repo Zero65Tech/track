@@ -2,7 +2,7 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { authService } from '@/service/authService';
-import { userFcmTokenService } from '@/service/userFcmTokenService';
+import { deviceService } from '@/service/deviceService';
 
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
@@ -18,7 +18,6 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref(null);
     const token = ref(null);
     const deviceId = ref(null);
-    const unsubscribe = ref(null);
     const error = ref(null);
 
     // Getters
@@ -40,20 +39,29 @@ export const useAuthStore = defineStore('auth', () => {
         if (savedDeviceId) {
             deviceId.value = savedDeviceId;
         } else {
-            deviceId.value = `${navigator.userAgent.substring(0, 20)}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-            localStorage.setItem(localStorageKeys.deviceId, deviceId.value);
+            const fcmToken = await authService.getFcmToken();
+            const device = await deviceService.createDevice(fcmToken);
+            deviceId.value = device.id;
+            localStorage.setItem(localStorageKeys.deviceId, device.id);
         }
 
-        // Set up auth state listener
-        unsubscribe.value = authService.onAuthStateChanged((currentUser) => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', async (event) => {
+                if (event.data?.type === 'FCM_TOKEN_REFRESH') {
+                    const fcmToken = await authService.getFcmToken();
+                    await deviceService.updateDevice(deviceId.value, fcmToken);
+                }
+            });
+        }
+
+        authService.onAuthStateChanged((currentUser) => {
             if (currentUser) {
                 user.value = currentUser;
                 localStorage.setItem(localStorageKeys.user, JSON.stringify(currentUser));
-                // Fetch fresh token when auth state changes
-                authService.getIdToken().then((newToken) => {
+                authService.getIdToken().then(async (newToken) => {
                     token.value = newToken;
                     localStorage.setItem(localStorageKeys.token, newToken);
-                    updateFcmToken();
+                    await deviceService.claimDevice(deviceId.value);
                 });
             } else {
                 user.value = null;
@@ -64,28 +72,10 @@ export const useAuthStore = defineStore('auth', () => {
         });
     }
 
-    async function updateFcmToken() {
-        try {
-            const fcmToken = await authService.getFcmToken();
-            if (fcmToken && deviceId.value) {
-                await userFcmTokenService.updateToken(fcmToken, deviceId.value);
-            }
-        } catch (err) {
-            // Log silently, don't block other operations
-            console.error('Failed to update FCM token:', err);
-        }
-    }
-
     async function refreshToken() {
-        try {
-            const newToken = await authService.getIdToken();
-            token.value = newToken;
-            localStorage.setItem(localStorageKeys.token, newToken);
-            await updateFcmToken();
-        } catch (err) {
-            error.value = err.message;
-            throw err;
-        }
+        const newToken = await authService.getIdToken();
+        token.value = newToken;
+        localStorage.setItem(localStorageKeys.token, newToken);
     }
 
     async function loginWithGoogle() {
@@ -135,10 +125,9 @@ export const useAuthStore = defineStore('auth', () => {
 
             user.value = null;
             token.value = null;
-            deviceId.value = null;
+            // Keep deviceId in localStorage - it persists across logout
             localStorage.removeItem(localStorageKeys.user);
             localStorage.removeItem(localStorageKeys.token);
-            localStorage.removeItem(localStorageKeys.deviceId);
 
             toast.add({
                 // TODO: Consolidate toast handling
@@ -177,7 +166,6 @@ export const useAuthStore = defineStore('auth', () => {
         // Actions
         initialize,
         refreshToken,
-        updateFcmToken,
         loginWithGoogle,
         logout
     };

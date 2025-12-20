@@ -4,7 +4,7 @@ const deviceSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
-      required: true,
+      required: false,
     },
     fcmToken: {
       type: String,
