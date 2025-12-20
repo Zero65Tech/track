@@ -19,11 +19,7 @@ async function createDevice(userId, fcmToken) {
 }
 
 async function updateDevice(userId, deviceId, fcmToken) {
-  await DeviceModel.updateOne(
-    { userId, _id: deviceId },
-    { fcmToken },
-    { new: true, runValidators: true },
-  );
+  await DeviceModel.updateOne({ userId, _id: deviceId }, { fcmToken });
 }
 
 export default { createDevice, updateDevice };
