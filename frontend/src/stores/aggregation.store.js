@@ -18,7 +18,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     // Getters
 
     function getAggregationState(aggregationName) {
-        if (!aggregations[aggregationName])
+        if (!aggregations[aggregationName]) {
             aggregations[aggregationName] = {
                 data: ref(null),
                 isUpdating: ref(false),
@@ -26,10 +26,27 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 error: ref(null),
                 _timeoutId: null
             };
+            if (profileStore.active) {
+                fetchAggregation(aggregationName);
+            }
+        }
         return aggregations[aggregationName];
     }
 
     // Actions
+
+    watch(
+        () => profileStore.active,
+        () => {
+            Object.keys(aggregations).forEach((aggregationName) => {
+                const state = aggregations[aggregationName];
+                if (state._timeoutId) {
+                    clearTimeout(state._timeoutId);
+                }
+                fetchAggregation(aggregationName);
+            });
+        }
+    );
 
     async function fetchAggregation(aggregationName) {
         const profileId = profileStore.active?.id;
@@ -37,7 +54,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
             throw new Error('No profile selected');
         }
 
-        const state = getAggregationState(aggregationName);
+        const state = aggregations[aggregationName];
         state.isLoading.value = true;
         state.error.value = null;
 
@@ -86,11 +103,13 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     async function notifyTriggerCompleted(aggregationName) {
         clearPendingTrigger(aggregationName);
-        await fetchAggregation(aggregationName);
+        if (aggregations[aggregationName]) {
+            await fetchAggregation(aggregationName);
+        }
     }
 
     function setPendingTrigger(aggregationName) {
-        const state = getAggregationState(aggregationName);
+        const state = aggregations[aggregationName];
         state.isUpdating.value = true;
 
         if (state._timeoutId) {
@@ -103,7 +122,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     }
 
     function clearPendingTrigger(aggregationName) {
-        const state = getAggregationState(aggregationName);
+        const state = aggregations[aggregationName];
         state.isUpdating.value = false;
 
         if (state._timeoutId) {
@@ -117,7 +136,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
         getAggregationState,
 
         // Actions
-        fetchAggregation,
         triggerAggregationUpdate,
         notifyTriggerCompleted,
         notifyTriggerFailed

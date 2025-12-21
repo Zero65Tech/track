@@ -1,9 +1,7 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
-import { useProfileStore } from '@/stores/profile.store';
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { useAggregationStore } from '@/stores/aggregation.store';
 
-const profileStore = useProfileStore();
 const aggregationStore = useAggregationStore();
 const currentTime = ref(new Date());
 let intervalId = null;
@@ -90,25 +88,10 @@ const aggregations = AGGREGATIONS.map((agg) => {
 });
 
 onMounted(() => {
-    if (profileStore.active)
-        for (const agg of AGGREGATIONS) {
-            aggregationStore.fetchAggregation(agg.name);
-        }
-
     intervalId = setInterval(() => {
         currentTime.value = new Date();
     }, 1000);
 });
-
-watch(
-    () => profileStore.active,
-    (activeProfile) => {
-        if (activeProfile)
-            for (const agg of AGGREGATIONS) {
-                aggregationStore.fetchAggregation(agg.name);
-            }
-    }
-);
 
 onBeforeUnmount(() => {
     if (intervalId) {
@@ -135,7 +118,7 @@ onBeforeUnmount(() => {
             </div>
             <div class="flex items-center justify-between gap-2">
                 <span class="text-primary font-medium">
-                    {{ agg.isLoading.value ? 'Loading...' : agg.isUpdating.value ? 'Updating...' : agg.formattedTimestamp.value }}
+                    {{ agg.isLoading.value ? 'Loading ...' : agg.isUpdating.value ? 'Updating ...' : agg.formattedTimestamp.value }}
                 </span>
                 <button
                     @click="agg.error.value ? agg.handleRetry() : agg.handleUpdate()"
