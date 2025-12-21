@@ -19,8 +19,8 @@ export const useAuthStore = defineStore('auth', () => {
     const error = ref(null);
 
     // Getters
-    const isAuthenticated = computed(() => token.value !== null);
     const userName = computed(() => user.value?.displayName || user.value?.email || 'User');
+    const isAuthenticated = computed(() => token.value !== null);
 
     // Actions
     async function initialize() {
@@ -116,8 +116,8 @@ export const useAuthStore = defineStore('auth', () => {
         error,
 
         // Getters
-        isAuthenticated,
         userName,
+        isAuthenticated,
 
         // Actions
         initialize,
