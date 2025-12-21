@@ -25,8 +25,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Actions
     async function initialize() {
         // Restore user from localStorage if available
-        const savedUser = localStorage.getItem(localStorageKeys.user);
-        const savedToken = localStorage.getItem(localStorageKeys.token);
+        const savedUser = localStorage.getItem(localStorageKeys.user) || null;
+        const savedToken = localStorage.getItem(localStorageKeys.token) || null;
 
         if (savedUser && savedToken) {
             user.value = JSON.parse(savedUser);

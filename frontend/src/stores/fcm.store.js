@@ -19,7 +19,7 @@ export const useFcmStore = defineStore('fcm', () => {
 
     // Actions
     async function initialize() {
-        const savedDeviceId = localStorage.getItem(localStorageKey);
+        const savedDeviceId = localStorage.getItem(localStorageKey) || null;
 
         const fcmToken = await fcmService.getFcmToken();
         if (savedDeviceId) {
