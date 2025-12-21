@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
             await authService.loginWithGoogle();
             toast.add({
                 severity: 'success',
-                summary: 'Success',
+                summary: 'Signed in',
                 detail: `Welcome, ${userName.value}!`,
                 life: 3000
             });
@@ -76,7 +76,7 @@ export const useAuthStore = defineStore('auth', () => {
                 detail: error.value,
                 life: 3000
             });
-            throw err;
+            console.log(err);
         } finally {
             isLoading.value = false;
         }
@@ -102,7 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
                 detail: error.value,
                 life: 3000
             });
-            throw err;
+            console.log(err);
         } finally {
             isLoading.value = false;
         }

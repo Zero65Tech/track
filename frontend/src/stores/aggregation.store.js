@@ -1,14 +1,20 @@
 import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
+import { useToast } from 'primevue/usetoast';
 import { useProfileStore } from '@/stores/profile.store';
+import { triggerService } from '@/service/triggerService';
 import { aggregationService } from '@/service/aggregationService';
 
 export const useAggregationStore = defineStore('aggregation', () => {
+    const toast = useToast();
     const profileStore = useProfileStore();
+
+    const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
+    const pendingTriggerTimeouts = {};
 
     // States
 
-    const aggregations = ref({}); // State structure: { aggregationName: { data, isLoading, error } }
+    const aggregations = ref({}); // State structure: { aggregationName: { data, isUpdating, isLoading, error } }
 
     // Getters
 
@@ -16,9 +22,11 @@ export const useAggregationStore = defineStore('aggregation', () => {
         if (!aggregations.value[aggregationName]) {
             aggregations.value[aggregationName] = {
                 data: null,
+                isUpdating: false,
                 isLoading: false,
                 error: null
             };
+            fetchAggregation(aggregationName);
         }
         return aggregations.value[aggregationName];
     }
@@ -26,6 +34,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
     function getAggregationData(aggregationName) {
         return computed(() => {
             return getAggregationState(aggregationName).data;
+        });
+    }
+
+    function isAggregationUpdating(aggregationName) {
+        return computed(() => {
+            return getAggregationState(aggregationName).isUpdating;
         });
     }
 
@@ -46,47 +60,106 @@ export const useAggregationStore = defineStore('aggregation', () => {
     watch(
         () => profileStore.active?.id,
         () => {
-            clearAllAggregations();
+            aggregations.value = {};
+            // Clear all pending trigger timeouts
+            Object.values(pendingTriggerTimeouts).forEach((timeoutId) => {
+                clearTimeout(timeoutId);
+            });
+            Object.keys(pendingTriggerTimeouts).forEach((key) => {
+                delete pendingTriggerTimeouts[key];
+            });
         }
     );
 
     async function fetchAggregation(aggregationName) {
         const profileId = profileStore.active?.id;
         if (!profileId) {
-            throw new Error('No active profile selected');
+            throw new Error('No profile selected');
         }
 
         const state = getAggregationState(aggregationName);
-
         state.isLoading = true;
         state.error = null;
 
         try {
-            const result = await aggregationService.getNamedAggregationResult(profileId, aggregationName);
-            state.data = result;
+            state.data = await aggregationService.getNamedAggregationResult(profileId, aggregationName);
         } catch (err) {
             state.error = err.message;
-            throw err;
+            console.log(err);
         } finally {
             state.isLoading = false;
         }
     }
 
-    function clearAllAggregations() {
-        aggregations.value = {};
+    async function triggerAggregationUpdate(aggregationName) {
+        const profileId = profileStore.active?.id;
+        if (!profileId) {
+            throw new Error('No profile selected');
+        }
+
+        try {
+            setPendingTrigger(aggregationName);
+            await triggerService.createDataAggregationTrigger(profileId, aggregationName);
+        } catch (err) {
+            clearPendingTrigger(aggregationName);
+            toast.add({
+                severity: 'error',
+                summary: 'Update failed',
+                detail: err.message,
+                life: 3000
+            });
+            console.log(err);
+        }
+    }
+
+    function notifyTriggerFailed(aggregationName, message) {
+        clearPendingTrigger(aggregationName);
+        toast.add({
+            severity: 'error',
+            summary: 'Update failed',
+            detail: message,
+            life: 3000
+        });
+    }
+
+    async function notifyTriggerCompleted(aggregationName) {
+        clearPendingTrigger(aggregationName);
+        await fetchAggregation(aggregationName);
+    }
+
+    function setPendingTrigger(aggregationName) {
+        const state = getAggregationState(aggregationName);
+        state.isUpdating = true;
+
+        if (pendingTriggerTimeouts[aggregationName]) {
+            clearTimeout(pendingTriggerTimeouts[aggregationName]);
+        }
+
+        pendingTriggerTimeouts[aggregationName] = setTimeout(() => {
+            clearPendingTrigger(aggregationName);
+        }, PENDING_TRIGGER_TIMEOUT_MS);
+    }
+
+    function clearPendingTrigger(aggregationName) {
+        const state = getAggregationState(aggregationName);
+        state.isUpdating = false;
+
+        if (pendingTriggerTimeouts[aggregationName]) {
+            clearTimeout(pendingTriggerTimeouts[aggregationName]);
+            delete pendingTriggerTimeouts[aggregationName];
+        }
     }
 
     return {
-        // State
-        aggregations,
-
         // Getters
         getAggregationData,
         isAggregationLoading,
+        isAggregationUpdating,
         getAggregationError,
 
         // Actions
-        fetchAggregation,
-        clearAllAggregations
+        triggerAggregationUpdate,
+        notifyTriggerCompleted,
+        notifyTriggerFailed
     };
 });

@@ -39,30 +39,19 @@ export const useFcmStore = defineStore('fcm', () => {
             await deviceService.claimDevice(deviceId.value);
         }
 
-        fcmService.onMessage(async ({ notification, data }) => {
+        fcmService.onMessage(async ({ /* notification, */ data }) => {
             if (data?.type === 'FCM_TOKEN_REFRESH') {
                 const fcmToken = await fcmService.getFcmToken();
                 await deviceService.updateDevice(deviceId.value, fcmToken);
-            } else {
-                const summary = notification.title;
-                const detail = notification.body;
-                let severity = 'info';
-                let life = 3000;
-                if (data.triggerState == TriggerState.FAILED.id) {
-                    severity = 'error';
-                    life = 5000;
-                } else if (data.triggerState == TriggerState.COMPLETED.id) {
-                    severity = 'success';
-                    life = 5000;
-                }
-                toast.add({ severity, summary, detail, life });
-
-                if (data) {
-                    if (data.profileId === profileStore.active?.id) {
-                        if (data.triggerState === TriggerState.COMPLETED.id) {
-                            if (data.triggerType === 'data_aggregation') {
-                                await aggregationStore.fetchAggregation(data.aggregationName);
-                            }
+            } else if (data) {
+                if (data.profileId === profileStore.active?.id) {
+                    if (data.triggerState === TriggerState.COMPLETED.id) {
+                        if (data.triggerType === 'data_aggregation') {
+                            await aggregationStore.notifyTriggerCompleted(data.aggregationName);
+                        }
+                    } else if (data.triggerState === TriggerState.FAILED.id) {
+                        if (data.triggerType === 'data_aggregation') {
+                            aggregationStore.notifyTriggerFailed(data.aggregationName, data.message);
                         }
                     }
                 }
@@ -79,11 +68,5 @@ export const useFcmStore = defineStore('fcm', () => {
         }
     );
 
-    return {
-        // State
-        deviceId,
-
-        // Actions
-        initialize
-    };
+    return { initialize };
 });

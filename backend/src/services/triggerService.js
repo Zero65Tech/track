@@ -121,16 +121,14 @@ async function _processTrigger(triggerData) {
 
       await _sendFirebaseMessage(
         [profile.owner, ...profile.editors],
-        {
-          title: "Trigger Failed",
-          body: "Insufficient Coins.",
-        },
+        {},
         {
           profileId: triggerData.profileId.toString(),
           triggerId: triggerData._id.toString(),
           triggerType: triggerData.type,
           triggerState: TriggerState.FAILED.id,
           aggregationName: triggerData.params.aggregationName,
+          message: "Insufficient Coins.",
         },
       );
 
@@ -145,10 +143,7 @@ async function _processTrigger(triggerData) {
 
     await _sendFirebaseMessage(
       [profile.owner, ...profile.editors],
-      {
-        title: "Trigger Completed",
-        body: "Your data aggregation trigger has completed successfully.",
-      },
+      {},
       {
         profileId: triggerData.profileId.toString(),
         triggerId: triggerData._id.toString(),

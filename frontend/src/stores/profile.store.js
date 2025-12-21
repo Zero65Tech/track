@@ -70,7 +70,7 @@ export const useProfileStore = defineStore('profile', () => {
             accessible.profiles.value = profiles;
         } catch (err) {
             accessible.error.value = err.message;
-            throw err;
+            console.log(err);
         } finally {
             accessible.isLoading.value = false;
         }
@@ -93,7 +93,7 @@ export const useProfileStore = defineStore('profile', () => {
             template.profiles.value = profiles;
         } catch (err) {
             template.error.value = err.message;
-            throw err;
+            console.log(err);
         } finally {
             template.isLoading.value = false;
         }
