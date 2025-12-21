@@ -43,6 +43,7 @@ export default (profileId) => [
                         EntryType.CREDIT.id,
                         EntryType.INCOME.id,
                         EntryType.REFUND.id,
+                        EntryType.RECEIPT.id,
                       ],
                     ],
                   },

@@ -10,6 +10,10 @@ async function getNamedAggregation(profileId, aggregationName) {
     name: aggregationName,
   }).lean();
 
+  if (!data) {
+    return null;
+  }
+
   data.id = data._id.toString();
   delete data["_id"];
 

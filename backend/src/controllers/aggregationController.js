@@ -9,7 +9,7 @@ async function getNamedAggregationResult(req, res) {
     req.params.profileId,
     req.params.name,
   );
-  sendData(res, { result: data.result, timestamp: data.updatedAt });
+  sendData(res, data ? { result: data.result, timestamp: data.updatedAt } : {});
 }
 
 // Custom

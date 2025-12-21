@@ -197,7 +197,7 @@ async function _processNamedDataAggregationTrigger(triggerData) {
       {
         profileId: triggerData.profileId,
         aggregationName: triggerData.params.aggregationName,
-        result: aggregationResult,
+        aggregationResult: aggregationResult,
       },
       session,
     );

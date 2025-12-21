@@ -1,6 +1,5 @@
 import { ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { TriggerState } from '@shared/enums';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfileStore } from '@/stores/profile.store';
@@ -9,8 +8,6 @@ import { fcmService } from '@/service/fcmService';
 import { deviceService } from '@/service/deviceService';
 
 export const useFcmStore = defineStore('fcm', () => {
-    const toast = useToast();
-
     const authStore = useAuthStore();
     const profileStore = useProfileStore();
     const aggregationStore = useAggregationStore();
