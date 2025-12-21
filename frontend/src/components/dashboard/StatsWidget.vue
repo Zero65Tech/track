@@ -68,6 +68,10 @@ const aggregations = AGGREGATIONS.map((agg) => {
         return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     });
 
+    const handleRetry = async () => {
+        await aggregationStore.fetchAggregation(agg.name);
+    };
+
     const handleUpdate = async () => {
         await aggregationStore.triggerAggregationUpdate(agg.name);
     };
@@ -80,6 +84,7 @@ const aggregations = AGGREGATIONS.map((agg) => {
         isUpdating: aggState.isUpdating,
         isLoading: aggState.isLoading,
         error: aggState.error,
+        handleRetry,
         handleUpdate
     };
 });
@@ -115,7 +120,11 @@ onBeforeUnmount(() => {
 <template>
     <div v-for="agg in aggregations" :key="agg.name" class="col-span-12 lg:col-span-6 xl:col-span-3">
         <div class="card mb-0">
-            <div class="flex justify-between mb-4">
+            <div v-if="agg.error.value" class="mb-4">
+                <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
+                <div class="text-red-500 dark:text-red-300 text-xs">{{ agg.error.value }}</div>
+            </div>
+            <div v-else class="flex justify-between mb-4">
                 <div>
                     <span class="block text-muted-color font-medium mb-4">{{ agg.title }}</span>
                     <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ agg.formattedBalance.value }}</div>
@@ -129,10 +138,10 @@ onBeforeUnmount(() => {
                     {{ agg.isLoading.value ? 'Loading...' : agg.isUpdating.value ? 'Updating...' : agg.formattedTimestamp.value }}
                 </span>
                 <button
-                    @click="agg.handleUpdate"
+                    @click="agg.error.value ? agg.handleRetry() : agg.handleRefresh()"
                     :disabled="agg.isLoading.value || agg.isUpdating.value"
                     :class="['p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed', agg.hoverBg, agg.darkHoverBg]"
-                    title="Re-calculate"
+                    :title="agg.error.value ? 'Retry' : 'Re-calculate'"
                 >
                     <i :class="['pi', agg.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', agg.iconColor, 'text-sm!']"></i>
                 </button>

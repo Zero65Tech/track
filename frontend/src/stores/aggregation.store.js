@@ -31,19 +31,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     // Actions
 
-    watch(
-        () => profileStore.active,
-        () => {
-            Object.keys(aggregations).forEach((key) => {
-                const state = aggregations[key];
-                if (state._timeoutId) {
-                    clearTimeout(state._timeoutId);
-                }
-                delete aggregations[key];
-            });
-        }
-    );
-
     async function fetchAggregation(aggregationName) {
         const profileId = profileStore.active?.id;
         if (!profileId) {
