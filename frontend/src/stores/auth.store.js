@@ -6,9 +6,10 @@ import { authService } from '@/service/authService';
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
+    const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.' : '';
     const localStorageKeys = {
-        user: `auth.user.${import.meta.env.MODE}`,
-        token: `auth.token.${import.meta.env.MODE}`
+        user: `${prefix}auth.user`,
+        token: `${prefix}auth.token`
     };
 
     // States
@@ -18,14 +19,14 @@ export const useAuthStore = defineStore('auth', () => {
     const error = ref(null);
 
     // Getters
-    const isAuthenticated = computed(() => user.value !== null);
     const userName = computed(() => user.value?.displayName || user.value?.email || 'User');
+    const isAuthenticated = computed(() => token.value !== null);
 
     // Actions
     async function initialize() {
         // Restore user from localStorage if available
-        const savedUser = localStorage.getItem(localStorageKeys.user);
-        const savedToken = localStorage.getItem(localStorageKeys.token);
+        const savedUser = localStorage.getItem(localStorageKeys.user) || null;
+        const savedToken = localStorage.getItem(localStorageKeys.token) || null;
 
         if (savedUser && savedToken) {
             user.value = JSON.parse(savedUser);
@@ -60,21 +61,11 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null;
 
         try {
-            const currentUser = await authService.loginWithGoogle();
-            user.value = currentUser;
-
-            // Get ID token
-            const idToken = await authService.getIdToken();
-            token.value = idToken;
-
-            // Persist to localStorage
-            localStorage.setItem(localStorageKeys.user, JSON.stringify(currentUser));
-            localStorage.setItem(localStorageKeys.token, idToken);
-
+            await authService.loginWithGoogle();
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Welcome, ${currentUser.displayName || 'User'}!`,
+                detail: `Welcome, ${userName.value}!`,
                 life: 3000
             });
         } catch (err) {
@@ -97,13 +88,6 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             await authService.logout();
-
-            user.value = null;
-            token.value = null;
-            // Keep deviceId in localStorage - it persists across logout
-            localStorage.removeItem(localStorageKeys.user);
-            localStorage.removeItem(localStorageKeys.token);
-
             toast.add({
                 severity: 'success',
                 summary: 'Signed out',
@@ -132,8 +116,8 @@ export const useAuthStore = defineStore('auth', () => {
         error,
 
         // Getters
-        isAuthenticated,
         userName,
+        isAuthenticated,
 
         // Actions
         initialize,
