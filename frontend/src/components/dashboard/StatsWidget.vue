@@ -1,32 +1,124 @@
+<script setup>
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { useAggregationStore } from '@/stores/aggregation.store';
+
+const aggregationStore = useAggregationStore();
+const currentTime = ref(new Date());
+let intervalId = null;
+
+const AGGREGATIONS = [
+    {
+        name: 'balances_by_book',
+        title: 'Balance by Book',
+        icon: 'pi-shopping-cart',
+        iconColor: 'text-blue-500',
+        bgColor: 'bg-blue-100',
+        hoverBg: 'hover:bg-blue-50',
+        darkBgColor: 'dark:bg-blue-400/10',
+        darkHoverBg: 'dark:hover:bg-blue-400/10'
+    },
+    {
+        name: 'balances_by_source',
+        title: 'Balance by Source',
+        icon: 'pi-dollar',
+        iconColor: 'text-orange-500',
+        bgColor: 'bg-orange-100',
+        hoverBg: 'hover:bg-orange-50',
+        darkBgColor: 'dark:bg-orange-400/10',
+        darkHoverBg: 'dark:hover:bg-orange-400/10'
+    }
+];
+
+const aggregations = AGGREGATIONS.map((agg) => {
+    const aggState = aggregationStore.getAggregationState(agg.name);
+
+    const totalBalance = computed(() => {
+        if (!aggState.data.value?.result) {
+            return 0;
+        }
+        return aggState.data.value.result.reduce((sum, item) => sum + item.balance, 0);
+    });
+
+    const formattedBalance = computed(() => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(totalBalance.value);
+    });
+
+    const formattedTimestamp = computed(() => {
+        if (!aggState.data.value?.timestamp) return '';
+
+        const diffMs = currentTime.value - aggState.data.value.timestamp;
+
+        const diffSeconds = Math.floor(diffMs / 1000);
+        if (diffSeconds < 60) return 'Just now';
+
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+        const diffDays = Math.floor(diffHours / 24);
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    });
+
+    const handleRefresh = async () => {
+        await aggregationStore.triggerAggregationUpdate(agg.name);
+    };
+
+    return {
+        ...agg,
+        totalBalance,
+        formattedBalance,
+        formattedTimestamp,
+        isUpdating: aggState.isUpdating,
+        isLoading: aggState.isLoading,
+        handleRefresh
+    };
+});
+
+onMounted(() => {
+    intervalId = setInterval(() => {
+        currentTime.value = new Date();
+    }, 1000);
+});
+
+onBeforeUnmount(() => {
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+});
+</script>
+
 <template>
-    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+    <div v-for="agg in aggregations" :key="agg.name" class="col-span-12 lg:col-span-6 xl:col-span-3">
         <div class="card mb-0">
             <div class="flex justify-between mb-4">
                 <div>
-                    <span class="block text-muted-color font-medium mb-4">Orders</span>
-                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">152</div>
+                    <span class="block text-muted-color font-medium mb-4">{{ agg.title }}</span>
+                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{ agg.formattedBalance.value }}</div>
                 </div>
-                <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                    <i class="pi pi-shopping-cart text-blue-500 text-xl!"></i>
-                </div>
-            </div>
-            <span class="text-primary font-medium">24 new </span>
-            <span class="text-muted-color">since last visit</span>
-        </div>
-    </div>
-    <div class="col-span-12 lg:col-span-6 xl:col-span-3">
-        <div class="card mb-0">
-            <div class="flex justify-between mb-4">
-                <div>
-                    <span class="block text-muted-color font-medium mb-4">Revenue</span>
-                    <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">$2.100</div>
-                </div>
-                <div class="flex items-center justify-center bg-orange-100 dark:bg-orange-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
-                    <i class="pi pi-dollar text-orange-500 text-xl!"></i>
+                <div :class="['flex items-center justify-center rounded-border', agg.bgColor, agg.darkBgColor]" style="width: 2.5rem; height: 2.5rem">
+                    <i :class="['pi', agg.icon, agg.iconColor, 'text-xl!']"></i>
                 </div>
             </div>
-            <span class="text-primary font-medium">%52+ </span>
-            <span class="text-muted-color">since last week</span>
+            <div class="flex items-center justify-between gap-2">
+                <span class="text-primary font-medium">
+                    {{ agg.isLoading.value ? 'Loading...' : agg.isUpdating.value ? 'Updating...' : agg.formattedTimestamp.value }}
+                </span>
+                <button
+                    @click="agg.handleRefresh"
+                    :disabled="agg.isLoading.value || agg.isUpdating.value"
+                    :class="['p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed', agg.hoverBg, agg.darkHoverBg]"
+                    title="Re-calculate"
+                >
+                    <i :class="['pi', agg.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', agg.iconColor, 'text-sm!']"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="col-span-12 lg:col-span-6 xl:col-span-3">

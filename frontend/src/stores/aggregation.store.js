@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { useProfileStore } from '@/stores/profile.store';
@@ -14,45 +14,21 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     // States
 
-    const aggregations = ref({}); // State structure: { aggregationName: { data, isUpdating, isLoading, error } }
+    const aggregations = {}; // State structure: { aggregationName: { data, isUpdating, isLoading, error } }
 
     // Getters
 
     function getAggregationState(aggregationName) {
-        if (!aggregations.value[aggregationName]) {
-            aggregations.value[aggregationName] = {
-                data: null,
-                isUpdating: false,
-                isLoading: false,
-                error: null
+        if (!aggregations[aggregationName]) {
+            aggregations[aggregationName] = {
+                data: ref(null),
+                isUpdating: ref(false),
+                isLoading: ref(false),
+                error: ref(null)
             };
             fetchAggregation(aggregationName);
         }
-        return aggregations.value[aggregationName];
-    }
-
-    function getAggregationData(aggregationName) {
-        return computed(() => {
-            return getAggregationState(aggregationName).data;
-        });
-    }
-
-    function isAggregationUpdating(aggregationName) {
-        return computed(() => {
-            return getAggregationState(aggregationName).isUpdating;
-        });
-    }
-
-    function isAggregationLoading(aggregationName) {
-        return computed(() => {
-            return getAggregationState(aggregationName).isLoading;
-        });
-    }
-
-    function getAggregationError(aggregationName) {
-        return computed(() => {
-            return getAggregationState(aggregationName).error;
-        });
+        return aggregations[aggregationName];
     }
 
     // Actions
@@ -60,7 +36,9 @@ export const useAggregationStore = defineStore('aggregation', () => {
     watch(
         () => profileStore.active?.id,
         () => {
-            aggregations.value = {};
+            Object.keys(aggregations).forEach((key) => {
+                delete aggregations[key];
+            });
             // Clear all pending trigger timeouts
             Object.values(pendingTriggerTimeouts).forEach((timeoutId) => {
                 clearTimeout(timeoutId);
@@ -78,16 +56,18 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
 
         const state = getAggregationState(aggregationName);
-        state.isLoading = true;
-        state.error = null;
+        state.isLoading.value = true;
+        state.error.value = null;
 
         try {
-            state.data = await aggregationService.getNamedAggregationResult(profileId, aggregationName);
+            let { result, timestamp } = await aggregationService.getNamedAggregationResult(profileId, aggregationName);
+            if (timestamp) timestamp = new Date(timestamp);
+            state.data.value = { result, timestamp };
         } catch (err) {
-            state.error = err.message;
+            state.error.value = err.message;
             console.log(err);
         } finally {
-            state.isLoading = false;
+            state.isLoading.value = false;
         }
     }
 
@@ -129,7 +109,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     function setPendingTrigger(aggregationName) {
         const state = getAggregationState(aggregationName);
-        state.isUpdating = true;
+        state.isUpdating.value = true;
 
         if (pendingTriggerTimeouts[aggregationName]) {
             clearTimeout(pendingTriggerTimeouts[aggregationName]);
@@ -142,7 +122,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     function clearPendingTrigger(aggregationName) {
         const state = getAggregationState(aggregationName);
-        state.isUpdating = false;
+        state.isUpdating.value = false;
 
         if (pendingTriggerTimeouts[aggregationName]) {
             clearTimeout(pendingTriggerTimeouts[aggregationName]);
@@ -152,10 +132,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     return {
         // Getters
-        getAggregationData,
-        isAggregationLoading,
-        isAggregationUpdating,
-        getAggregationError,
+        getAggregationState,
 
         // Actions
         triggerAggregationUpdate,
