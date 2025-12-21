@@ -61,21 +61,11 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null;
 
         try {
-            const currentUser = await authService.loginWithGoogle();
-            user.value = currentUser;
-
-            // Get ID token
-            const idToken = await authService.getIdToken();
-            token.value = idToken;
-
-            // Persist to localStorage
-            localStorage.setItem(localStorageKeys.user, JSON.stringify(currentUser));
-            localStorage.setItem(localStorageKeys.token, idToken);
-
+            await authService.loginWithGoogle();
             toast.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Welcome, ${currentUser.displayName || 'User'}!`,
+                detail: `Welcome, ${userName.value}!`,
                 life: 3000
             });
         } catch (err) {
@@ -98,13 +88,6 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             await authService.logout();
-
-            user.value = null;
-            token.value = null;
-            // Keep deviceId in localStorage - it persists across logout
-            localStorage.removeItem(localStorageKeys.user);
-            localStorage.removeItem(localStorageKeys.token);
-
             toast.add({
                 severity: 'success',
                 summary: 'Signed out',
