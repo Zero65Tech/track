@@ -104,9 +104,8 @@ async function _processTrigger(triggerData) {
     const profile = await _getCachedProfile(triggerData.profileId);
     const balance = await _getCoinLedgerBalance(triggerData.profileId);
     if (
-      process.env.STAGE !== "alpha" &&
-      process.env.STAGE !== "beta" &&
-      triggerData.profileId.toString() !== process.env.SYSTEM_USER_ID &&
+      !["alpha", "beta"].includes(process.env.STAGE) &&
+      triggerData.profileId.toString() !== process.env.MASTER_PROFILE_ID &&
       balance.total < 1
     ) {
       const updateResult = await TriggerModel.updateOne(
@@ -131,6 +130,7 @@ async function _processTrigger(triggerData) {
           triggerId: triggerData._id.toString(),
           triggerType: triggerData.type,
           triggerState: TriggerState.FAILED.id,
+          aggregationName: triggerData.params.aggregationName,
         },
       );
 
@@ -154,6 +154,7 @@ async function _processTrigger(triggerData) {
         triggerId: triggerData._id.toString(),
         triggerType: triggerData.type,
         triggerState: TriggerState.COMPLETED.id,
+        aggregationName: triggerData.params.aggregationName,
       },
     );
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
