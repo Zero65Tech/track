@@ -138,7 +138,7 @@ onBeforeUnmount(() => {
                     {{ agg.isLoading.value ? 'Loading...' : agg.isUpdating.value ? 'Updating...' : agg.formattedTimestamp.value }}
                 </span>
                 <button
-                    @click="agg.error.value ? agg.handleRetry() : agg.handleRefresh()"
+                    @click="agg.error.value ? agg.handleRetry() : agg.handleUpdate()"
                     :disabled="agg.isLoading.value || agg.isUpdating.value"
                     :class="['p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed', agg.hoverBg, agg.darkHoverBg]"
                     :title="agg.error.value ? 'Retry' : 'Re-calculate'"
