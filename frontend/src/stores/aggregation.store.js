@@ -5,16 +5,15 @@ import { useProfileStore } from '@/stores/profile.store';
 import { triggerService } from '@/service/triggerService';
 import { aggregationService } from '@/service/aggregationService';
 
+const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
+
 export const useAggregationStore = defineStore('aggregation', () => {
     const toast = useToast();
     const profileStore = useProfileStore();
 
-    const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
-    const pendingTriggerTimeouts = {};
-
     // States
 
-    const aggregations = {}; // State structure: { aggregationName: { data, isUpdating, isLoading, error } }
+    const aggregations = {}; // State structure: { aggregationName: { data, isUpdating, isLoading, error, _timeoutId } }
 
     // Getters
 
@@ -24,7 +23,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 data: ref(null),
                 isUpdating: ref(false),
                 isLoading: ref(false),
-                error: ref(null)
+                error: ref(null),
+                _timeoutId: null
             };
             fetchAggregation(aggregationName);
         }
@@ -37,14 +37,11 @@ export const useAggregationStore = defineStore('aggregation', () => {
         () => profileStore.active?.id,
         () => {
             Object.keys(aggregations).forEach((key) => {
+                const state = aggregations[key];
+                if (state._timeoutId) {
+                    clearTimeout(state._timeoutId);
+                }
                 delete aggregations[key];
-            });
-            // Clear all pending trigger timeouts
-            Object.values(pendingTriggerTimeouts).forEach((timeoutId) => {
-                clearTimeout(timeoutId);
-            });
-            Object.keys(pendingTriggerTimeouts).forEach((key) => {
-                delete pendingTriggerTimeouts[key];
             });
         }
     );
@@ -111,11 +108,11 @@ export const useAggregationStore = defineStore('aggregation', () => {
         const state = getAggregationState(aggregationName);
         state.isUpdating.value = true;
 
-        if (pendingTriggerTimeouts[aggregationName]) {
-            clearTimeout(pendingTriggerTimeouts[aggregationName]);
+        if (state._timeoutId) {
+            clearTimeout(state._timeoutId);
         }
 
-        pendingTriggerTimeouts[aggregationName] = setTimeout(() => {
+        state._timeoutId = setTimeout(() => {
             clearPendingTrigger(aggregationName);
         }, PENDING_TRIGGER_TIMEOUT_MS);
     }
@@ -124,9 +121,9 @@ export const useAggregationStore = defineStore('aggregation', () => {
         const state = getAggregationState(aggregationName);
         state.isUpdating.value = false;
 
-        if (pendingTriggerTimeouts[aggregationName]) {
-            clearTimeout(pendingTriggerTimeouts[aggregationName]);
-            delete pendingTriggerTimeouts[aggregationName];
+        if (state._timeoutId) {
+            clearTimeout(state._timeoutId);
+            state._timeoutId = null;
         }
     }
 
