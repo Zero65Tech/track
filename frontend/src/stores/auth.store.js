@@ -6,9 +6,10 @@ import { authService } from '@/service/authService';
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
+    const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.' : '';
     const localStorageKeys = {
-        user: `auth.user.${import.meta.env.MODE}`,
-        token: `auth.token.${import.meta.env.MODE}`
+        user: `${prefix}auth.user`,
+        token: `${prefix}auth.token`
     };
 
     // States

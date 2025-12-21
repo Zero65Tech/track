@@ -10,7 +10,9 @@ export const useFcmStore = defineStore('fcm', () => {
     const toast = useToast();
 
     const authStore = useAuthStore();
-    const localStorageKey = `fcm.deviceId.${import.meta.env.MODE}`;
+
+    const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.' : '';
+    const localStorageKey = `${prefix}fcm.deviceId`;
 
     // States
     const deviceId = ref(null);
