@@ -103,7 +103,12 @@ async function _processTrigger(triggerData) {
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
     const profile = await _getCachedProfile(triggerData.profileId);
     const balance = await _getCoinLedgerBalance(triggerData.profileId);
-    if (balance.total < 1) {
+    if (
+      process.env.STAGE !== "alpha" &&
+      process.env.STAGE !== "beta" &&
+      triggerData.profileId.toString() !== process.env.SYSTEM_USER_ID &&
+      balance.total < 1
+    ) {
       const updateResult = await TriggerModel.updateOne(
         { _id: triggerData._id, state: TriggerState.RUNNING.id },
         {

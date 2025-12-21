@@ -13,6 +13,12 @@ resource "google_service_account_iam_member" "cloudrun_user_cloudbuild" {
   member             = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
+resource "google_project_iam_member" "cloudrun_cloudmessaging" {
+  project = var.project_id
+  role    = "roles/firebase.admin"
+  member  = "serviceAccount:${google_service_account.cloudrun.email}"
+}
+
 // Cloud Run Service
 
 resource "google_cloud_run_v2_service" "backend" {
@@ -86,4 +92,3 @@ resource "google_cloud_run_service_iam_binding" "public_access" {
   role     = "roles/run.invoker"
   members  = ["allUsers"]
 }
-

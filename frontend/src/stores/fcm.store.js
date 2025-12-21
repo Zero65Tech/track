@@ -3,6 +3,8 @@ import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { TriggerState } from '@shared/enums';
 import { useAuthStore } from '@/stores/auth.store';
+import { useProfileStore } from '@/stores/profile.store';
+import { useAggregationStore } from '@/stores/aggregation.store';
 import { fcmService } from '@/service/fcmService';
 import { deviceService } from '@/service/deviceService';
 
@@ -10,6 +12,8 @@ export const useFcmStore = defineStore('fcm', () => {
     const toast = useToast();
 
     const authStore = useAuthStore();
+    const profileStore = useProfileStore();
+    const aggregationStore = useAggregationStore();
 
     const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.' : '';
     const localStorageKey = `${prefix}fcm.deviceId`;
@@ -52,6 +56,16 @@ export const useFcmStore = defineStore('fcm', () => {
                     life = 5000;
                 }
                 toast.add({ severity, summary, detail, life });
+
+                if (data) {
+                    if (data.profileId === profileStore.active?.id) {
+                        if (data.triggerState === TriggerState.COMPLETED.id) {
+                            if (data.triggerType === 'data_aggregation') {
+                                await aggregationStore.fetchAggregation(data.aggregationName);
+                            }
+                        }
+                    }
+                }
             }
         });
     }
