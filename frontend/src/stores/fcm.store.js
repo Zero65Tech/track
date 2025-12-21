@@ -31,6 +31,10 @@ export const useFcmStore = defineStore('fcm', () => {
             localStorage.setItem(localStorageKey, device.id);
         }
 
+        if (authStore.isAuthenticated) {
+            await deviceService.claimDevice(deviceId.value);
+        }
+
         fcmService.onMessage(async ({ notification, data }) => {
             if (data?.type === 'FCM_TOKEN_REFRESH') {
                 const fcmToken = await fcmService.getFcmToken();
@@ -55,7 +59,7 @@ export const useFcmStore = defineStore('fcm', () => {
     watch(
         () => authStore.isAuthenticated,
         (isAuthenticated) => {
-            if (isAuthenticated) {
+            if (isAuthenticated && deviceId.value) {
                 deviceService.claimDevice(deviceId.value);
             }
         }
