@@ -1,7 +1,9 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { useProfileStore } from '@/stores/profile.store';
 import { useAggregationStore } from '@/stores/aggregation.store';
 
+const profileStore = useProfileStore();
 const aggregationStore = useAggregationStore();
 const currentTime = ref(new Date());
 let intervalId = null;
@@ -66,7 +68,7 @@ const aggregations = AGGREGATIONS.map((agg) => {
         return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     });
 
-    const handleRefresh = async () => {
+    const handleUpdate = async () => {
         await aggregationStore.triggerAggregationUpdate(agg.name);
     };
 
@@ -77,15 +79,31 @@ const aggregations = AGGREGATIONS.map((agg) => {
         formattedTimestamp,
         isUpdating: aggState.isUpdating,
         isLoading: aggState.isLoading,
-        handleRefresh
+        error: aggState.error,
+        handleUpdate
     };
 });
 
 onMounted(() => {
+    if (profileStore.active)
+        for (const agg of AGGREGATIONS) {
+            aggregationStore.fetchAggregation(agg.name);
+        }
+
     intervalId = setInterval(() => {
         currentTime.value = new Date();
     }, 1000);
 });
+
+watch(
+    () => profileStore.active,
+    (activeProfile) => {
+        if (activeProfile)
+            for (const agg of AGGREGATIONS) {
+                aggregationStore.fetchAggregation(agg.name);
+            }
+    }
+);
 
 onBeforeUnmount(() => {
     if (intervalId) {
@@ -111,7 +129,7 @@ onBeforeUnmount(() => {
                     {{ agg.isLoading.value ? 'Loading...' : agg.isUpdating.value ? 'Updating...' : agg.formattedTimestamp.value }}
                 </span>
                 <button
-                    @click="agg.handleRefresh"
+                    @click="agg.handleUpdate"
                     :disabled="agg.isLoading.value || agg.isUpdating.value"
                     :class="['p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed', agg.hoverBg, agg.darkHoverBg]"
                     title="Re-calculate"

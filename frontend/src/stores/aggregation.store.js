@@ -18,7 +18,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     // Getters
 
     function getAggregationState(aggregationName) {
-        if (!aggregations[aggregationName]) {
+        if (!aggregations[aggregationName])
             aggregations[aggregationName] = {
                 data: ref(null),
                 isUpdating: ref(false),
@@ -26,15 +26,13 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 error: ref(null),
                 _timeoutId: null
             };
-            fetchAggregation(aggregationName);
-        }
         return aggregations[aggregationName];
     }
 
     // Actions
 
     watch(
-        () => profileStore.active?.id,
+        () => profileStore.active,
         () => {
             Object.keys(aggregations).forEach((key) => {
                 const state = aggregations[key];
@@ -132,6 +130,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         getAggregationState,
 
         // Actions
+        fetchAggregation,
         triggerAggregationUpdate,
         notifyTriggerCompleted,
         notifyTriggerFailed
