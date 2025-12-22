@@ -16,15 +16,15 @@
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
 - Testing (**beta**)
-  - GCP `zero65-test` → Google Cloud Build, Firebase Hosting, Cloud Run
+  - GCP `zero65-test` → Google Cloud Build, Firebase Hosting, Cloud Run, Secret Manager
   - GCP `zero65-test` → Firebase Authentication
-  - MongoDB → Project `Zero65 Test` → DB `track`
+  - MongoDB Atlas → Project `Zero65 Test` → DB `track`
 - Staging (**gamma**)
   - Local Machine / GitHub Codespaces
   - GCP `zero65-track` → Firebase Authentication
-  - MongoDB → Project `Zero65 Prod` → DB `track`
+  - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
 - Production (**prod**)
-  - GCP `zero65-track` → Google Cloud Build, Firebase Hosting, Cloud Run
+  - GCP `zero65-track` → Google Cloud Build, Firebase Hosting, Cloud Run, Secret Manager
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
 
@@ -38,46 +38,60 @@ function names starting with '\_' are meant to be used internally, i.e. not call
 
 - Devcontainer
 - GitHub Workflows
-- Dockerfile / cloudbuild.yaml
-
-### MongoDB OCC
-
-- `services`/`triggerService`
+- Dockerfile
+- Terraform
 
 ### Checklist
 
+- `devices`
+  - [x] Logged-in User always claims the device
 - Users
-- Profiles
+- `profiles`
   - [x] CRU APIs
-  - [ ] Disallow un-deleting after 30 days
+  - [ ] Disallow un-deleting after grace period
+  - [ ] Clean-up **deleted** Profiles after grace period
 - Core Components
-  - Boooks, Heads, Tags, Sources
+  - `boooks`, `heads`, `tags`, `sources`
     - [x] CRUD APIs
-  - Folders
+  - `folders`
     - [x] CRUD APIs
-  - Groups
+  - `groups`
     - [x] CRUD APIs
-  - Entries
-    - [x] CRUD APIs
-  - [x] Do **not** check if nested `docId` exists and active
-  - [ ] Allow only Read APIs for `inactive` and `disabled` Profiles
-  - [ ] Disallow all APIs for `deleted` Profiles
-- Audit Logs (Profiles, Core Components)
+  - [ ] Do not allow deleting if in use
+  - [ ] Disallow un-deleting after grace period
+  - [ ] Clean-up **deleted** items after grace period
+  - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
+  - [ ] Disallow all APIs for **deleted** Profiles
+  - [ ] Allow Read APIs for SYSTEM_USER_ID **template** Profiles
+- `entries`
+  - [x] CRUD APIs
+  - [x] Do **not** check if nested **docId** exists and **active**
+  - [ ] Disallow un-deleting after grace period
+  - [ ] Clean-up **deleted** items after grace period
+  - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
+  - [ ] Disallow all APIs for **deleted** Profiles
+  - [ ] Allow Read APIs for SYSTEM_USER_ID **template** Profiles
+- `audit_logs` (Profiles, Core Components)
   - [ ] Read APIs
 - Purchase
 - Promotions
 - Offline Processing
   - Automations
-    - [ ] Clean-up `deleted` Profiles after wating period
-  - Triggers
-    - [ ] Create & Read APIs
+    - [ ] Clean-up **deleted** Profiles after wating period
+  - `triggers`
+    - [x] Create & Process APIs
+    - [x] FCM Integration
+  - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
+  - [ ] Disallow all APIs for **deleted** Profiles
+  - [ ] Allow all APIs for SYSTEM_USER_ID **template** Profiles
 - Feature Components
-  - Aggregations (on Entry Collection)
+  - `aggregations` (on Entry Collection)
+    - [x] Read APIs
+  - `coins`
     - [ ] Read APIs
-  - Coin Ledger
-    - [ ] Read APIs
-  - [ ] Allow only Read APIs for `inactive` and `disabled` Profiles
-  - [ ] Disallow all APIs for `deleted` Profiles
+  - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
+  - [ ] Disallow all APIs for **deleted** Profiles
+  - [ ] Allow all APIs for SYSTEM_USER_ID **template** Profiles
 
 # Sequence Diagrams
 
