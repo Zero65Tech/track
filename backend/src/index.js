@@ -6,6 +6,7 @@ import cron from "./cron.js";
 import app from "./app.js";
 
 (async () => {
+  const instanceId = process.env.HOSTNAME || "local";
   dotenv.config({
     path: [
       ".env",
@@ -15,10 +16,10 @@ import app from "./app.js";
   });
   initialiseFirebase();
   await connectToDatabase();
-  cron.start();
+  cron.start(instanceId);
   app.listen(process.env.PORT, () =>
     console.log(
-      `🎉 Server (${process.env.STAGE}) is listening on port ${process.env.PORT}`,
+      `🎉 Server (${process.env.STAGE}) is listening on port ${process.env.PORT} [instance: ${instanceId}]`,
     ),
   );
 })();
