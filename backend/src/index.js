@@ -6,6 +6,7 @@ import cron from "./cron.js";
 import app from "./app.js";
 
 (async () => {
+  console.log(process.env);
   const instanceId = process.env.HOSTNAME || "local";
   dotenv.config({
     path: [
