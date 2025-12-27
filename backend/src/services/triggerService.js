@@ -70,6 +70,10 @@ async function _processTriggers(instanceId, limit = 1000) {
   // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on state
   // to prevent duplicate processing: the first invocation succeeds and transitions the trigger to
   // RUNNING state, causing subsequent attempts to fail the OCC check (modifiedCount === 0) and skip.
+  //
+  // Optimization: Once a concurrent instance claims the first trigger for a profile, skip all
+  // remaining triggers from that profile in this batch. This reduces contention on the same
+  // profile's triggers and allows other instances to process triggers from different profiles.
 
   const timestamp = Date.now();
 
@@ -80,19 +84,36 @@ async function _processTriggers(instanceId, limit = 1000) {
     .limit(limit)
     .lean();
 
+  if (triggerDataArr.length === 0) return;
+
   let processedCount = 0;
+  const skippedProfileIds = new Set(); // Track profiles where we failed to claim a trigger
   for (const triggerData of triggerDataArr) {
+    const profileIdStr = triggerData.profileId.toString();
+
+    if (skippedProfileIds.has(profileIdStr)) {
+      // If we already failed to claim a trigger for this profile, skip all other triggers from it
+      continue;
+    }
+
     const result = await TriggerModel.updateOne(
       { _id: triggerData._id, state: TriggerState.QUEUED.id },
       { $set: { state: TriggerState.RUNNING.id } },
     );
-    if (result.modifiedCount === 0) continue;
+
+    if (result.modifiedCount === 0) {
+      // Another instance claimed this trigger. Skip all other triggers from this profile.
+      skippedProfileIds.add(profileIdStr);
+      continue;
+    }
+
     console.log(`[${instanceId}] ⏰ Processing trigger ${triggerData._id}`);
     await _processTrigger(triggerData);
     processedCount++;
   }
+
   console.log(
-    `[${instanceId}] ⏰ ${processedCount} trigger(s) processed in ${Date.now() - timestamp}ms`,
+    `[${instanceId}] ⏰ Fetched ${triggerDataArr.length} and processed ${processedCount} trigger(s) in ${Date.now() - timestamp}ms`,
   );
 }
 
