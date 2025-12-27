@@ -78,7 +78,7 @@ async function _processTriggers(instanceId, limit = 1000) {
   const timestamp = Date.now();
 
   const triggerDataArr = await TriggerModel.find({
-    state: TriggerState.QUEUED.id,
+    state: { $in: [TriggerState.QUEUED.id, TriggerState.RUNNING.id] },
   })
     .sort({ createdAt: 1 })
     .limit(limit)
@@ -93,6 +93,12 @@ async function _processTriggers(instanceId, limit = 1000) {
 
     if (skippedProfileIds.has(profileIdStr)) {
       // If we already failed to claim a trigger for this profile, skip all other triggers from it
+      continue;
+    }
+
+    if (triggerData.state === TriggerState.RUNNING.id) {
+      // If this trigger is already running, skip all other triggers from this profile
+      skippedProfileIds.add(profileIdStr);
       continue;
     }
 
