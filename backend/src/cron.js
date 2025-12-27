@@ -1,6 +1,6 @@
 import { _processTriggers } from "./services/triggerService.js";
 
-const CRON_INTERVAL_MS = 5 * 1000;
+const CRON_INTERVAL_MS = 1000;
 
 async function start(instanceId) {
   console.log(
