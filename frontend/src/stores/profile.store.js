@@ -1,8 +1,8 @@
-import { ref, computed, watch } from 'vue';
-import { defineStore } from 'pinia';
-import { ProfileAccess, ProfileState } from '@shared/enums';
-import { useAuthStore } from '@/stores/auth.store';
 import { profileService } from '@/service/profileService';
+import { useAuthStore } from '@/stores/auth.store';
+import { ProfileAccess, ProfileState } from '@shared/enums';
+import { defineStore } from 'pinia';
+import { computed, ref, watch } from 'vue';
 
 export const useProfileStore = defineStore('profile', () => {
     const authStore = useAuthStore();
@@ -22,21 +22,22 @@ export const useProfileStore = defineStore('profile', () => {
         error: ref(null)
     };
 
-    const active = ref(null);
+    const activeProfile = ref(null);
 
     // Actions
     async function initialize() {
-        active.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
-        fetchTemplates();
-        if (authStore.isAuthenticated) {
-            fetchAccessibles();
+        activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
+        if (!authStore.isAuthenticated) {
+            await fetchTemplates();
+        } else {
+            await Promise.all([fetchTemplates(), fetchAccessibles()]);
         }
     }
 
     watch(
         () => authStore.isAuthenticated,
         (isAuthenticated) => {
-            active.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
+            activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
             if (isAuthenticated) {
                 fetchAccessibles();
             } else {
@@ -106,13 +107,13 @@ export const useProfileStore = defineStore('profile', () => {
             return;
         }
         const profiles = [...accessible.profiles.value, ...template.profiles.value];
-        if (!active.value || !profiles.find((p) => p.id === active.value.id)) {
-            active.value = profiles[0];
+        if (!activeProfile.value || !profiles.find((p) => p.id === activeProfile.value.id)) {
+            activeProfile.value = profiles[0];
         }
     }
 
     function setActive(profile) {
-        active.value = profile;
+        activeProfile.value = profile;
         localStorage.setItem(localStorageKey.value, JSON.stringify(profile));
     }
 
@@ -120,7 +121,8 @@ export const useProfileStore = defineStore('profile', () => {
         // States
         accessible,
         template,
-        active,
+        activeProfile,
+        active: activeProfile, // DEPRECATE
 
         // Actions
         initialize,

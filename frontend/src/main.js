@@ -9,8 +9,8 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 
-import '@/assets/tailwind.css';
 import '@/assets/styles.scss';
+import '@/assets/tailwind.css';
 
 import { useAuthStore } from '@/stores/auth.store';
 import { useFcmStore } from '@/stores/fcm.store';
@@ -35,14 +35,14 @@ app.use(ToastService);
 
 // Initialize auth store
 const authStore = useAuthStore();
-authStore.initialize();
+/* await */ authStore.initialize();
 
 // Initialize fcm store
 const fcmStore = useFcmStore();
-fcmStore.initialize();
+/* await */ fcmStore.initialize();
 
 // Initialize profile store
 const profileStore = useProfileStore();
-profileStore.initialize();
+/* await */ profileStore.initialize();
 
 app.mount('#app');

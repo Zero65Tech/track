@@ -1,6 +1,10 @@
 {
   "folders": [
     {
+      "name": "✨ root",
+      "path": ".",
+    },
+    {
       "name": "🌐 frontend",
       "path": "frontend",
     },
@@ -16,12 +20,15 @@
       "name": "🛠️ infrastructure",
       "path": "infrastructure",
     },
-    {
-      "name": "✨ root",
-      "path": ".",
-    },
   ],
   "settings": {
+    "files.exclude": {
+      "frontend/": true,
+      "shared/": true,
+      "backend/": true,
+      "infrastructure/": true,
+      "node_modules/": true,
+    },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
       "README.md": "PULL_REQUEST_TEMPLATE.md",

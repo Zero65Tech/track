@@ -1,19 +1,19 @@
-import { ref, computed } from 'vue';
+import { authService } from '@/service/authService';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
-import { authService } from '@/service/authService';
+import { computed, ref } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
-    const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.' : '';
+    const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.auth' : 'auth';
     const localStorageKeys = {
-        user: `${prefix}auth.user`,
-        token: `${prefix}auth.token`
+        user: `${prefix}.user`,
+        token: `${prefix}.token`
     };
 
     // States
-    const isLoading = ref(false);
+    const isLoading = ref(true);
     const user = ref(null);
     const token = ref(null);
     const error = ref(null);
@@ -47,6 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
                 localStorage.removeItem(localStorageKeys.user);
                 localStorage.removeItem(localStorageKeys.token);
             }
+            isLoading.value = false;
         });
     }
 
@@ -69,6 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
                 life: 3000
             });
         } catch (err) {
+            isLoading.value = false;
             error.value = err.message;
             toast.add({
                 severity: 'error',
@@ -77,8 +79,6 @@ export const useAuthStore = defineStore('auth', () => {
                 life: 3000
             });
             console.log(err);
-        } finally {
-            isLoading.value = false;
         }
     }
 
@@ -95,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
                 life: 3000
             });
         } catch (err) {
+            isLoading.value = false;
             error.value = err.message;
             toast.add({
                 severity: 'error',
@@ -103,8 +104,6 @@ export const useAuthStore = defineStore('auth', () => {
                 life: 3000
             });
             console.log(err);
-        } finally {
-            isLoading.value = false;
         }
     }
 

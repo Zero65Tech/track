@@ -14,9 +14,6 @@ dist-ssr
 coverage
 *.local
 
-# Environment variables
-.env
-
 # Editor directories and files
 .vscode/*
 !.vscode/settings.json
