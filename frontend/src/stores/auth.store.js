@@ -6,7 +6,7 @@ import { computed, ref } from 'vue';
 export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
 
-    const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.auth' : 'auth';
+    const prefix = ['prod', 'gamma'].includes(import.meta.env.MODE) ? 'auth' : 'test.auth';
     const localStorageKeys = {
         user: `${prefix}.user`,
         token: `${prefix}.token`

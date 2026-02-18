@@ -41,7 +41,7 @@ export const useFcmStore = defineStore('fcm', () => {
                 const fcmToken = await fcmService.getFcmToken();
                 await deviceService.updateDevice(deviceId.value, fcmToken);
             } else if (data) {
-                if (data.profileId === profileStore.active?.id) {
+                if (data.profileId === profileStore.activeProfile?.id) {
                     if (data.triggerState === TriggerState.COMPLETED.id) {
                         if (data.triggerType === 'data_aggregation') {
                             await aggregationStore.notifyTriggerCompleted(data.aggregationName);

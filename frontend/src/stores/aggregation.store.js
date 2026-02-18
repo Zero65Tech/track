@@ -26,7 +26,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 error: ref(null),
                 _timeoutId: null
             };
-            if (profileStore.active) {
+            if (profileStore.activeProfile) {
                 fetchAggregation(aggregationName);
             }
         }
@@ -36,7 +36,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     // Actions
 
     watch(
-        () => profileStore.active,
+        () => profileStore.activeProfile,
         () => {
             Object.keys(aggregations).forEach((aggregationName) => {
                 const state = aggregations[aggregationName];
@@ -49,7 +49,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     );
 
     async function fetchAggregation(aggregationName) {
-        const profileId = profileStore.active?.id;
+        const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
             throw new Error('No profile selected');
         }
@@ -71,7 +71,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     }
 
     async function triggerAggregationUpdate(aggregationName) {
-        const profileId = profileStore.active?.id;
+        const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
             throw new Error('No profile selected');
         }

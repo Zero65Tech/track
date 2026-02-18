@@ -93,7 +93,7 @@ const handleProfileClick = (profile) => {
 
                 <ul v-else class="profiles-list">
                     <li v-for="profile in profileStore.accessible.profiles" :key="profile.id" class="profile-item">
-                        <button :class="['profile-button', profileStore.active?.id === profile.id && 'profile-button-active']" @click="handleProfileClick(profile)">
+                        <button :class="['profile-button', profileStore.activeProfile?.id === profile.id && 'profile-button-active']" @click="handleProfileClick(profile)">
                             <div class="profile-content">
                                 <div class="profile-name-section">
                                     <i :class="['pi', profile.access.icon, 'access-icon']" :title="`${profile.access.name}: ${profile.access.description}`"></i>
@@ -131,7 +131,7 @@ const handleProfileClick = (profile) => {
 
                 <ul v-else-if="profileStore.template.profiles.length" class="profiles-list">
                     <li v-for="profile in profileStore.template.profiles" :key="profile.id" class="profile-item">
-                        <button :class="['profile-button', profileStore.active?.id === profile.id && 'profile-button-active']" @click="handleProfileClick(profile)">
+                        <button :class="['profile-button', profileStore.activeProfile?.id === profile.id && 'profile-button-active']" @click="handleProfileClick(profile)">
                             <div class="profile-content">
                                 <div class="profile-name-section">
                                     <i :class="['pi', profile.access.icon, 'access-icon']" :title="`${profile.access.name}: ${profile.access.description}`"></i>

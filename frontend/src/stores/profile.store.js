@@ -122,7 +122,6 @@ export const useProfileStore = defineStore('profile', () => {
         accessible,
         template,
         activeProfile,
-        active: activeProfile, // DEPRECATE
 
         // Actions
         initialize,
