@@ -1,9 +1,9 @@
-import { ref, watch } from 'vue';
+import { aggregationService } from '@/service/aggregationService';
+import { triggerService } from '@/service/triggerService';
+import { useProfileStore } from '@/stores/profile.store';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
-import { useProfileStore } from '@/stores/profile.store';
-import { triggerService } from '@/service/triggerService';
-import { aggregationService } from '@/service/aggregationService';
+import { ref, watch } from 'vue';
 
 const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
 
@@ -20,11 +20,11 @@ export const useAggregationStore = defineStore('aggregation', () => {
     function getAggregationState(aggregationName) {
         if (!aggregations[aggregationName]) {
             aggregations[aggregationName] = {
+                _timeoutId: null,
                 data: ref(null),
                 isUpdating: ref(false),
                 isLoading: ref(false),
-                error: ref(null),
-                _timeoutId: null
+                error: ref(null)
             };
             if (profileStore.activeProfile) {
                 fetchAggregation(aggregationName);
@@ -43,7 +43,14 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 if (state._timeoutId) {
                     clearTimeout(state._timeoutId);
                 }
-                fetchAggregation(aggregationName);
+                if (profileStore.activeProfile) {
+                    fetchAggregation(aggregationName);
+                } else {
+                    state.data.value = null;
+                    state.isUpdating.value = false;
+                    state.isLoading.value = false;
+                    state.error.value = null;
+                }
             });
         }
     );
@@ -51,7 +58,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
     async function fetchAggregation(aggregationName) {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
-            throw new Error('No profile selected');
+            toast.add({
+                severity: 'error',
+                summary: 'Refresh failed',
+                detail: 'Kindly select a profile to fetch aggregation data',
+                life: 3000
+            });
         }
 
         const state = aggregations[aggregationName];
@@ -60,7 +72,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         try {
             let { result, timestamp } = await aggregationService.getNamedAggregationResult(profileId, aggregationName);
-            if (timestamp) timestamp = new Date(timestamp);
+
+            if (profileStore.activeProfile?.id !== profileId) {
+                // Profile has changed during fetch
+                return;
+            }
+
             state.data.value = { result, timestamp };
         } catch (err) {
             state.error.value = err.message;
@@ -73,14 +90,19 @@ export const useAggregationStore = defineStore('aggregation', () => {
     async function triggerAggregationUpdate(aggregationName) {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
-            throw new Error('No profile selected');
+            toast.add({
+                severity: 'error',
+                summary: 'Update failed',
+                detail: 'Kindly select a profile to trigger aggregation update',
+                life: 3000
+            });
         }
 
         try {
-            setPendingTrigger(aggregationName);
+            _setPendingTrigger(aggregationName);
             await triggerService.createDataAggregationTrigger(profileId, aggregationName);
         } catch (err) {
-            clearPendingTrigger(aggregationName);
+            _clearPendingTrigger(aggregationName);
             toast.add({
                 severity: 'error',
                 summary: 'Update failed',
@@ -92,7 +114,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     }
 
     function notifyTriggerFailed(aggregationName, message) {
-        clearPendingTrigger(aggregationName);
+        _clearPendingTrigger(aggregationName);
         toast.add({
             severity: 'error',
             summary: 'Update failed',
@@ -102,13 +124,13 @@ export const useAggregationStore = defineStore('aggregation', () => {
     }
 
     async function notifyTriggerCompleted(aggregationName) {
-        clearPendingTrigger(aggregationName);
+        _clearPendingTrigger(aggregationName);
         if (aggregations[aggregationName]) {
             await fetchAggregation(aggregationName);
         }
     }
 
-    function setPendingTrigger(aggregationName) {
+    function _setPendingTrigger(aggregationName) {
         const state = aggregations[aggregationName];
         state.isUpdating.value = true;
 
@@ -117,11 +139,11 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
 
         state._timeoutId = setTimeout(() => {
-            clearPendingTrigger(aggregationName);
+            _clearPendingTrigger(aggregationName);
         }, PENDING_TRIGGER_TIMEOUT_MS);
     }
 
-    function clearPendingTrigger(aggregationName) {
+    function _clearPendingTrigger(aggregationName) {
         const state = aggregations[aggregationName];
         state.isUpdating.value = false;
 
@@ -136,6 +158,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         getAggregationState,
 
         // Actions
+        fetchAggregation,
         triggerAggregationUpdate,
         notifyTriggerCompleted,
         notifyTriggerFailed

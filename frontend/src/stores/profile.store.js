@@ -2,22 +2,26 @@ import { profileService } from '@/service/profileService';
 import { useAuthStore } from '@/stores/auth.store';
 import { ProfileAccess, ProfileState } from '@shared/enums';
 import { defineStore } from 'pinia';
+import { useToast } from 'primevue/usetoast';
 import { computed, ref, watch } from 'vue';
 
 export const useProfileStore = defineStore('profile', () => {
+    const toast = useToast();
+
     const authStore = useAuthStore();
 
     const localStorageKey = computed(() => `profile.active.${authStore.user?.uid || 'guest'}`);
 
     // States
+
     const accessible = {
-        isLoading: ref(false),
+        isLoading: ref(true),
         profiles: ref([]),
         error: ref(null)
     };
 
     const template = {
-        isLoading: ref(false),
+        isLoading: ref(true),
         profiles: ref([]),
         error: ref(null)
     };
@@ -25,9 +29,11 @@ export const useProfileStore = defineStore('profile', () => {
     const activeProfile = ref(null);
 
     // Actions
+
     async function initialize() {
         activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
         if (!authStore.isAuthenticated) {
+            accessible.isLoading.value = false;
             await fetchTemplates();
         } else {
             await Promise.all([fetchTemplates(), fetchAccessibles()]);
@@ -41,20 +47,38 @@ export const useProfileStore = defineStore('profile', () => {
             if (isAuthenticated) {
                 fetchAccessibles();
             } else {
+                accessible.isLoading.value = false;
                 accessible.profiles.value = [];
                 accessible.error.value = null;
-                autoSelectActive();
+                _autoSelectActive();
             }
         }
     );
 
     async function fetchAccessibles() {
+        if (!authStore.isAuthenticated) {
+            toast.add({
+                severity: 'error',
+                summary: 'Refresh failed',
+                detail: 'Kindly login to fetch profiles',
+                life: 3000
+            });
+            return;
+        }
+
+        const userId = authStore.user.uid;
+
         accessible.isLoading.value = true;
         accessible.profiles.value = [];
         accessible.error.value = null;
 
         try {
             const profiles = await profileService.getAllAccessible();
+
+            if (authStore.user?.id !== userId) {
+                // User has changed/logged out during the fetch
+                return;
+            }
 
             // Sort
             const accessIds = Object.values(ProfileAccess).map((access) => access.id);
@@ -76,7 +100,7 @@ export const useProfileStore = defineStore('profile', () => {
             accessible.isLoading.value = false;
         }
 
-        autoSelectActive();
+        _autoSelectActive();
     }
 
     async function fetchTemplates() {
@@ -99,10 +123,10 @@ export const useProfileStore = defineStore('profile', () => {
             template.isLoading.value = false;
         }
 
-        autoSelectActive();
+        _autoSelectActive();
     }
 
-    function autoSelectActive() {
+    function _autoSelectActive() {
         if (accessible.isLoading.value || template.isLoading.value) {
             return;
         }
@@ -125,6 +149,8 @@ export const useProfileStore = defineStore('profile', () => {
 
         // Actions
         initialize,
+        fetchAccessibles,
+        fetchTemplates,
         setActive
     };
 });
