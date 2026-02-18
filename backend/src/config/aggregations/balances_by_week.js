@@ -26,10 +26,15 @@ export default (profileId) => [
   {
     $group: {
       _id: {
-        $dateAdd: {
-          startDate: "$date",
-          unit: "day",
-          amount: { $subtract: [8, { $isoDayOfWeek: "$date" }] },
+        $dateToString: {
+          format: "%Y-%m-%d",
+          date: {
+            $dateAdd: {
+              startDate: "$date",
+              unit: "day",
+              amount: { $subtract: [8, { $isoDayOfWeek: "$date" }] },
+            },
+          },
         },
       },
       balance: {
