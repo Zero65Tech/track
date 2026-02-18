@@ -801,7 +801,7 @@
 			"name": "triggers",
 			"item": [
 				{
-					"name": "create",
+					"name": "data-aggregation",
 					"id": "db766ab9-304a-4dd1-8711-0ada5b09042f",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
