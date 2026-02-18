@@ -811,14 +811,32 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"type\": \"data_aggregation\",\n    \"params\": {\n        \"name\": \"head-tag\"\n    }\n}",
+							"raw": "{\n    \"aggregationName\": \"amounts_by_type\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{track}}/api/profiles/{{profileId}}/triggers"
+						"url": {
+							"raw": "{{track}}/api/profiles/:profileId/triggers/data-aggregation",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profileId",
+								"triggers",
+								"data-aggregation"
+							],
+							"variable": [
+								{
+									"key": "profileId",
+									"value": "6939b520ad27169f5c7cd75e"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -858,7 +876,7 @@
 								},
 								{
 									"key": "aggregationName",
-									"value": "balances_by_book"
+									"value": "amounts_by_type"
 								}
 							]
 						}
