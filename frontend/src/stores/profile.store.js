@@ -66,19 +66,12 @@ export const useProfileStore = defineStore('profile', () => {
             return;
         }
 
-        const userId = authStore.user.uid;
-
         accessible.isLoading.value = true;
         accessible.profiles.value = [];
         accessible.error.value = null;
 
         try {
             const profiles = await profileService.getAllAccessible();
-
-            if (authStore.user?.id !== userId) {
-                // User has changed/logged out during the fetch
-                return;
-            }
 
             // Sort
             const accessIds = Object.values(ProfileAccess).map((access) => access.id);

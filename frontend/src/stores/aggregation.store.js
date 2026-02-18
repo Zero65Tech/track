@@ -10,6 +10,7 @@ const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
 export const useAggregationStore = defineStore('aggregation', () => {
     const toast = useToast();
     const profileStore = useProfileStore();
+    let abortController = new AbortController();
 
     // States
 
@@ -38,16 +39,17 @@ export const useAggregationStore = defineStore('aggregation', () => {
     watch(
         () => profileStore.activeProfile,
         () => {
+            // Abort all in-flight requests
+            abortController.abort();
+            abortController = new AbortController();
+
             Object.keys(aggregations).forEach((aggregationName) => {
                 const state = aggregations[aggregationName];
-                if (state._timeoutId) {
-                    clearTimeout(state._timeoutId);
-                }
+                _clearPendingTrigger(aggregationName);
                 if (profileStore.activeProfile) {
                     fetchAggregation(aggregationName);
                 } else {
                     state.data.value = null;
-                    state.isUpdating.value = false;
                     state.isLoading.value = false;
                     state.error.value = null;
                 }
@@ -64,6 +66,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 detail: 'Kindly select a profile to fetch aggregation data',
                 life: 3000
             });
+            return;
         }
 
         const state = aggregations[aggregationName];
@@ -71,13 +74,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         state.error.value = null;
 
         try {
-            let { result, timestamp } = await aggregationService.getNamedAggregationResult(profileId, aggregationName);
-
-            if (profileStore.activeProfile?.id !== profileId) {
-                // Profile has changed during fetch
-                return;
-            }
-
+            const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName }, abortController.signal);
             state.data.value = { result, timestamp };
         } catch (err) {
             state.error.value = err.message;
@@ -96,6 +93,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 detail: 'Kindly select a profile to trigger aggregation update',
                 life: 3000
             });
+            return;
         }
 
         try {
