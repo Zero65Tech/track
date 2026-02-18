@@ -1,38 +1,47 @@
 {
 	"info": {
-		"_postman_id": "4291336-de54ac95-c713-4e99-9c70-d94d6e71c044",
+		"_postman_id": "de54ac95-c713-4e99-9c70-d94d6e71c044",
 		"name": "track",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "New Request",
+					"id": "a7f971dc-b926-4c3e-b34d-acacced47132",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			],
+			"id": "a7af7186-508b-4880-84d2-9cf6f66b1d08"
+		},
 		{
 			"name": "profiles",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-f22c2450-274a-4bc2-b1da-3ca0688b14c3",
+					"id": "f22c2450-274a-4bc2-b1da-3ca0688b14c3",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles"
-							]
-						}
+						"url": "{{track}}/api/profiles"
 					},
 					"response": []
 				},
 				{
 					"name": "create",
-					"id": "4291336-d3184beb-9f64-48d4-bf85-7ba30eac24c1",
+					"id": "d3184beb-9f64-48d4-bf85-7ba30eac24c1",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -48,22 +57,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles"
-							]
-						}
+						"url": "{{track}}/api/profiles"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-9b350f7f-7ef0-4e04-9a89-d80f0f9b95c2",
+					"id": "9b350f7f-7ef0-4e04-9a89-d80f0f9b95c2",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -79,53 +79,32 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/68aac5697a43917f32702447",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"68aac5697a43917f32702447"
-							]
-						}
+						"url": "{{track}}/api/profiles/68aac5697a43917f32702447"
 					},
 					"response": []
 				},
 				{
 					"name": "getSystemTemplates",
-					"id": "4291336-3db81f18-4dc2-445c-9fcb-3c74ccf4a479",
+					"id": "3db81f18-4dc2-445c-9fcb-3c74ccf4a479",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/templates/system",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"templates",
-								"system"
-							]
-						}
+						"url": "{{track}}/api/profiles/templates/system"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-93bcbb3d-ae70-4419-b60c-18fa7f9ad038"
+			"id": "93bcbb3d-ae70-4419-b60c-18fa7f9ad038"
 		},
 		{
 			"name": "books",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-c11952f2-3cce-485c-8a40-13c200f6a952",
+					"id": "c11952f2-3cce-485c-8a40-13c200f6a952",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -136,18 +115,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/books",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"books"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/books"
 					},
 					"response": []
 				},
@@ -167,7 +135,7 @@
 							}
 						}
 					],
-					"id": "4291336-b84b077b-a394-49b4-aadb-9d34b490ff01",
+					"id": "b84b077b-a394-49b4-aadb-9d34b490ff01",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -183,24 +151,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/books",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"books"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/books"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-1a7d3351-8e39-4178-a434-fea5754348f9",
+					"id": "1a7d3351-8e39-4178-a434-fea5754348f9",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -216,80 +173,45 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/books/68aac3d017999e3e78a06021",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"books",
-								"68aac3d017999e3e78a06021"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/books/68aac3d017999e3e78a06021"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-2036819c-e0eb-4cec-a6bf-0201578845cd",
+					"id": "2036819c-e0eb-4cec-a6bf-0201578845cd",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/books/68a5bddcf7424cf50a5a2e97",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"books",
-								"68a5bddcf7424cf50a5a2e97"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/books/68a5bddcf7424cf50a5a2e97"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-63bf98ad-f6d8-4d89-af8d-22f4e9461e6b"
+			"id": "63bf98ad-f6d8-4d89-af8d-22f4e9461e6b"
 		},
 		{
 			"name": "heads",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-a86141e3-e073-4446-931b-53b55313785e",
+					"id": "a86141e3-e073-4446-931b-53b55313785e",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/heads",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"heads"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/heads"
 					},
 					"response": []
 				},
 				{
 					"name": "create",
-					"id": "4291336-a34bde4c-698b-4163-886a-612c65911e5f",
+					"id": "a34bde4c-698b-4163-886a-612c65911e5f",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -305,24 +227,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/heads",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"heads"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/heads"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-4bb552fc-334b-4a43-9bf1-edcb557eab50",
+					"id": "4bb552fc-334b-4a43-9bf1-edcb557eab50",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -338,24 +249,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/head/{{profileId}}/68b9ad1a0fdd6c6bdcbd4fa9",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"head",
-								"{{profileId}}",
-								"68b9ad1a0fdd6c6bdcbd4fa9"
-							]
-						}
+						"url": "{{track}}/api/head/{{profileId}}/68b9ad1a0fdd6c6bdcbd4fa9"
 					},
 					"response": []
 				},
 				{
 					"name": "update-bulk-sortOrder",
-					"id": "4291336-3a917f0d-c451-4881-97ce-e7f379af8e07",
+					"id": "3a917f0d-c451-4881-97ce-e7f379af8e07",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -371,56 +271,32 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/heads/sortOrder",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"heads",
-								"sortOrder"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/heads/sortOrder"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-02f88f18-aa54-4872-8239-c35ff555d78a",
+					"id": "02f88f18-aa54-4872-8239-c35ff555d78a",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/heads/689599c7063009193d9d4c98",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"heads",
-								"689599c7063009193d9d4c98"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/heads/689599c7063009193d9d4c98"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-f5ec3a8c-a66f-4585-85aa-608a46489792"
+			"id": "f5ec3a8c-a66f-4585-85aa-608a46489792"
 		},
 		{
 			"name": "tags",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-f76126bd-f1df-452d-bb92-81cb4bd5a7ff",
+					"id": "f76126bd-f1df-452d-bb92-81cb4bd5a7ff",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -431,24 +307,13 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/tags",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"tags"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/tags"
 					},
 					"response": []
 				},
 				{
 					"name": "create",
-					"id": "4291336-95119569-0f81-453d-9a34-7712b171f50b",
+					"id": "95119569-0f81-453d-9a34-7712b171f50b",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -464,24 +329,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/tags",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"tags"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/tags"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-26138d02-6ddf-441a-adfd-d247c04ff3f0",
+					"id": "26138d02-6ddf-441a-adfd-d247c04ff3f0",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -497,25 +351,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/tags/68c553505d32a151b331d165",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"tags",
-								"68c553505d32a151b331d165"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/tags/68c553505d32a151b331d165"
 					},
 					"response": []
 				},
 				{
 					"name": "update-bulk-sortOrder",
-					"id": "4291336-345d619c-4086-4332-aec4-53c61a9e24b8",
+					"id": "345d619c-4086-4332-aec4-53c61a9e24b8",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -531,25 +373,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/tags/sortOrder",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"tags",
-								"sortOrder"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/tags/sortOrder"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-8800b3a8-7351-4ae3-8618-b2b8063829d4",
+					"id": "8800b3a8-7351-4ae3-8618-b2b8063829d4",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -560,31 +390,19 @@
 							"mode": "raw",
 							"raw": "{\r\n    \"name\":\"Aise hi\"\r\n}"
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/tags/68c553505d32a151b331d165",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"tags",
-								"68c553505d32a151b331d165"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/tags/68c553505d32a151b331d165"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-d552601d-a448-4f74-b0c0-70fa0c764957"
+			"id": "d552601d-a448-4f74-b0c0-70fa0c764957"
 		},
 		{
 			"name": "sources",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-3be5f95d-6ad3-4d30-808c-09d810f96bfd",
+					"id": "3be5f95d-6ad3-4d30-808c-09d810f96bfd",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -595,18 +413,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/sources",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"sources"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/sources"
 					},
 					"response": []
 				},
@@ -626,7 +433,7 @@
 							}
 						}
 					],
-					"id": "4291336-5d8a5495-ceae-4457-a05b-eab249ba1892",
+					"id": "5d8a5495-ceae-4457-a05b-eab249ba1892",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -642,24 +449,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/sources",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"sources"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/sources"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-f68de027-d3a1-481c-bee3-155846e34b95",
+					"id": "f68de027-d3a1-481c-bee3-155846e34b95",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -675,56 +471,32 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/sources/68a48fe4faff67054bd38d70",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"sources",
-								"68a48fe4faff67054bd38d70"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/sources/68a48fe4faff67054bd38d70"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-d4c38c50-a2e4-4505-a411-6f033a1dded7",
+					"id": "d4c38c50-a2e4-4505-a411-6f033a1dded7",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/sources/68a48fe4faff67054bd38d70",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"sources",
-								"68a48fe4faff67054bd38d70"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/sources/68a48fe4faff67054bd38d70"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-293d0514-17f3-44a6-bd47-3d64f2e39e01"
+			"id": "293d0514-17f3-44a6-bd47-3d64f2e39e01"
 		},
 		{
 			"name": "folders",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-4c7001f0-3182-4279-93bb-ee79d47c0af1",
+					"id": "4c7001f0-3182-4279-93bb-ee79d47c0af1",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -735,18 +507,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/folders",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"folders"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/folders"
 					},
 					"response": []
 				},
@@ -766,7 +527,7 @@
 							}
 						}
 					],
-					"id": "4291336-feeb4018-3ac8-4044-915e-0d4674254fa4",
+					"id": "feeb4018-3ac8-4044-915e-0d4674254fa4",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -782,24 +543,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/folders",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"folders"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/folders"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-c533c8cc-03a6-419a-83fd-5eff4cff27dd",
+					"id": "c533c8cc-03a6-419a-83fd-5eff4cff27dd",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -815,56 +565,32 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/folders/6901088563fe73bdcf65486c",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"folders",
-								"6901088563fe73bdcf65486c"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/folders/6901088563fe73bdcf65486c"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-0551e26c-a484-4278-be39-d4b771b07171",
+					"id": "0551e26c-a484-4278-be39-d4b771b07171",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/folders/6901088563fe73bdcf65486c",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"folders",
-								"6901088563fe73bdcf65486c"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/folders/6901088563fe73bdcf65486c"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-482a9e66-bea9-4857-a00c-1210e33b27ab"
+			"id": "482a9e66-bea9-4857-a00c-1210e33b27ab"
 		},
 		{
 			"name": "groups",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-a5905089-203e-438c-911e-cfeaffe9bb7c",
+					"id": "a5905089-203e-438c-911e-cfeaffe9bb7c",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -875,18 +601,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/groups",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"groups"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/groups"
 					},
 					"response": []
 				},
@@ -906,7 +621,7 @@
 							}
 						}
 					],
-					"id": "4291336-1ba9879a-8da7-4ebc-a7d9-ce024082df5f",
+					"id": "1ba9879a-8da7-4ebc-a7d9-ce024082df5f",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -922,24 +637,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/groups",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"groups"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/groups"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-dbb8c69d-0a89-48b6-b2b7-17e140046c3a",
+					"id": "dbb8c69d-0a89-48b6-b2b7-17e140046c3a",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -955,56 +659,32 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/groups/69010ca149db90a655ea147b",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"groups",
-								"69010ca149db90a655ea147b"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/groups/69010ca149db90a655ea147b"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-b9858853-631d-4966-a9b5-5de166c20dbe",
+					"id": "b9858853-631d-4966-a9b5-5de166c20dbe",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/groups/69010ca149db90a655ea147b",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"groups",
-								"69010ca149db90a655ea147b"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/groups/69010ca149db90a655ea147b"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-27a4e04f-b8ff-4a0a-872a-cf8d8334915d"
+			"id": "27a4e04f-b8ff-4a0a-872a-cf8d8334915d"
 		},
 		{
 			"name": "entries",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-9107a1b7-c800-4aa2-8784-33e04a3b92f1",
+					"id": "9107a1b7-c800-4aa2-8784-33e04a3b92f1",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1015,18 +695,7 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/entries",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"entries"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/entries"
 					},
 					"response": []
 				},
@@ -1046,7 +715,7 @@
 							}
 						}
 					],
-					"id": "4291336-8f743673-d24c-4926-9ced-3d99da5b3ffe",
+					"id": "8f743673-d24c-4926-9ced-3d99da5b3ffe",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1062,24 +731,13 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/entries",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"entries"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/entries"
 					},
 					"response": []
 				},
 				{
 					"name": "update",
-					"id": "4291336-827f3d2b-4c41-4304-a89a-0c7cd8d93a4a",
+					"id": "827f3d2b-4c41-4304-a89a-0c7cd8d93a4a",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1095,91 +753,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/entries/68a48fe4faff67054bd38d70",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"entries",
-								"68a48fe4faff67054bd38d70"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/entries/68a48fe4faff67054bd38d70"
 					},
 					"response": []
 				},
 				{
 					"name": "delete",
-					"id": "4291336-79360425-1fff-49fc-9442-6b54b1070e6c",
+					"id": "79360425-1fff-49fc-9442-6b54b1070e6c",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/entries/68fe4c7c1928cbd33b1297d0",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"entries",
-								"68fe4c7c1928cbd33b1297d0"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/entries/68fe4c7c1928cbd33b1297d0"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-953526cc-36a0-4f2b-bab8-610e6d1d037f"
+			"id": "953526cc-36a0-4f2b-bab8-610e6d1d037f"
 		},
 		{
 			"name": "audit_logs",
 			"item": [
 				{
 					"name": "getAll",
-					"id": "4291336-b1d5dace-acf7-409a-ba31-716844e86d69",
+					"id": "b1d5dace-acf7-409a-ba31-716844e86d69",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/audit-logs",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"audit-logs"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/audit-logs"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-7c4262bb-e985-42ad-8dfa-e7e5f68ddf36"
+			"id": "7c4262bb-e985-42ad-8dfa-e7e5f68ddf36"
 		},
 		{
 			"name": "automations",
 			"item": [],
-			"id": "4291336-f326fc8b-4ad4-4658-ae16-3da0d92332de"
+			"id": "f326fc8b-4ad4-4658-ae16-3da0d92332de"
 		},
 		{
 			"name": "triggers",
 			"item": [
 				{
 					"name": "create",
-					"id": "4291336-db766ab9-304a-4dd1-8711-0ada5b09042f",
+					"id": "db766ab9-304a-4dd1-8711-0ada5b09042f",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1195,30 +818,19 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/profiles/{{profileId}}/triggers",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"profiles",
-								"{{profileId}}",
-								"triggers"
-							]
-						}
+						"url": "{{track}}/api/profiles/{{profileId}}/triggers"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-58e94a9d-a4d7-4d21-b10d-131cc8c8bb4b"
+			"id": "58e94a9d-a4d7-4d21-b10d-131cc8c8bb4b"
 		},
 		{
 			"name": "aggregations",
 			"item": [
 				{
 					"name": "getResult",
-					"id": "4291336-ff2e5a76-f0d1-4cd7-9579-9972f6c1826b",
+					"id": "ff2e5a76-f0d1-4cd7-9579-9972f6c1826b",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1226,31 +838,41 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{track}}/profiles/{{profileId}}/aggregations/named/head-tag/result",
+							"raw": "{{track}}/profiles/:profileId/aggregations/named/:aggregationName/result",
 							"host": [
 								"{{track}}"
 							],
 							"path": [
 								"profiles",
-								"{{profileId}}",
+								":profileId",
 								"aggregations",
 								"named",
-								"head-tag",
+								":aggregationName",
 								"result"
+							],
+							"variable": [
+								{
+									"key": "profileId",
+									"value": "6939b520ad27169f5c7cd75e"
+								},
+								{
+									"key": "aggregationName",
+									"value": "head-tag"
+								}
 							]
 						}
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-0988a152-eeff-4fc2-86ba-426073ecaf57"
+			"id": "0988a152-eeff-4fc2-86ba-426073ecaf57"
 		},
 		{
 			"name": "coins",
 			"item": [
 				{
 					"name": "create-coinLedger",
-					"id": "4291336-e5ee9c3b-b398-46c1-ad94-db9db6cfbb23",
+					"id": "e5ee9c3b-b398-46c1-ad94-db9db6cfbb23",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -1266,21 +888,12 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{track}}/api/coin",
-							"host": [
-								"{{track}}"
-							],
-							"path": [
-								"api",
-								"coin"
-							]
-						}
+						"url": "{{track}}/api/coin"
 					},
 					"response": []
 				}
 			],
-			"id": "4291336-1df872ee-518e-4382-b33f-bab289dd4532"
+			"id": "1df872ee-518e-4382-b33f-bab289dd4532"
 		},
 		{
 			"name": "loginTest",
@@ -1310,7 +923,7 @@
 					}
 				}
 			],
-			"id": "4291336-54b2625c-dfd2-4b2d-a3ee-07c2f9bba7d2",
+			"id": "54b2625c-dfd2-4b2d-a3ee-07c2f9bba7d2",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -1353,35 +966,23 @@
 		},
 		{
 			"name": "cron",
-			"id": "4291336-7a3db7fd-a3fe-49c9-919a-77721d6d2892",
+			"id": "7a3db7fd-a3fe-49c9-919a-77721d6d2892",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": {
-					"raw": "{{track}}/cron",
-					"host": [
-						"{{track}}"
-					],
-					"path": [
-						"cron"
-					]
-				}
+				"url": "{{track}}/cron"
 			},
 			"response": []
 		}
 	],
 	"auth": {
 		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{vault:track_test_idtoken}}",
-				"type": "string"
-			}
-		]
+		"bearer": {
+			"token": "{{vault:track_test_idtoken}}"
+		}
 	},
 	"event": [
 		{
