@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import { useAggregationStore } from '@/stores/aggregation.store';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const aggregationStore = useAggregationStore();
 const currentTime = ref(new Date());
