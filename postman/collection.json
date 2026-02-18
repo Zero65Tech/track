@@ -838,11 +838,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{track}}/profiles/:profileId/aggregations/named/:aggregationName/result",
+							"raw": "{{track}}/api/profiles/:profileId/aggregations/named/:aggregationName/result",
 							"host": [
 								"{{track}}"
 							],
 							"path": [
+								"api",
 								"profiles",
 								":profileId",
 								"aggregations",
@@ -857,7 +858,7 @@
 								},
 								{
 									"key": "aggregationName",
-									"value": "head-tag"
+									"value": "balances_by_book"
 								}
 							]
 						}
