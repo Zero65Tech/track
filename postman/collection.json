@@ -981,14 +981,14 @@
 	"auth": {
 		"type": "bearer",
 		"bearer": {
-			"token": "{{vault:track_test_idtoken}}"
+			"token": "{{vault:firebase_id_token}}"
 		}
 	},
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "03098c3f-1f5b-4ccf-a505-a68a7973f7f2",
+				"id": "8f10ffc6-ad4e-4f20-b00a-a6cc3184410c",
 				"type": "text/javascript",
 				"packages": {},
 				"requests": {},
@@ -1054,7 +1054,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "38626dfa-86c4-4dc0-b7ea-239b795b2a94",
+				"id": "5f100e33-5f30-4cdd-ace7-e2d04b1f6e2e",
 				"type": "text/javascript",
 				"packages": {},
 				"requests": {},
