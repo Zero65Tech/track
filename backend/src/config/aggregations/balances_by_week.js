@@ -12,7 +12,6 @@ export default (profileId) => [
           EntryType.EXPENSE.id,
           EntryType.REFUND.id,
           EntryType.TAX.id,
-          EntryType.RELOCATE.id,
         ],
       },
     },
