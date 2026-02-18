@@ -811,7 +811,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"aggregationName\": \"amounts_by_type\"\n}",
+							"raw": "{\n    \"aggregationName\": \"balances_by_week\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
