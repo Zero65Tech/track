@@ -29,10 +29,10 @@ export default (profileId) => [
         $dateToString: {
           format: "%Y-%m-%d",
           date: {
-            $dateAdd: {
+            $dateSubtract: {
               startDate: "$date",
               unit: "day",
-              amount: { $subtract: [8, { $isoDayOfWeek: "$date" }] },
+              amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
             },
           },
         },
