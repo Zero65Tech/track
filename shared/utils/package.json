@@ -1,0 +1,11 @@
+{
+  "name": "@shared/utils",
+  "version": "5.0.0",
+  "description": "Track Shared Utils",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "npx eslint src"
+  }
+}
