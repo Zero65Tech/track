@@ -55,4 +55,20 @@ function max(...dates) {
   return dates.reduce((maxDate, current) => (current > maxDate ? current : maxDate));
 }
 
-export default { getToday, getYesterday, getNext, getPrevious, min, max };
+function getFormattedTimeAgo(timestamp) {
+    const diffMillis = Date.now() - timestamp;
+    const diffSeconds = Math.floor(diffMillis / 1000);
+
+    if (diffSeconds < 60) return 'Just now';
+
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+export default { getToday, getYesterday, getNext, getPrevious, min, max, getFormattedTimeAgo };
