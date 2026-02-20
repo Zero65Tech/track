@@ -6,25 +6,26 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const aggregationStore = useAggregationStore();
-let intervalId = null;
-let resizeObserver = null;
 
 const aggregationName = 'amounts_by_week';
 const aggState = aggregationStore.getAggregationState(aggregationName);
 
-// Calculate number of data points based on widget width
-const numDataPoints = ref(52);
 const widgetContainer = ref(null);
+const chartOptions = ref(null);
+const numDataPoints = ref(52);
+
+let resizeObserver = null;
+let intervalId = null;
 
 const calculateDataPoints = () => {
-    if (!widgetContainer.value) return;
-    const width = widgetContainer.value.offsetWidth;
-    // Roughly 30px per data point, accounting for padding
-    const calculated = Math.max(12, Math.floor((width - 40) / 10));
-    numDataPoints.value = Math.min(calculated, 104); // Cap at 104 weeks (2 years)
+    if (widgetContainer.value) {
+        numDataPoints.value = Math.max(13, Math.floor((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
+    }
 };
 
-const chartOptions = ref(null);
+const formatDate = (date) => {
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+};
 
 const chartData = computed(() => {
     if (!aggState.data.value?.result || aggState.data.value.result.length === 0) {
@@ -43,11 +44,9 @@ const chartData = computed(() => {
 
     const data = allData.slice(-numDataPoints.value);
     const documentStyle = getComputedStyle(document.documentElement);
-
     return {
         labels: data.map((item) => {
-            const date = new Date(item._id);
-            return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+            return formatDate(new Date(item._id));
         }),
         datasets: [
             {
@@ -66,8 +65,6 @@ const chartData = computed(() => {
         ]
     };
 });
-
-const formattedTimestamp = ref(aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null);
 
 function setChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
