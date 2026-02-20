@@ -17,56 +17,17 @@ const numDataPoints = ref(52);
 let resizeObserver = null;
 let intervalId = null;
 
+const formatDate = (date) => {
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+};
+
 const calculateDataPoints = () => {
     if (widgetContainer.value) {
         numDataPoints.value = Math.max(13, Math.floor((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
     }
 };
 
-const formatDate = (date) => {
-    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-};
-
-const chartData = computed(() => {
-    if (!aggState.data.value?.result || aggState.data.value.result.length === 0) {
-        return null;
-    }
-
-    const allData = [...aggState.data.value.result];
-    for (let i = 0; i < allData.length - 1; i++) {
-        const nextDate = dateUtil.getNext(allData[i]._id, 7);
-        if (allData[i + 1]._id !== nextDate) {
-            allData.splice(i + 1, 0, { _id: nextDate, balance: allData[i].balance });
-        } else {
-            allData[i + 1] = { _id: nextDate, balance: allData[i].balance + allData[i + 1].balance };
-        }
-    }
-
-    const data = allData.slice(-numDataPoints.value);
-    const documentStyle = getComputedStyle(document.documentElement);
-    return {
-        labels: data.map((item) => {
-            return formatDate(new Date(item._id));
-        }),
-        datasets: [
-            {
-                label: 'Closing Balance',
-                data: data.map((item) => item.balance),
-                fill: true,
-                tension: 0.4,
-                borderWidth: 1,
-                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
-                pointRadius: 2.5,
-                pointHoverRadius: 4,
-                pointBorderColor: '#ffffff',
-                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
-            }
-        ]
-    };
-});
-
-function setChartOptions() {
+function getChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
@@ -110,9 +71,7 @@ function setChartOptions() {
                         const startDate = new Date(weekStart);
                         const endDate = new Date(startDate);
                         endDate.setDate(endDate.getDate() + 6);
-                        const startFormatted = startDate.toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' });
-                        const endFormatted = endDate.toLocaleDateString('en-IN', { month: 'short', day: '2-digit', year: 'numeric' });
-                        return [`${startFormatted} - ${endFormatted}`];
+                        return [`${formatDate(startDate)} - ${formatDate(endDate)}`];
                     },
                     label: function (context) {
                         return (
@@ -131,9 +90,50 @@ function setChartOptions() {
     };
 }
 
+const chartData = computed(() => {
+    if (!aggState.data.value?.result || aggState.data.value.result.length === 0) {
+        return null;
+    }
+
+    const allData = [...aggState.data.value.result];
+    for (let i = 0; i < allData.length - 1; i++) {
+        const nextDate = dateUtil.getNext(allData[i]._id, 7);
+        if (allData[i + 1]._id !== nextDate) {
+            allData.splice(i + 1, 0, { _id: nextDate, balance: allData[i].balance });
+        } else {
+            allData[i + 1] = { _id: nextDate, balance: allData[i].balance + allData[i + 1].balance };
+        }
+    }
+
+    const data = allData.slice(-numDataPoints.value);
+    const documentStyle = getComputedStyle(document.documentElement);
+    return {
+        labels: data.map((item) => {
+            return formatDate(new Date(item._id));
+        }),
+        datasets: [
+            {
+                label: 'Closing Balance',
+                data: data.map((item) => item.balance),
+                fill: true,
+                tension: 0.4,
+                borderWidth: 1,
+                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
+                pointRadius: 2.5,
+                pointHoverRadius: 4,
+                pointBorderColor: '#ffffff',
+                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
+            }
+        ]
+    };
+});
+
+const dataUpdatedTimeAgo = ref(aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null);
+
 onMounted(() => {
     calculateDataPoints();
-    chartOptions.value = setChartOptions();
+    chartOptions.value = getChartOptions();
 
     resizeObserver = new ResizeObserver(() => {
         calculateDataPoints();
@@ -144,12 +144,12 @@ onMounted(() => {
     }
 
     intervalId = setInterval(() => {
-        formattedTimestamp.value = dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp);
+        dataUpdatedTimeAgo.value = dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp);
     }, 60 * 1000);
 });
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
-    chartOptions.value = setChartOptions();
+    chartOptions.value = getChartOptions();
 });
 
 onBeforeUnmount(() => {
@@ -204,7 +204,7 @@ const handleUpdate = async () => {
 
                 <div v-else>
                     <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
-                    <div class="text-xs text-muted-color text-right mt-2">{{ aggState.isUpdating.value ? 'Updating ...' : 'Updated ' + formattedTimestamp }}</div>
+                    <div class="text-xs text-muted-color text-right mt-2">{{ aggState.isUpdating.value ? 'Updating ...' : 'Updated ' + dataUpdatedTimeAgo }}</div>
                 </div>
             </div>
         </div>
