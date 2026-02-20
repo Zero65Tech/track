@@ -10,10 +10,6 @@ const aggregationStore = useAggregationStore();
 const aggregationName = 'amounts_by_week';
 const aggState = aggregationStore.getAggregationState(aggregationName);
 
-const widgetContainer = ref(null);
-const chartOptions = ref(null);
-const numDataPoints = ref(52);
-
 let resizeObserver = null;
 let intervalId = null;
 
@@ -92,6 +88,10 @@ function calculateDataPoints() {
     }
 }
 
+const widgetContainer = ref(null);
+const chartOptions = ref(null);
+const numDataPoints = ref(52);
+
 const chartData = computed(() => {
     if (!aggState.data.value?.result || aggState.data.value.result.length === 0) {
         return null;
@@ -131,11 +131,12 @@ const chartData = computed(() => {
     };
 });
 
-const dataUpdatedTimeAgo = ref(aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null);
+const dataUpdatedTimeAgo = ref(null);
 
 onMounted(() => {
     chartOptions.value = getChartOptions();
     numDataPoints.value = calculateDataPoints();
+    dataUpdatedTimeAgo.value = aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null;
 
     resizeObserver = new ResizeObserver(() => {
         numDataPoints.value = calculateDataPoints();
@@ -146,7 +147,7 @@ onMounted(() => {
     }
 
     intervalId = setInterval(() => {
-        dataUpdatedTimeAgo.value = dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp);
+        dataUpdatedTimeAgo.value = aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null;
     }, 60 * 1000);
 });
 
