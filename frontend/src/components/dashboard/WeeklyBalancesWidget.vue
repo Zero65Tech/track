@@ -17,15 +17,9 @@ const numDataPoints = ref(52);
 let resizeObserver = null;
 let intervalId = null;
 
-const formatDate = (date) => {
+function formatDate(date) {
     return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-};
-
-const calculateDataPoints = () => {
-    if (widgetContainer.value) {
-        numDataPoints.value = Math.max(13, Math.floor((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
-    }
-};
+}
 
 function getChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
@@ -90,6 +84,14 @@ function getChartOptions() {
     };
 }
 
+function calculateDataPoints() {
+    if (widgetContainer.value) {
+        return Math.max(13, Math.floor((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
+    } else {
+        return numDataPoints.value;
+    }
+}
+
 const chartData = computed(() => {
     if (!aggState.data.value?.result || aggState.data.value.result.length === 0) {
         return null;
@@ -132,11 +134,11 @@ const chartData = computed(() => {
 const dataUpdatedTimeAgo = ref(aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null);
 
 onMounted(() => {
-    calculateDataPoints();
     chartOptions.value = getChartOptions();
+    numDataPoints.value = calculateDataPoints();
 
     resizeObserver = new ResizeObserver(() => {
-        calculateDataPoints();
+        numDataPoints.value = calculateDataPoints();
     });
 
     if (widgetContainer.value) {
