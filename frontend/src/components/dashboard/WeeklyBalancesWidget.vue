@@ -131,7 +131,9 @@ const chartData = computed(() => {
     };
 });
 
-const dataUpdatedTimeAgo = ref(null);
+const dataUpdatedTimeAgo = computed(() => {
+    return aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null;
+});
 
 onMounted(() => {
     chartOptions.value = getChartOptions();
