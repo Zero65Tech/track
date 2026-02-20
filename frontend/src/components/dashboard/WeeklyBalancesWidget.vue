@@ -11,7 +11,6 @@ const aggregationName = 'amounts_by_week';
 const aggState = aggregationStore.getAggregationState(aggregationName);
 
 let resizeObserver = null;
-let intervalId = null;
 
 function formatDate(date) {
     return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
@@ -93,11 +92,11 @@ const chartOptions = ref(null);
 const numDataPoints = ref(52);
 
 const chartData = computed(() => {
-    if (!aggState.data.value?.result || aggState.data.value.result.length === 0) {
+    if (!aggState.data.value || aggState.data.value.length === 0) {
         return null;
     }
 
-    const allData = [...aggState.data.value.result];
+    const allData = [...aggState.data.value];
     for (let i = 0; i < allData.length - 1; i++) {
         const nextDate = dateUtil.getNext(allData[i]._id, 7);
         if (allData[i + 1]._id !== nextDate) {
@@ -131,14 +130,9 @@ const chartData = computed(() => {
     };
 });
 
-const dataUpdatedTimeAgo = computed(() => {
-    return aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null;
-});
-
 onMounted(() => {
     chartOptions.value = getChartOptions();
     numDataPoints.value = calculateDataPoints();
-    dataUpdatedTimeAgo.value = aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null;
 
     resizeObserver = new ResizeObserver(() => {
         numDataPoints.value = calculateDataPoints();
@@ -147,10 +141,6 @@ onMounted(() => {
     if (widgetContainer.value) {
         resizeObserver.observe(widgetContainer.value);
     }
-
-    intervalId = setInterval(() => {
-        dataUpdatedTimeAgo.value = aggState.data.value?.timestamp ? dateUtil.getFormattedTimeAgo(aggState.data.value.timestamp) : null;
-    }, 60 * 1000);
 });
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
@@ -160,9 +150,6 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
 onBeforeUnmount(() => {
     if (resizeObserver) {
         resizeObserver.disconnect();
-    }
-    if (intervalId) {
-        clearInterval(intervalId);
     }
 });
 
@@ -201,7 +188,7 @@ const handleUpdate = async () => {
 
             <div v-else-if="!chartData && aggState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center">
-                    <div class="text-muted-color">Loading...</div>
+                    <div class="text-muted-color">Loading ...</div>
                 </div>
             </div>
 
@@ -209,7 +196,7 @@ const handleUpdate = async () => {
                 <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
                 <div v-if="aggState.isUpdating.value" class="text-xs text-muted-color text-right mt-2">Updating ...</div>
                 <div v-else-if="aggState.isLoading.value" class="text-xs text-muted-color text-right mt-2">Loading ...</div>
-                <div v-else class="text-xs text-muted-color text-right mt-2">Updated {{ dataUpdatedTimeAgo }}</div>
+                <div v-else class="text-xs text-muted-color text-right mt-2">Updated {{ aggState.dataUpdatedTimeAgo.value }}</div>
             </div>
         </div>
     </div>
