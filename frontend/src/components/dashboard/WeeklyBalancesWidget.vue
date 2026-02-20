@@ -176,39 +176,38 @@ const handleUpdate = async () => {
 <template>
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
+            <div class="flex items-center justify-between mb-4">
+                <div class="font-semibold text-xl">Closing Balances by Week</div>
+                <button
+                    @click="aggState.error.value ? handleRetry() : handleUpdate()"
+                    :disabled="aggState.isUpdating.value || aggState.isLoading.value"
+                    class="p-2 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
+                    :title="aggState.error.value ? 'Retry' : 'Re-calculate'"
+                >
+                    <i :class="['pi', aggState.isUpdating.value || aggState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                </button>
+            </div>
+
             <div v-if="aggState.error.value" class="mb-4">
                 <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
                 <div class="text-red-500 dark:text-red-300 text-xs">{{ aggState.error.value }}</div>
             </div>
 
-            <div v-else>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="font-semibold text-xl">Closing Balances by Week</div>
-                    <button
-                        @click="aggState.error.value ? handleRetry() : handleUpdate()"
-                        :disabled="aggState.isLoading.value || aggState.isUpdating.value"
-                        class="p-2 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
-                        :title="aggState.error.value ? 'Retry' : 'Re-calculate'"
-                    >
-                        <i :class="['pi', aggState.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
-                    </button>
-                </div>
+            <div v-else-if="!chartData && !aggState.isLoading.value" class="flex items-center justify-center h-80">
+                <div class="text-center text-muted-color">No weekly balance data available</div>
+            </div>
 
-                <div v-if="aggState.isLoading.value" class="flex items-center justify-center h-80">
-                    <div class="text-center">
-                        <i class="pi pi-spin pi-spinner text-2xl text-primary mb-2"></i>
-                        <div class="text-muted-color">Loading...</div>
-                    </div>
+            <div v-else-if="!chartData && aggState.isLoading.value" class="flex items-center justify-center h-80">
+                <div class="text-center">
+                    <div class="text-muted-color">Loading...</div>
                 </div>
+            </div>
 
-                <div v-else-if="!chartData || chartData.labels.length === 0" class="flex items-center justify-center h-80">
-                    <div class="text-center text-muted-color">No weekly balance data available</div>
-                </div>
-
-                <div v-else>
-                    <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
-                    <div class="text-xs text-muted-color text-right mt-2">{{ aggState.isUpdating.value ? 'Updating ...' : 'Updated ' + dataUpdatedTimeAgo }}</div>
-                </div>
+            <div v-else-if="chartData && chartData.labels.length">
+                <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
+                <div v-if="aggState.isUpdating.value" class="text-xs text-muted-color text-right mt-2">Updating ...</div>
+                <div v-else-if="aggState.isLoading.value" class="text-xs text-muted-color text-right mt-2">Loading ...</div>
+                <div v-else class="text-xs text-muted-color text-right mt-2">Updated {{ dataUpdatedTimeAgo }}</div>
             </div>
         </div>
     </div>
