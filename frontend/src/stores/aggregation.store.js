@@ -36,7 +36,9 @@ export const useAggregationStore = defineStore('aggregation', () => {
             if (!globalIntervalId) {
                 globalIntervalId = setInterval(() => {
                     Object.values(aggregations).forEach((aggregation) => {
-                        aggregation.dataUpdatedTimeAgo.value = dateUtil.getFormattedTimeAgo(aggregation.dataTimestamp.value);
+                        if (aggregation.dataTimestamp.value) {
+                            aggregation.dataUpdatedTimeAgo.value = dateUtil.getFormattedTimeAgo(aggregation.dataTimestamp.value);
+                        }
                     });
                 }, TIME_UPDATE_INTERVAL_MS);
             }
@@ -64,6 +66,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
                     fetchAggregation(aggregationName);
                 } else {
                     state.data.value = null;
+                    state.dataTimestamp.value = null;
+                    state.dataUpdatedTimeAgo.value = null;
                     state.isLoading.value = false;
                     state.error.value = null;
                 }
