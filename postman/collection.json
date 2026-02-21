@@ -811,7 +811,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"aggregationName\": \"expenses_by_tag_month\"\n}",
+							"raw": "{\n    \"aggregationName\": \"expenses_by_book_tag_month\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -876,7 +876,7 @@
 								},
 								{
 									"key": "aggregationName",
-									"value": "expenses_by_tag_month"
+									"value": "expenses_by_book_tag_month"
 								}
 							]
 						}
