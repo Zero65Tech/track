@@ -19,6 +19,7 @@ export default (profileId) => [
   {
     $group: {
       _id: {
+        bookId: "$bookId",
         tagId: "$tagId",
         month: {
           $dateToString: {
@@ -40,6 +41,6 @@ export default (profileId) => [
     },
   },
   {
-    $sort: { "_id.tagId": 1, "_id.month": 1 },
+    $sort: { "_id.bookId": 1, "_id.tagId": 1, "_id.month": 1 },
   },
 ];
