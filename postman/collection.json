@@ -876,7 +876,7 @@
 								},
 								{
 									"key": "aggregationName",
-									"value": "amounts_by_type"
+									"value": "expenses_by_tag_month"
 								}
 							]
 						}
