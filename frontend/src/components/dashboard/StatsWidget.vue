@@ -33,10 +33,10 @@ const aggregations = AGGREGATIONS.map((agg) => {
     const aggState = aggregationStore.getAggregationState(agg.name);
 
     const totalBalance = computed(() => {
-        if (!aggState.data.value?.result) {
+        if (!aggState.data.value) {
             return 0;
         }
-        return aggState.data.value.result.reduce((sum, item) => sum + item.balance, 0);
+        return aggState.data.value.reduce((sum, item) => sum + item.balance, 0);
     });
 
     const formattedBalance = computed(() => {
@@ -46,24 +46,6 @@ const aggregations = AGGREGATIONS.map((agg) => {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(totalBalance.value);
-    });
-
-    const formattedTimestamp = computed(() => {
-        if (!aggState.data.value?.timestamp) return '';
-
-        const diffMs = currentTime.value - aggState.data.value.timestamp;
-
-        const diffSeconds = Math.floor(diffMs / 1000);
-        if (diffSeconds < 60) return 'Just now';
-
-        const diffMinutes = Math.floor(diffSeconds / 60);
-        if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
-
-        const diffHours = Math.floor(diffMinutes / 60);
-        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-
-        const diffDays = Math.floor(diffHours / 24);
-        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     });
 
     const handleRetry = async () => {
@@ -78,7 +60,7 @@ const aggregations = AGGREGATIONS.map((agg) => {
         ...agg,
         totalBalance,
         formattedBalance,
-        formattedTimestamp,
+        formattedTimestamp: aggState.dataUpdatedTimeAgo,
         isUpdating: aggState.isUpdating,
         isLoading: aggState.isLoading,
         error: aggState.error,
