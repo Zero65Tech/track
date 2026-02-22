@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
                 <div class="text-muted-color">No data available</div>
             </div>
 
-            <Chart v-else type="bar" :data="chartData" :options="chartOptions" />
+            <Chart v-else type="bar" :data="chartData" :options="chartOptions" class="h-96" />
         </div>
     </div>
 </template>
