@@ -61,10 +61,7 @@ const chartData = computed(() => {
         });
     }
 
-    const monthLabels = months.map((month) => {
-        const [yyyy, mm] = month.split('-');
-        return getMonthName(mm) + ' ' + yyyy;
-    });
+    const monthLabels = months.map(formatUtil.formatMonth);
     return { labels: monthLabels, datasets };
 });
 

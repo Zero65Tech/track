@@ -1,3 +1,4 @@
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const INR_FORMATTER = new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -13,12 +14,17 @@ const INR_FORMATTER_NO_DECIMALS = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 0
 });
 
-export function formatCurrency(value) {
+function formatCurrency(value) {
     return INR_FORMATTER.format(value);
 }
 
-export function formatCurrencyNoDecimals(value) {
+function formatCurrencyNoDecimals(value) {
     return INR_FORMATTER_NO_DECIMALS.format(value);
 }
 
-export default { formatCurrency, formatCurrencyNoDecimals };
+function formatMonth(month) {
+    const [yyyy, mm] = month.split('-');
+    return yyyy + ' ' + (MONTH_NAMES[mm - 1] || `Month ${mm}`);
+};
+
+export default { formatMonth, formatCurrency, formatCurrencyNoDecimals };
