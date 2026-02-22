@@ -4,7 +4,10 @@ import { useBookStore } from '@/stores/book.store';
 import { EntryType } from '@shared/enums';
 import { formatUtil } from '@shared/utils';
 import Chart from 'primevue/chart';
-import { computed, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+
+let resizeObserver = null;
+const widgetContainer = ref(null);
 
 const bookStore = useBookStore();
 const aggregationStore = useAggregationStore();
@@ -12,12 +15,12 @@ const aggregationStore = useAggregationStore();
 const aggregationName = 'amounts_by_type_book_month';
 const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
-let resizeObserver = null;
+const numBars = ref(12);
 
 const sortedMonths = computed(() => {
     const monthsSet = new Set();
     aggregationState.data.value.forEach((item) => monthsSet.add(item._id.month));
-    return Array.from(monthsSet).sort().slice(-36);
+    return Array.from(monthsSet).sort().slice(-numBars.value);
 });
 
 const amountsByBookIdAndMonth = computed(() => {
@@ -93,6 +96,22 @@ const chartOptions = computed(() => {
     };
 });
 
+onMounted(() => {
+    resizeObserver = new ResizeObserver(() => {
+        numBars.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 25);
+    });
+
+    if (widgetContainer.value) {
+        resizeObserver.observe(widgetContainer.value);
+    }
+});
+
+onBeforeUnmount(() => {
+    if (resizeObserver) {
+        resizeObserver.disconnect();
+    }
+});
+
 function handleRetry() {
     if (aggregationState.error.value) {
         aggregationStore.fetchAggregation(aggregationName);
@@ -113,7 +132,7 @@ watch(
 </script>
 
 <template>
-    <div class="col-span-12">
+    <div class="col-span-12" ref="widgetContainer">
         <div class="card">
             <div class="flex justify-between items-center mb-6">
                 <div class="font-semibold text-xl">Expenses by Book (Monthly)</div>

@@ -82,7 +82,7 @@ function getChartOptions() {
 
 function calculateDataPoints() {
     if (widgetContainer.value) {
-        return Math.max(13, Math.floor((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
+        return Math.max(13, Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
     } else {
         return numDataPoints.value;
     }
