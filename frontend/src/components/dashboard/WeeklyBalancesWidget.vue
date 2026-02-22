@@ -16,10 +16,6 @@ const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
 const numDataPoints = ref(52);
 
-function formatDate(date) {
-    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-}
-
 const chartData = computed(() => {
     if (!aggregationState.data.value || aggregationState.data.value.length === 0) {
         return null;
@@ -39,7 +35,7 @@ const chartData = computed(() => {
     const documentStyle = getComputedStyle(document.documentElement);
     return {
         labels: data.map((item) => {
-            return formatDate(new Date(item._id));
+            return formatUtil.formatDate(new Date(item._id));
         }),
         datasets: [
             {
@@ -68,6 +64,23 @@ function getChartOptions() {
 
     return {
         maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    title: function (context) {
+                        const weekStart = context[0].label;
+                        const startDate = new Date(weekStart);
+                        const endDate = new Date(startDate);
+                        endDate.setDate(endDate.getDate() + 6);
+                        return [`${formatUtil.formatDate(startDate)} - ${formatUtil.formatDate(endDate)}`];
+                    },
+                    label: (context) => 'Closing Balance: ' + formatUtil.formatCurrency(context.parsed.y)
+                }
+            }
+        },
         scales: {
             x: {
                 ticks: {
@@ -87,46 +100,20 @@ function getChartOptions() {
                     color: surfaceBorder
                 }
             }
-        },
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                callbacks: {
-                    title: function (context) {
-                        const weekStart = context[0].label;
-                        const startDate = new Date(weekStart);
-                        const endDate = new Date(startDate);
-                        endDate.setDate(endDate.getDate() + 6);
-                        return [`${formatDate(startDate)} - ${formatDate(endDate)}`];
-                    },
-                    label: (context) => 'Closing Balance: ' + formatUtil.formatCurrency(context.parsed.y)
-                }
-            }
         }
     };
 }
 
-function calculateDataPoints() {
-    if (widgetContainer.value) {
-        return Math.max(13, Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10));
-    } else {
-        return numDataPoints.value;
-    }
-}
-
 onMounted(() => {
-    chartOptions.value = getChartOptions();
-    numDataPoints.value = calculateDataPoints();
-
     resizeObserver = new ResizeObserver(() => {
-        numDataPoints.value = calculateDataPoints();
+        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10);
     });
 
     if (widgetContainer.value) {
         resizeObserver.observe(widgetContainer.value);
     }
+
+    chartOptions.value = getChartOptions();
 });
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
@@ -138,14 +125,6 @@ onBeforeUnmount(() => {
         resizeObserver.disconnect();
     }
 });
-
-const handleRetry = async () => {
-    await aggregationStore.fetchAggregation(aggregationName);
-};
-
-const handleUpdate = async () => {
-    await aggregationStore.triggerAggregationUpdate(aggregationName);
-};
 </script>
 
 <template>
@@ -153,14 +132,19 @@ const handleUpdate = async () => {
         <div class="card">
             <div class="flex items-center justify-between mb-4">
                 <div class="font-semibold text-xl">Closing Balances by Week</div>
-                <button
-                    @click="aggregationState.error.value ? handleRetry() : handleUpdate()"
-                    :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
-                    class="p-2 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
-                    :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
-                >
-                    <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
-                </button>
+                <div class="flex items-center gap-2">
+                    <span class="text-primary font-medium text-sm">
+                        {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : aggregationState.dataUpdatedTimeAgo.value }}
+                    </span>
+                    <button
+                        @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
+                        :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
+                        class="p-2 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
+                        :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
+                    >
+                        <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                    </button>
+                </div>
             </div>
 
             <div v-if="aggregationState.error.value" class="mb-4">
@@ -178,12 +162,7 @@ const handleUpdate = async () => {
                 </div>
             </div>
 
-            <div v-else-if="chartData && chartData.labels.length">
-                <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
-                <div v-if="aggregationState.isUpdating.value" class="text-xs text-muted-color text-right mt-2">Updating ...</div>
-                <div v-else-if="aggregationState.isLoading.value" class="text-xs text-muted-color text-right mt-2">Loading ...</div>
-                <div v-else class="text-xs text-muted-color text-right mt-2">Updated {{ aggregationState.dataUpdatedTimeAgo.value }}</div>
-            </div>
+            <Chart v-else type="line" :data="chartData" :options="chartOptions" class="h-96" />
         </div>
     </div>
 </template>

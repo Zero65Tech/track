@@ -1,5 +1,11 @@
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-IN', { 
+    day: '2-digit', 
+    month: 'short', 
+    year: '2-digit' 
+});
+
 const INR_FORMATTER = new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
@@ -27,4 +33,8 @@ function formatMonth(month) {
     return yyyy + ' ' + (MONTH_NAMES[mm - 1] || `Month ${mm}`);
 };
 
-export default { formatMonth, formatCurrency, formatCurrencyNoDecimals };
+function formatDate(date) {
+    return DATE_FORMATTER.format(date);
+}
+
+export default { formatCurrency, formatCurrencyNoDecimals, formatMonth, formatDate };

@@ -162,8 +162,14 @@ onBeforeUnmount(() => {
                 <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
             </div>
 
-            <div v-else-if="chartData.labels.length === 0" class="text-center py-8">
+            <div v-else-if="chartData.labels.length === 0 && !aggregationState.isLoading.value" class="text-center py-8">
                 <div class="text-muted-color">No data available</div>
+            </div>
+
+            <div v-else-if="!chartData && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
+                <div class="text-center">
+                    <div class="text-muted-color">Loading ...</div>
+                </div>
             </div>
 
             <Chart v-else type="bar" :data="chartData" :options="chartOptions" class="h-96" />
