@@ -2,6 +2,7 @@
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
 import { EntryType } from '@shared/enums';
+import { formatUtil } from '@shared/utils';
 import Chart from 'primevue/chart';
 import { computed, watch } from 'vue';
 
@@ -87,14 +88,7 @@ const chartOptions = computed(() => {
             y: {
                 ticks: {
                     color: textColorSecondary,
-                    callback: function (value) {
-                        return new Intl.NumberFormat('en-IN', {
-                            style: 'currency',
-                            currency: 'INR',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
-                        }).format(value);
-                    }
+                    callback: formatUtil.formatCurrencyNoDecimals
                 },
                 grid: {
                     color: surfaceBorder
@@ -102,27 +96,10 @@ const chartOptions = computed(() => {
             }
         },
         plugins: {
-            legend: {
-                display: true
-            },
             tooltip: {
-                filter: function (item) {
-                    // Only show items with non-zero values
-                    return item.parsed.y !== 0;
-                },
+                filter: (item) => item.parsed.y !== 0, // Only show items with non-zero values
                 callbacks: {
-                    label: function (context) {
-                        return (
-                            context.dataset.label +
-                            ': ' +
-                            new Intl.NumberFormat('en-IN', {
-                                style: 'currency',
-                                currency: 'INR',
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            }).format(context.parsed.y)
-                        );
-                    }
+                    label: (context) => context.dataset.label + ': ' + formatUtil.formatCurrency(context.parsed.y)
                 }
             }
         }
