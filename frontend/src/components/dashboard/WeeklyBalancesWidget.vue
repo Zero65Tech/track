@@ -1,16 +1,18 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
-import { dateUtil } from '@shared/utils';
+import { dateUtil, formatUtil } from '@shared/utils';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
+
+const widgetContainer = ref(null);
+let resizeObserver = null;
+
 const aggregationStore = useAggregationStore();
 
 const aggregationName = 'amounts_by_week';
 const aggregationState = aggregationStore.getAggregationState(aggregationName);
-
-let resizeObserver = null;
 
 function formatDate(date) {
     return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
@@ -36,14 +38,7 @@ function getChartOptions() {
                 beginAtZero: true,
                 ticks: {
                     color: textColorSecondary,
-                    callback: function (value) {
-                        return new Intl.NumberFormat('en-IN', {
-                            style: 'currency',
-                            currency: 'INR',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
-                        }).format(value);
-                    }
+                    callback: formatUtil.formatCurrencyNoDecimals
                 },
                 grid: {
                     color: surfaceBorder
@@ -63,17 +58,7 @@ function getChartOptions() {
                         endDate.setDate(endDate.getDate() + 6);
                         return [`${formatDate(startDate)} - ${formatDate(endDate)}`];
                     },
-                    label: function (context) {
-                        return (
-                            'Closing Balance: ' +
-                            new Intl.NumberFormat('en-IN', {
-                                style: 'currency',
-                                currency: 'INR',
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            }).format(context.parsed.y)
-                        );
-                    }
+                    label: (context) => 'Closing Balance: ' + formatUtil.formatCurrency(context.parsed.y)
                 }
             }
         }
@@ -88,7 +73,6 @@ function calculateDataPoints() {
     }
 }
 
-const widgetContainer = ref(null);
 const chartOptions = ref(null);
 const numDataPoints = ref(52);
 

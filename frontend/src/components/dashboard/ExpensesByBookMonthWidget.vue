@@ -4,7 +4,6 @@ import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
 import { EntryType } from '@shared/enums';
 import { formatUtil } from '@shared/utils';
-import Chart from 'primevue/chart';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
