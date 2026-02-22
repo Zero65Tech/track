@@ -15,13 +15,13 @@ export const useProfileStore = defineStore('profile', () => {
     // States
 
     const accessible = {
-        isLoading: ref(true),
+        isLoading: ref(false),
         profiles: ref([]),
         error: ref(null)
     };
 
     const template = {
-        isLoading: ref(true),
+        isLoading: ref(false),
         profiles: ref([]),
         error: ref(null)
     };
@@ -33,7 +33,6 @@ export const useProfileStore = defineStore('profile', () => {
     async function initialize() {
         activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
         if (!authStore.isAuthenticated) {
-            accessible.isLoading.value = false;
             await fetchTemplates();
         } else {
             await Promise.all([fetchTemplates(), fetchAccessibles()]);
