@@ -35,34 +35,24 @@ const amountsByBookIdAndMonth = computed(() => {
     return result;
 });
 
-const getMonthName = (monthNumber) => {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return monthNames[monthNumber - 1] || `Month ${monthNumber}`;
-};
-
 const chartData = computed(() => {
     const months = sortedMonths.value;
     const amounts = amountsByBookIdAndMonth.value;
-    if (months.length === 0) {
-        return { labels: [], datasets: [] };
-    }
+
+    const lables = months.map(formatUtil.formatMonth);
 
     const datasets = [];
     for (const book of bookStore.books) {
-        if (!amounts[book.id]) {
-            continue;
-        }
-        const data = months.map((month) => amounts[book.id][month] || 0);
+        if (!amounts[book.id]) continue;
+        const data = months.map((month) => amounts[book.id][month] || null);
         datasets.push({
             label: book.name,
             data,
-            backgroundColor: book.color,
-            borderColor: '#ffffff'
+            backgroundColor: book.color
         });
     }
 
-    const monthLabels = months.map(formatUtil.formatMonth);
-    return { labels: monthLabels, datasets };
+    return { labels: lables, datasets };
 });
 
 const chartOptions = computed(() => {
@@ -94,7 +84,7 @@ const chartOptions = computed(() => {
         },
         plugins: {
             tooltip: {
-                filter: (item) => item.parsed.y !== 0, // Only show items with non-zero values
+                filter: (item) => item.parsed.y !== null, // Only show items with non-zero values
                 callbacks: {
                     label: (context) => context.dataset.label + ': ' + formatUtil.formatCurrency(context.parsed.y)
                 }
@@ -111,7 +101,6 @@ function handleRetry() {
     }
 }
 
-// Watch for theme changes to update chart colors
 watch(
     () => document.documentElement.classList.contains('dark'),
     () => {
