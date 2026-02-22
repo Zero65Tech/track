@@ -15,9 +15,9 @@ import { EntryType } from '@shared/enums';
 
         <WeeklyBalancesWidget />
 
-        <AmountsByTypeBookMonthWidget title="Expenses/Refunds by Month" :entry-types="[EntryType.EXPENSE.id, EntryType.REFUND.id]" />
-        <AmountsByTypeBookMonthWidget title="Incomes/Taxes by Month" :entry-types="[EntryType.INCOME.id, EntryType.TAX.id]" />
-        <AmountsByTypeBookMonthWidget title="Credits/Debits by Month" :entry-types="[EntryType.CREDIT.id, EntryType.DEBIT.id]" />
+        <AmountsByTypeBookMonthWidget title="Credits - Debits" :entry-types="[EntryType.CREDIT.id, EntryType.DEBIT.id]" />
+        <AmountsByTypeBookMonthWidget title="Incomes - Taxes" :entry-types="[EntryType.INCOME.id, EntryType.TAX.id]" />
+        <AmountsByTypeBookMonthWidget title="Expenses - Refunds" :entry-types="[EntryType.EXPENSE.id, EntryType.REFUND.id]" />
 
         <div class="col-span-12 xl:col-span-6">
             <RecentSalesWidget />

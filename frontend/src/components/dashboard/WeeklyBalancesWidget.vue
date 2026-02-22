@@ -11,7 +11,7 @@ let resizeObserver = null;
 
 const aggregationStore = useAggregationStore();
 
-const aggregationName = 'amounts_by_week';
+const aggregationName = 'balances_by_week';
 const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
 const numDataPoints = ref(52);
@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
             <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">Closing Balances by Week</div>
+                <div class="font-semibold text-xl">Closing Balances</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
