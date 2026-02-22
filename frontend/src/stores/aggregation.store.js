@@ -25,7 +25,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         if (!aggregations[aggregationName]) {
             aggregations[aggregationName] = {
                 _timeoutId: null,
-                data: ref(null),
+                data: ref([]),
                 dataTimestamp: ref(null),
                 dataUpdatedTimeAgo: ref(null),
                 isUpdating: ref(false),
