@@ -36,7 +36,7 @@ const amountsByBookIdAndMonth = computed(() => {
             if (!result[bookId]) {
                 result[bookId] = {};
             }
-            result[bookId][month] = (result[bookId][month] || 0) + (item._id.type === EntryType.EXPENSE.id ? -item.balance : item.balance);
+            result[bookId][month] = (result[bookId][month] || 0) + (item._id.type === EntryType.EXPENSE.id ? item.amount : -item.amount);
         });
     return result;
 });
@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
     }
 });
 
-function handleRetry() {
+function handleRefresh() {
     if (aggregationState.error.value) {
         aggregationStore.fetchAggregation(aggregationName);
     } else {
@@ -150,10 +150,10 @@ function handleRetry() {
                 <div class="font-semibold text-xl">Expenses by Book (Monthly)</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
-                        {{ aggregationState.isLoading.value ? 'Loading ...' : aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.dataUpdatedTimeAgo.value }}
+                        {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : aggregationState.dataUpdatedTimeAgo.value }}
                     </span>
                     <button
-                        @click="handleRetry"
+                        @click="handleRefresh"
                         :disabled="aggregationState.isLoading.value || aggregationState.isUpdating.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
