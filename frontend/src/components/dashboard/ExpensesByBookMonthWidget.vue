@@ -133,14 +133,6 @@ onBeforeUnmount(() => {
         resizeObserver.disconnect();
     }
 });
-
-function handleRefresh() {
-    if (aggregationState.error.value) {
-        aggregationStore.fetchAggregation(aggregationName);
-    } else {
-        aggregationStore.triggerAggregationUpdate(aggregationName);
-    }
-}
 </script>
 
 <template>
@@ -153,11 +145,11 @@ function handleRefresh() {
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : aggregationState.dataUpdatedTimeAgo.value }}
                     </span>
                     <button
-                        @click="handleRefresh"
-                        :disabled="aggregationState.isLoading.value || aggregationState.isUpdating.value"
+                        @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
+                        :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                            aggregationState.isLoading.value || aggregationState.isUpdating.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                         ]"
                         :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
                     >
@@ -171,11 +163,7 @@ function handleRefresh() {
                 <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
             </div>
 
-            <div v-else-if="aggregationState.isLoading.value" class="text-center py-8">
-                <div class="text-muted-color">Loading data...</div>
-            </div>
-
-            <div v-else-if="!chartData.labels || chartData.labels.length === 0" class="text-center py-8">
+            <div v-else-if="chartData.labels.length === 0" class="text-center py-8">
                 <div class="text-muted-color">No data available</div>
             </div>
 
