@@ -1,13 +1,13 @@
-import { booksService } from '@/service/booksService';
+import { bookService } from '@/service/bookService';
 import { useProfileStore } from '@/stores/profile.store';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { ref, watch } from 'vue';
 
-export const useBooksStore = defineStore('books', () => {
+export const useBookStore = defineStore('book', () => {
     const toast = useToast();
-
     const profileStore = useProfileStore();
+    let abortController = new AbortController();
 
     // States
 
@@ -30,6 +30,9 @@ export const useBooksStore = defineStore('books', () => {
     watch(
         () => profileStore.activeProfile,
         () => {
+            // Abort all in-flight requests
+            abortController.abort();
+            abortController = new AbortController();
             if (profileStore.activeProfile) {
                 fetchBooks();
             } else {
@@ -55,7 +58,7 @@ export const useBooksStore = defineStore('books', () => {
         error.value = null;
 
         try {
-            books.value = await booksService.getBooks(profileId);
+            books.value = await bookService.getBooks({ profileId }, abortController.signal);
         } catch (err) {
             error.value = err.message;
             console.log(err);
