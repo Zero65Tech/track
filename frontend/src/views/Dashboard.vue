@@ -10,11 +10,11 @@ import WeeklyBalancesWidget from '@/components/dashboard/WeeklyBalancesWidget.vu
 
 <template>
     <div class="grid grid-cols-12 gap-8">
-        <ExpensesByBookMonthWidget />
-
         <StatsWidget />
 
         <WeeklyBalancesWidget />
+
+        <ExpensesByBookMonthWidget />
 
         <div class="col-span-12 xl:col-span-6">
             <RecentSalesWidget />
