@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl">Closing Balances by Week</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
-                        {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : aggregationState.dataUpdatedTimeAgo.value }}
+                        {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
                     </span>
                     <button
                         @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
@@ -146,7 +146,7 @@ onBeforeUnmount(() => {
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
                             aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                         ]"
-                        :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
+                        :title="aggregationState.error.value ? 'Retry' : 'Update'"
                     >
                         <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                     </button>
@@ -158,14 +158,8 @@ onBeforeUnmount(() => {
                 <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
             </div>
 
-            <div v-else-if="chartData.labels.length === 0 && !aggregationState.isLoading.value" class="flex items-center justify-center h-80">
-                <div class="text-center text-muted-color">No data available</div>
-            </div>
-
-            <div v-else-if="chartData.labels.length === 0 && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
-                <div class="text-center">
-                    <div class="text-muted-color">Loading ...</div>
-                </div>
+            <div v-else-if="chartData.labels.length === 0" class="mb-4">
+                <div class="text-center text-muted-color">No data available !</div>
             </div>
 
             <Chart v-else type="line" :data="chartData" :options="chartOptions" class="h-80" />
