@@ -2,7 +2,7 @@ import { bookService } from '@/service/bookService';
 import { useProfileStore } from '@/stores/profile.store';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 export const useBookStore = defineStore('book', () => {
     const toast = useToast();
@@ -17,15 +17,21 @@ export const useBookStore = defineStore('book', () => {
 
     // Getters
 
-    const booksMap = () => {
+    const booksMap = computed(() => {
         const map = {};
         books.value.forEach((book) => {
             map[book.id] = book;
         });
         return map;
-    };
+    });
 
     // Actions
+
+    async function initialize() {
+        if (profileStore.activeProfile) {
+            await fetchBooks();
+        }
+    }
 
     watch(
         () => profileStore.activeProfile,
@@ -77,6 +83,7 @@ export const useBookStore = defineStore('book', () => {
         booksMap,
 
         // Actions
+        initialize,
         fetchBooks
     };
 });

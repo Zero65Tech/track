@@ -13,6 +13,7 @@ import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
 
 import { useAuthStore } from '@/stores/auth.store';
+import { useBookStore } from '@/stores/book.store';
 import { useFcmStore } from '@/stores/fcm.store';
 import { useProfileStore } from '@/stores/profile.store';
 
@@ -44,5 +45,9 @@ const fcmStore = useFcmStore();
 // Initialize profile store
 const profileStore = useProfileStore();
 /* await */ profileStore.initialize();
+
+// Initialize book store
+const bookStore = useBookStore();
+/* await */ bookStore.initialize();
 
 app.mount('#app');
