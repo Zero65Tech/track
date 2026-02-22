@@ -1,4 +1,5 @@
 <script setup>
+import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
 import { EntryType } from '@shared/enums';
@@ -6,8 +7,10 @@ import { formatUtil } from '@shared/utils';
 import Chart from 'primevue/chart';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-let resizeObserver = null;
+const { getPrimary, getSurface, isDarkTheme } = useLayout();
+
 const widgetContainer = ref(null);
+let resizeObserver = null;
 
 const bookStore = useBookStore();
 const aggregationStore = useAggregationStore();
@@ -58,21 +61,41 @@ const chartData = computed(() => {
     return { labels: lables, datasets };
 });
 
-const chartOptions = computed(() => {
+const chartOptions = ref(null);
+
+function getChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
     return {
         maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    fontColor: textColor
+                }
+            },
+            tooltip: {
+                filter: (item) => item.parsed.y !== null, // Only show items with non-zero values
+                callbacks: {
+                    label: (context) => context.dataset.label + ': ' + formatUtil.formatCurrency(context.parsed.y)
+                }
+            }
+        },
         scales: {
             x: {
                 stacked: true,
                 ticks: {
-                    color: textColorSecondary
+                    color: textColorSecondary,
+                    font: {
+                        weight: 500
+                    }
                 },
                 grid: {
-                    color: surfaceBorder
+                    display: false,
+                    drawBorder: false
                 }
             },
             y: {
@@ -81,20 +104,13 @@ const chartOptions = computed(() => {
                     callback: formatUtil.formatCurrencyNoDecimals
                 },
                 grid: {
-                    color: surfaceBorder
-                }
-            }
-        },
-        plugins: {
-            tooltip: {
-                filter: (item) => item.parsed.y !== null, // Only show items with non-zero values
-                callbacks: {
-                    label: (context) => context.dataset.label + ': ' + formatUtil.formatCurrency(context.parsed.y)
+                    color: surfaceBorder,
+                    drawBorder: false
                 }
             }
         }
     };
-});
+}
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => {
@@ -104,6 +120,12 @@ onMounted(() => {
     if (widgetContainer.value) {
         resizeObserver.observe(widgetContainer.value);
     }
+
+    chartOptions.value = getChartOptions();
+});
+
+watch([getPrimary, getSurface, isDarkTheme], () => {
+    chartOptions.value = getChartOptions();
 });
 
 onBeforeUnmount(() => {
@@ -119,16 +141,6 @@ function handleRetry() {
         aggregationStore.triggerAggregationUpdate(aggregationName);
     }
 }
-
-watch(
-    () => document.documentElement.classList.contains('dark'),
-    () => {
-        // Force reactivity for chart by reassigning options
-        if (chartOptions.value) {
-            chartOptions.value = { ...chartOptions.value };
-        }
-    }
-);
 </script>
 
 <template>
