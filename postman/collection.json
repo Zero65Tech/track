@@ -876,7 +876,7 @@
 								},
 								{
 									"key": "aggregationName",
-									"value": "expenses_by_book_tag_month"
+									"value": "amounts_by_week"
 								}
 							]
 						}
