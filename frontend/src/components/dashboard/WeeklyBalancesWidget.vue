@@ -14,9 +14,52 @@ const aggregationStore = useAggregationStore();
 const aggregationName = 'amounts_by_week';
 const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
+const numDataPoints = ref(52);
+
 function formatDate(date) {
     return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
 }
+
+const chartData = computed(() => {
+    if (!aggregationState.data.value || aggregationState.data.value.length === 0) {
+        return null;
+    }
+
+    const allData = [...aggregationState.data.value];
+    for (let i = 0; i < allData.length - 1; i++) {
+        const nextDate = dateUtil.getNext(allData[i]._id, 7);
+        if (allData[i + 1]._id !== nextDate) {
+            allData.splice(i + 1, 0, { _id: nextDate, balance: allData[i].balance });
+        } else {
+            allData[i + 1] = { _id: nextDate, balance: allData[i].balance + allData[i + 1].balance };
+        }
+    }
+
+    const data = allData.slice(-numDataPoints.value);
+    const documentStyle = getComputedStyle(document.documentElement);
+    return {
+        labels: data.map((item) => {
+            return formatDate(new Date(item._id));
+        }),
+        datasets: [
+            {
+                label: 'Closing Balance',
+                data: data.map((item) => item.balance),
+                fill: true,
+                tension: 0.4,
+                borderWidth: 1,
+                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
+                pointRadius: 2.5,
+                pointHoverRadius: 4,
+                pointBorderColor: '#ffffff',
+                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
+            }
+        ]
+    };
+});
+
+const chartOptions = ref(null);
 
 function getChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
@@ -72,48 +115,6 @@ function calculateDataPoints() {
         return numDataPoints.value;
     }
 }
-
-const chartOptions = ref(null);
-const numDataPoints = ref(52);
-
-const chartData = computed(() => {
-    if (!aggregationState.data.value || aggregationState.data.value.length === 0) {
-        return null;
-    }
-
-    const allData = [...aggregationState.data.value];
-    for (let i = 0; i < allData.length - 1; i++) {
-        const nextDate = dateUtil.getNext(allData[i]._id, 7);
-        if (allData[i + 1]._id !== nextDate) {
-            allData.splice(i + 1, 0, { _id: nextDate, balance: allData[i].balance });
-        } else {
-            allData[i + 1] = { _id: nextDate, balance: allData[i].balance + allData[i + 1].balance };
-        }
-    }
-
-    const data = allData.slice(-numDataPoints.value);
-    const documentStyle = getComputedStyle(document.documentElement);
-    return {
-        labels: data.map((item) => {
-            return formatDate(new Date(item._id));
-        }),
-        datasets: [
-            {
-                label: 'Closing Balance',
-                data: data.map((item) => item.balance),
-                fill: true,
-                tension: 0.4,
-                borderWidth: 1,
-                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
-                pointRadius: 2.5,
-                pointHoverRadius: 4,
-                pointBorderColor: '#ffffff',
-                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
-            }
-        ]
-    };
-});
 
 onMounted(() => {
     chartOptions.value = getChartOptions();
