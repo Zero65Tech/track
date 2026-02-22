@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
             <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">Expenses by Book (Monthly)</div>
+                <div class="font-semibold text-xl">Expenses by Month</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : aggregationState.dataUpdatedTimeAgo.value }}
@@ -153,7 +153,7 @@ onBeforeUnmount(() => {
                         ]"
                         :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
                     >
-                        <i :class="['pi', aggregationState.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                     </button>
                 </div>
             </div>
@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
                 <div class="text-muted-color">No data available</div>
             </div>
 
-            <Chart v-else type="bar" :data="chartData" :options="chartOptions" class="h-96" />
+            <Chart v-else type="bar" :data="chartData" :options="chartOptions" />
         </div>
     </div>
 </template>
