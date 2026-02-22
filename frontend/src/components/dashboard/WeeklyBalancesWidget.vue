@@ -30,9 +30,7 @@ const chartData = computed(() => {
     const data = allData.slice(-numDataPoints.value);
     const documentStyle = getComputedStyle(document.documentElement);
     return {
-        labels: data.map((item) => {
-            return formatUtil.formatDate(new Date(item._id));
-        }),
+        labels: data.map((item) => formatUtil.formatDate(new Date(item._id))),
         datasets: [
             {
                 label: 'Closing Balance',
@@ -135,7 +133,7 @@ onBeforeUnmount(() => {
 <template>
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex justify-between items-center mb-6">
                 <div class="font-semibold text-xl">Closing Balances by Week</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
@@ -144,7 +142,10 @@ onBeforeUnmount(() => {
                     <button
                         @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
                         :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
-                        class="p-2 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
+                        :class="[
+                            'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                            aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                        ]"
                         :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
                     >
                         <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
@@ -157,17 +158,17 @@ onBeforeUnmount(() => {
                 <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
             </div>
 
-            <div v-else-if="!chartData.labels.length === 0 && !aggregationState.isLoading.value" class="flex items-center justify-center h-80">
-                <div class="text-center text-muted-color">No weekly balance data available</div>
+            <div v-else-if="chartData.labels.length === 0 && !aggregationState.isLoading.value" class="flex items-center justify-center h-80">
+                <div class="text-center text-muted-color">No data available</div>
             </div>
 
-            <div v-else-if="!chartData.labels.length === 0 && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
+            <div v-else-if="chartData.labels.length === 0 && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center">
                     <div class="text-muted-color">Loading ...</div>
                 </div>
             </div>
 
-            <Chart v-else type="line" :data="chartData" :options="chartOptions" class="h-96" />
+            <Chart v-else type="line" :data="chartData" :options="chartOptions" class="h-80" />
         </div>
     </div>
 </template>
