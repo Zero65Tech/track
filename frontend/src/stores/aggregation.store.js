@@ -1,7 +1,7 @@
 import { aggregationService } from '@/service/aggregationService';
 import { triggerService } from '@/service/triggerService';
 import { useProfileStore } from '@/stores/profile.store';
-import { dateUtil } from '@shared/utils';
+import { formatUtil } from '@shared/utils';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { ref, watch } from 'vue';
@@ -37,7 +37,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 globalIntervalId = setInterval(() => {
                     Object.values(aggregations).forEach((aggregation) => {
                         if (aggregation.dataTimestamp.value) {
-                            aggregation.dataUpdatedTimeAgo.value = dateUtil.getFormattedTimeAgo(aggregation.dataTimestamp.value);
+                            aggregation.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(aggregation.dataTimestamp.value);
                         }
                     });
                 }, TIME_UPDATE_INTERVAL_MS);
@@ -95,7 +95,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
             const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName }, abortController.signal);
             state.data.value = result;
             state.dataTimestamp.value = timestamp;
-            state.dataUpdatedTimeAgo.value = dateUtil.getFormattedTimeAgo(timestamp);
+            state.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(timestamp);
         } catch (err) {
             state.error.value = err.message;
             console.log(err);
