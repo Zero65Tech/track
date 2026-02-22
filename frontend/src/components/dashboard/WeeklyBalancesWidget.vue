@@ -17,10 +17,6 @@ const aggregationState = aggregationStore.getAggregationState(aggregationName);
 const numDataPoints = ref(52);
 
 const chartData = computed(() => {
-    if (!aggregationState.data.value || aggregationState.data.value.length === 0) {
-        return null;
-    }
-
     const allData = [...aggregationState.data.value];
     for (let i = 0; i < allData.length - 1; i++) {
         const nextDate = dateUtil.getNext(allData[i]._id, 7);
@@ -59,6 +55,7 @@ const chartOptions = ref(null);
 
 function getChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--text-color');
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
@@ -66,7 +63,10 @@ function getChartOptions() {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false
+                display: false,
+                labels: {
+                    fontColor: textColor
+                }
             },
             tooltip: {
                 callbacks: {
@@ -84,10 +84,14 @@ function getChartOptions() {
         scales: {
             x: {
                 ticks: {
-                    color: textColorSecondary
+                    color: textColorSecondary,
+                    font: {
+                        weight: 500
+                    }
                 },
                 grid: {
-                    color: surfaceBorder
+                    display: false,
+                    drawBorder: false
                 }
             },
             y: {
@@ -97,7 +101,8 @@ function getChartOptions() {
                     callback: formatUtil.formatCurrencyNoDecimals
                 },
                 grid: {
-                    color: surfaceBorder
+                    color: surfaceBorder,
+                    drawBorder: false
                 }
             }
         }
@@ -152,11 +157,11 @@ onBeforeUnmount(() => {
                 <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
             </div>
 
-            <div v-else-if="!chartData && !aggregationState.isLoading.value" class="flex items-center justify-center h-80">
+            <div v-else-if="!chartData.labels.length === 0 && !aggregationState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center text-muted-color">No weekly balance data available</div>
             </div>
 
-            <div v-else-if="!chartData && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
+            <div v-else-if="!chartData.labels.length === 0 && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center">
                     <div class="text-muted-color">Loading ...</div>
                 </div>

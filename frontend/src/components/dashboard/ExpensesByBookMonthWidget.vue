@@ -72,6 +72,7 @@ function getChartOptions() {
         maintainAspectRatio: false,
         plugins: {
             legend: {
+                display: false,
                 labels: {
                     fontColor: textColor
                 }
@@ -166,7 +167,7 @@ onBeforeUnmount(() => {
                 <div class="text-muted-color">No data available</div>
             </div>
 
-            <div v-else-if="!chartData && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
+            <div v-else-if="!chartData.labels.length === 0 && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center">
                     <div class="text-muted-color">Loading ...</div>
                 </div>
