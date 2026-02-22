@@ -109,7 +109,7 @@ function getChartOptions() {
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => {
-        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 10);
+        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 9.23);
     });
 
     if (widgetContainer.value) {

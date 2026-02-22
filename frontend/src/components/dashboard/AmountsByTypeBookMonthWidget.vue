@@ -129,7 +129,7 @@ function getChartOptions() {
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => {
-        numBars.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 25);
+        numBars.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 40);
     });
 
     if (widgetContainer.value) {
