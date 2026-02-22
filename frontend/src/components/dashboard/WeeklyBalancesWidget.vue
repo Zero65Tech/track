@@ -8,7 +8,7 @@ const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const aggregationStore = useAggregationStore();
 
 const aggregationName = 'amounts_by_week';
-const aggState = aggregationStore.getAggregationState(aggregationName);
+const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
 let resizeObserver = null;
 
@@ -33,6 +33,7 @@ function getChartOptions() {
                 }
             },
             y: {
+                beginAtZero: true,
                 ticks: {
                     color: textColorSecondary,
                     callback: function (value) {
@@ -92,11 +93,11 @@ const chartOptions = ref(null);
 const numDataPoints = ref(52);
 
 const chartData = computed(() => {
-    if (!aggState.data.value || aggState.data.value.length === 0) {
+    if (!aggregationState.data.value || aggregationState.data.value.length === 0) {
         return null;
     }
 
-    const allData = [...aggState.data.value];
+    const allData = [...aggregationState.data.value];
     for (let i = 0; i < allData.length - 1; i++) {
         const nextDate = dateUtil.getNext(allData[i]._id, 7);
         if (allData[i + 1]._id !== nextDate) {
@@ -168,25 +169,25 @@ const handleUpdate = async () => {
             <div class="flex items-center justify-between mb-4">
                 <div class="font-semibold text-xl">Closing Balances by Week</div>
                 <button
-                    @click="aggState.error.value ? handleRetry() : handleUpdate()"
-                    :disabled="aggState.isUpdating.value || aggState.isLoading.value"
+                    @click="aggregationState.error.value ? handleRetry() : handleUpdate()"
+                    :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                     class="p-2 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
-                    :title="aggState.error.value ? 'Retry' : 'Re-calculate'"
+                    :title="aggregationState.error.value ? 'Retry' : 'Re-calculate'"
                 >
-                    <i :class="['pi', aggState.isUpdating.value || aggState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                    <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                 </button>
             </div>
 
-            <div v-if="aggState.error.value" class="mb-4">
+            <div v-if="aggregationState.error.value" class="mb-4">
                 <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                <div class="text-red-500 dark:text-red-300 text-xs">{{ aggState.error.value }}</div>
+                <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
             </div>
 
-            <div v-else-if="!chartData && !aggState.isLoading.value" class="flex items-center justify-center h-80">
+            <div v-else-if="!chartData && !aggregationState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center text-muted-color">No weekly balance data available</div>
             </div>
 
-            <div v-else-if="!chartData && aggState.isLoading.value" class="flex items-center justify-center h-80">
+            <div v-else-if="!chartData && aggregationState.isLoading.value" class="flex items-center justify-center h-80">
                 <div class="text-center">
                     <div class="text-muted-color">Loading ...</div>
                 </div>
@@ -194,9 +195,9 @@ const handleUpdate = async () => {
 
             <div v-else-if="chartData && chartData.labels.length">
                 <Chart type="line" :data="chartData" :options="chartOptions" class="h-80" />
-                <div v-if="aggState.isUpdating.value" class="text-xs text-muted-color text-right mt-2">Updating ...</div>
-                <div v-else-if="aggState.isLoading.value" class="text-xs text-muted-color text-right mt-2">Loading ...</div>
-                <div v-else class="text-xs text-muted-color text-right mt-2">Updated {{ aggState.dataUpdatedTimeAgo.value }}</div>
+                <div v-if="aggregationState.isUpdating.value" class="text-xs text-muted-color text-right mt-2">Updating ...</div>
+                <div v-else-if="aggregationState.isLoading.value" class="text-xs text-muted-color text-right mt-2">Loading ...</div>
+                <div v-else class="text-xs text-muted-color text-right mt-2">Updated {{ aggregationState.dataUpdatedTimeAgo.value }}</div>
             </div>
         </div>
     </div>

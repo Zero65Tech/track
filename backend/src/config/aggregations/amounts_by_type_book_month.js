@@ -35,17 +35,7 @@ export default (profileId) => [
         type: "$type",
         bookId: "$bookId",
       },
-      balance: {
-        $sum: {
-          $cond: [
-            {
-              $in: ["$type", [EntryType.CREDIT.id, EntryType.INCOME.id, EntryType.REFUND.id]],
-            },
-            "$amount",
-            { $multiply: ["$amount", -1] },
-          ],
-        },
-      },
+      amount: { $sum: "$amount" },
       count: { $sum: 1 },
     },
   },
