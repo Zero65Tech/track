@@ -6,6 +6,17 @@ import { EntryType } from '@shared/enums';
 import { formatUtil } from '@shared/utils';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
+const props = defineProps({
+    title: {
+        type: String,
+        required: true
+    },
+    entryTypes: {
+        type: Array,
+        required: true
+    }
+});
+
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const widgetContainer = ref(null);
@@ -28,14 +39,18 @@ const sortedMonths = computed(() => {
 const amountsByBookIdAndMonth = computed(() => {
     const result = {};
     aggregationState.data.value
-        .filter((item) => sortedMonths.value.includes(item._id.month) && (item._id.type === EntryType.EXPENSE.id || item._id.type === EntryType.REFUND.id))
+        .filter((item) => sortedMonths.value.includes(item._id.month) && props.entryTypes.includes(item._id.type))
         .forEach((item) => {
             const bookId = item._id.bookId;
             const month = item._id.month;
             if (!result[bookId]) {
                 result[bookId] = {};
             }
-            result[bookId][month] = (result[bookId][month] || 0) + (item._id.type === EntryType.EXPENSE.id ? item.amount : -item.amount);
+            if ([EntryType.DEBIT.id, EntryType.INCOME.id, EntryType.EXPENSE.id].includes(item._id.type)) {
+                result[bookId][month] = (result[bookId][month] || 0) + item.amount;
+            } else {
+                result[bookId][month] = (result[bookId][month] || 0) - item.amount;
+            }
         });
     return result;
 });
@@ -139,7 +154,7 @@ onBeforeUnmount(() => {
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
             <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">Expenses by Month</div>
+                <div class="font-semibold text-xl">{{ title }}</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
