@@ -34,6 +34,11 @@ const amountsByBookIdAndMonth = computed(() => {
     return result;
 });
 
+const getMonthName = (monthNumber) => {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return monthNames[monthNumber - 1] || `Month ${monthNumber}`;
+};
+
 const chartData = computed(() => {
     const months = sortedMonths.value;
     const amounts = amountsByBookIdAndMonth.value;
@@ -55,7 +60,11 @@ const chartData = computed(() => {
         });
     }
 
-    return { labels: months, datasets };
+    const monthLabels = months.map((month) => {
+        const [yyyy, mm] = month.split('-');
+        return getMonthName(mm) + ' ' + yyyy;
+    });
+    return { labels: monthLabels, datasets };
 });
 
 const chartOptions = computed(() => {
