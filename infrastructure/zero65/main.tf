@@ -7,19 +7,6 @@ terraform {
   } 
 }
 
-module "track-v4" {
-  source      = "../module"
-  name        = "track-v4"
-  stage       = "prod"
-  github      = {
-    org = "Zero65Tech"
-    repo = "track-v4"
-  }
-  project_id  = "zero65"
-  region      = "asia-south1"
-  zone        = "asia-south1-a"
-}
-
 module "track-v5" {
   source      = "../module"
   name        = "track-v5"
