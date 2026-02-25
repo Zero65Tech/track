@@ -1,9 +1,9 @@
 <script setup>
-import BestSellingWidget from '@/components/dashboard/BestSellingWidget.vue';
-import NotificationsWidget from '@/components/dashboard/NotificationsWidget.vue';
-import RecentSalesWidget from '@/components/dashboard/RecentSalesWidget.vue';
-import RevenueStreamWidget from '@/components/dashboard/RevenueStreamWidget.vue';
-import StatsWidget from '@/components/dashboard/StatsWidget.vue';
+import BestSellingWidget from '@/components-demo/dashboard/BestSellingWidget.vue';
+import NotificationsWidget from '@/components-demo/dashboard/NotificationsWidget.vue';
+import RecentSalesWidget from '@/components-demo/dashboard/RecentSalesWidget.vue';
+import RevenueStreamWidget from '@/components-demo/dashboard/RevenueStreamWidget.vue';
+import StatsWidget from '@/components-demo/dashboard/StatsWidget.vue';
 </script>
 
 <template>

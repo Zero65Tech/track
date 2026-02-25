@@ -1,5 +1,5 @@
 <script setup>
-import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
+import FloatingConfigurator from '@/components-demo/FloatingConfigurator.vue';
 import { ref } from 'vue';
 
 const email = ref('');
