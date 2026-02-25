@@ -16,25 +16,44 @@ const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
 const numDataPoints = ref(52);
 
-const chartData = computed(() => {
-    const allData = [...aggregationState.data.value];
-    for (let i = 0; i < allData.length - 1; i++) {
-        const nextDate = dateUtil.getNext(allData[i]._id, 7);
-        if (allData[i + 1]._id !== nextDate) {
-            allData.splice(i + 1, 0, { _id: nextDate, balance: allData[i].balance });
-        } else {
-            allData[i + 1] = { _id: nextDate, balance: allData[i].balance + allData[i + 1].balance };
+const sortedWeeks = computed(() => {
+    const weeksSet = new Set();
+    aggregationState.data.value.forEach((item) => weeksSet.add(item.id));
+    const weeks = Array.from(weeksSet).sort();
+    for (let i = 0; i < weeks.length - 1; i++) {
+        const nextWeek = dateUtil.getNext(weeks[i], 7);
+        if (weeks[i + 1] !== nextWeek) {
+            weeks.splice(i + 1, 0, nextWeek);
         }
     }
+    return weeks;
+});
 
-    const data = allData.slice(-numDataPoints.value);
+const cumulativeAmountsByWeek = computed(() => {
+    const weeks = sortedWeeks.value;
+
+    const amounts = {};
+    aggregationState.data.value.forEach((item) => {
+        amounts[item.id] = item.balance;
+    });
+
+    for (let i = 1; i < weeks.length; i++) {
+        amounts[weeks[i]] = amounts[weeks[i - 1]] + (amounts[weeks[i]] || 0);
+    }
+
+    return amounts;
+});
+
+const chartData = computed(() => {
+    const weeks = sortedWeeks.value.slice(-numDataPoints.value);
+    const dataMap = cumulativeAmountsByWeek.value;
     const documentStyle = getComputedStyle(document.documentElement);
     return {
-        labels: data.map((item) => formatUtil.formatDate(new Date(item._id))),
+        labels: weeks.map((week) => formatUtil.formatDate(new Date(week))),
         datasets: [
             {
                 label: 'Closing Balance',
-                data: data.map((item) => item.balance),
+                data: weeks.map((week) => dataMap[week]),
                 fill: true,
                 tension: 0.4,
                 borderWidth: 1,
