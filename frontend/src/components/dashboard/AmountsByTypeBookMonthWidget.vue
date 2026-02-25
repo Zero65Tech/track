@@ -32,21 +32,21 @@ const numBars = ref(12);
 
 const sortedMonths = computed(() => {
     const monthsSet = new Set();
-    aggregationState.data.value.forEach((item) => monthsSet.add(item._id.month));
+    aggregationState.data.value.forEach((item) => monthsSet.add(item.id.month));
     return Array.from(monthsSet).sort();
 });
 
 const amountsByBookIdAndMonth = computed(() => {
     const result = {};
     aggregationState.data.value
-        .filter((item) => props.entryTypes.includes(item._id.type))
+        .filter((item) => props.entryTypes.includes(item.id.type))
         .forEach((item) => {
-            const bookId = item._id.bookId;
-            const month = item._id.month;
+            const bookId = item.id.bookId;
+            const month = item.id.month;
             if (!result[bookId]) {
                 result[bookId] = {};
             }
-            if ([EntryType.DEBIT.id, EntryType.INCOME.id, EntryType.EXPENSE.id].includes(item._id.type)) {
+            if ([EntryType.DEBIT.id, EntryType.INCOME.id, EntryType.EXPENSE.id].includes(item.id.type)) {
                 result[bookId][month] = (result[bookId][month] || 0) + item.amount;
             } else {
                 result[bookId][month] = (result[bookId][month] || 0) - item.amount;

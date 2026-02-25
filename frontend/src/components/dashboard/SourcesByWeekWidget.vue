@@ -11,14 +11,14 @@ let resizeObserver = null;
 
 const aggregationStore = useAggregationStore();
 
-const aggregationName = 'balances_by_week';
+const aggregationName = 'balances_by_source_week';
 const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
 const numDataPoints = ref(52);
 
 const sortedWeeks = computed(() => {
     const weeksSet = new Set();
-    aggregationState.data.value.forEach((item) => weeksSet.add(item.id));
+    aggregationState.data.value.forEach((item) => weeksSet.add(item.id.week));
     const weeks = Array.from(weeksSet).sort();
     for (let i = 0; i < weeks.length - 1; i++) {
         const nextWeek = dateUtil.getNext(weeks[i], 7);
@@ -29,13 +29,28 @@ const sortedWeeks = computed(() => {
     return weeks;
 });
 
-const cumulativeAmountsByWeek = computed(() => {
+const amountsBySourceIdAndWeek = computed(() => {
+    const amounts = {};
+    aggregationState.data.value.forEach((item) => {
+        const sourceId = item.id.sourceId;
+        const week = item.id.week;
+        if (!amounts[sourceId]) {
+            amounts[sourceId] = {};
+        }
+        amounts[sourceId][week] = (amounts[sourceId][week] || 0) + item.balance;
+    });
+    return amounts;
+});
+
+const totalCumulativeAmountsByWeek = computed(() => {
     const weeks = sortedWeeks.value;
 
     const amounts = {};
-    aggregationState.data.value.forEach((item) => {
-        amounts[item.id] = item.balance;
-    });
+    for (const amountsByWeek of Object.values(amountsBySourceIdAndWeek.value)) {
+        for (const [week, amount] of Object.entries(amountsByWeek)) {
+            amounts[week] = (amounts[week] || 0) + amount;
+        }
+    }
 
     for (let i = 1; i < weeks.length; i++) {
         amounts[weeks[i]] = amounts[weeks[i - 1]] + (amounts[weeks[i]] || 0);
@@ -46,14 +61,14 @@ const cumulativeAmountsByWeek = computed(() => {
 
 const chartData = computed(() => {
     const weeks = sortedWeeks.value.slice(-numDataPoints.value);
-    const dataMap = cumulativeAmountsByWeek.value;
+    const data = weeks.map((week) => totalCumulativeAmountsByWeek.value[week]);
     const documentStyle = getComputedStyle(document.documentElement);
     return {
         labels: weeks.map((week) => formatUtil.formatDate(new Date(week))),
         datasets: [
             {
                 label: 'Closing Balance',
-                data: weeks.map((week) => dataMap[week]),
+                data: data,
                 fill: true,
                 tension: 0.4,
                 borderWidth: 1,
