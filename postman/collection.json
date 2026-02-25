@@ -811,7 +811,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"aggregationName\": \"expenses_by_book_tag_month\"\n}",
+							"raw": "{\n    \"aggregationName\": \"balances_by_source_week\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -876,7 +876,7 @@
 								},
 								{
 									"key": "aggregationName",
-									"value": "amounts_by_week"
+									"value": "balances_by_source_week"
 								}
 							]
 						}
