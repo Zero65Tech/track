@@ -114,6 +114,7 @@ function getChartOptions() {
                 }
             },
             y: {
+                stacked: true,
                 ticks: {
                     color: textColorSecondary,
                     callback: formatUtil.formatCurrencyNoDecimals
