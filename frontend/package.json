@@ -9,8 +9,8 @@
     },
     "scripts": {
         "dev": "vite --port=8080 --mode=${STAGE:-beta}",
-        "build": "vite build",
-        "preview": "vite preview",
+        "build": "vite build --mode=${STAGE:-beta}",
+        "preview": "vite preview --port=8080 --mode=${STAGE:-beta}",
         "lint": "eslint --fix . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
         "format": "prettier --write --experimental-cli src/"
     },

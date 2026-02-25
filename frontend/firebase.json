@@ -18,23 +18,6 @@
             ]
         },
         {
-            "site": "track-v4",
-            "public": "frontend/dist",
-            "rewrites": [
-                {
-                    "source": "/api/**",
-                    "run": {
-                        "serviceId": "track-v4",
-                        "region": "asia-south1"
-                    }
-                },
-                {
-                    "source": "**",
-                    "destination": "/index.html"
-                }
-            ]
-        },
-        {
             "site": "track-v5",
             "public": "frontend/dist",
             "rewrites": [

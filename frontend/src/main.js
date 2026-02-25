@@ -34,6 +34,8 @@ app.use(PrimeVue, {
 app.use(ConfirmationService);
 app.use(ToastService);
 
+app.mount('#app');
+
 // Initialize auth store
 const authStore = useAuthStore();
 /* await */ authStore.initialize();
@@ -49,5 +51,3 @@ const profileStore = useProfileStore();
 // Initialize book store
 const bookStore = useBookStore();
 /* await */ bookStore.initialize();
-
-app.mount('#app');
