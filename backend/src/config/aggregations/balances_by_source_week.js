@@ -20,6 +20,13 @@ export default (profileId) => [
     },
   },
   {
+    $addFields: {
+      date: {
+        $dateFromString: { dateString: "$date" },
+      },
+    },
+  },
+  {
     $facet: {
       sourceEntries: [
         {
@@ -32,7 +39,21 @@ export default (profileId) => [
         },
         {
           $group: {
-            _id: "$sourceId",
+            _id: {
+              week: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: {
+                    $dateSubtract: {
+                      startDate: "$date",
+                      unit: "day",
+                      amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
+                    },
+                  },
+                },
+              },
+              sourceId: "$sourceId",
+            },
             balance: {
               $sum: {
                 $cond: [
@@ -62,7 +83,21 @@ export default (profileId) => [
         },
         {
           $group: {
-            _id: "$sourceIdFrom",
+            _id: {
+              week: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: {
+                    $dateSubtract: {
+                      startDate: "$date",
+                      unit: "day",
+                      amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
+                    },
+                  },
+                },
+              },
+              sourceId: "$sourceIdFrom",
+            },
             balance: { $sum: { $multiply: ["$amount", -1] } },
             count: { $sum: 1 },
           },
@@ -74,7 +109,21 @@ export default (profileId) => [
         },
         {
           $group: {
-            _id: "$sourceIdTo",
+            _id: {
+              week: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: {
+                    $dateSubtract: {
+                      startDate: "$date",
+                      unit: "day",
+                      amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
+                    },
+                  },
+                },
+              },
+              sourceId: "$sourceIdTo",
+            },
             balance: { $sum: "$amount" },
             count: { $sum: 1 },
           },
@@ -98,5 +147,8 @@ export default (profileId) => [
       balance: { $sum: "$allResults.balance" },
       count: { $sum: "$allResults.count" },
     },
+  },
+  {
+    $sort: { "_id.week": 1 },
   },
 ];
