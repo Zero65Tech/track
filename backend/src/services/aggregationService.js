@@ -17,6 +17,11 @@ async function getNamedAggregation(profileId, aggregationName) {
   data.id = data._id.toString();
   delete data["_id"];
 
+  data.result.forEach((item) => {
+    item.id = item._id;
+    delete item["_id"];
+  });
+
   return data;
 }
 
