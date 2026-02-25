@@ -64,7 +64,7 @@ const chartData = computed(() => {
     const data = weeks.map((week) => totalCumulativeAmountsByWeek.value[week]);
     const documentStyle = getComputedStyle(document.documentElement);
     return {
-        labels: weeks,
+        labels: weeks.map((week) => formatUtil.formatDate(new Date(week))),
         datasets: [
             {
                 label: 'Closing Balance',
