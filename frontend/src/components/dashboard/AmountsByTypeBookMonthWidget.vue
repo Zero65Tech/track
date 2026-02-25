@@ -33,13 +33,13 @@ const numBars = ref(12);
 const sortedMonths = computed(() => {
     const monthsSet = new Set();
     aggregationState.data.value.forEach((item) => monthsSet.add(item._id.month));
-    return Array.from(monthsSet).sort().slice(-numBars.value);
+    return Array.from(monthsSet).sort();
 });
 
 const amountsByBookIdAndMonth = computed(() => {
     const result = {};
     aggregationState.data.value
-        .filter((item) => sortedMonths.value.includes(item._id.month) && props.entryTypes.includes(item._id.type))
+        .filter((item) => props.entryTypes.includes(item._id.type))
         .forEach((item) => {
             const bookId = item._id.bookId;
             const month = item._id.month;
@@ -55,13 +55,52 @@ const amountsByBookIdAndMonth = computed(() => {
     return result;
 });
 
+const moving12MonthsAverage = computed(() => {
+    const NUM_MONTHS = 12;
+
+    const totalAmountsByMonth = {};
+    for (const amountsByMonth of Object.values(amountsByBookIdAndMonth.value)) {
+        for (const [month, amount] of Object.entries(amountsByMonth)) {
+            totalAmountsByMonth[month] = (totalAmountsByMonth[month] || 0) + amount;
+        }
+    }
+
+    const movingAverages = [];
+    for (let index = 0; index < sortedMonths.value.length; index++) {
+        const startIndex = Math.max(0, index + 1 - NUM_MONTHS);
+        const endIndex = index + 1;
+        const movingAverage =
+            sortedMonths.value
+                .slice(startIndex, endIndex)
+                .map((month) => totalAmountsByMonth[month])
+                .reduce((a, b) => a + b, 0) /
+            (endIndex - startIndex);
+        movingAverages.push(movingAverage);
+    }
+
+    return movingAverages;
+});
+
 const chartData = computed(() => {
-    const months = sortedMonths.value;
+    const months = sortedMonths.value.slice(-numBars.value);
     const amounts = amountsByBookIdAndMonth.value;
+    const movingAverages = moving12MonthsAverage.value.slice(-numBars.value);
 
     const lables = months.map(formatUtil.formatMonth);
 
-    const datasets = [];
+    const datasets = [
+        {
+            label: 'Average (12M)',
+            data: movingAverages,
+            type: 'line',
+            fill: false,
+            tension: 0.4,
+            borderWidth: 1,
+            pointRadius: 2.5,
+            pointHoverRadius: 4
+        }
+    ];
+
     for (const book of bookStore.books) {
         if (!amounts[book.id]) continue;
         const data = months.map((month) => amounts[book.id][month] || null);
