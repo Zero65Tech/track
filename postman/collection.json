@@ -717,7 +717,7 @@
 					"response": []
 				},
 				{
-					"name": "list/sources",
+					"name": "list-by-source",
 					"id": "1fb88521-f904-45b1-8838-5b9202044d34",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -730,7 +730,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{track}}/api/profiles/:profileId/entries/sources?sourceId=6909e5537d0302d9b602d762",
+							"raw": "{{track}}/api/profiles/:profileId/sources/:sourceId/entries",
 							"host": [
 								"{{track}}"
 							],
@@ -738,19 +738,18 @@
 								"api",
 								"profiles",
 								":profileId",
-								"entries",
-								"sources"
-							],
-							"query": [
-								{
-									"key": "sourceId",
-									"value": "6909e5537d0302d9b602d762"
-								}
+								"sources",
+								":sourceId",
+								"entries"
 							],
 							"variable": [
 								{
 									"key": "profileId",
 									"value": "6939b520ad27169f5c7cd75e"
+								},
+								{
+									"key": "sourceId",
+									"value": "6909e5537d0302d9b602d762"
 								}
 							]
 						}
