@@ -16,6 +16,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useBookStore } from '@/stores/book.store';
 import { useFcmStore } from '@/stores/fcm.store';
 import { useProfileStore } from '@/stores/profile.store';
+import { useSourceStore } from '@/stores/source.store';
 
 const app = createApp(App);
 app.use(router);
@@ -51,3 +52,7 @@ const profileStore = useProfileStore();
 // Initialize book store
 const bookStore = useBookStore();
 /* await */ bookStore.initialize();
+
+// Initialize source store
+const sourceStore = useSourceStore();
+/* await */ sourceStore.initialize();
