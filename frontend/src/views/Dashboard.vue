@@ -1,7 +1,6 @@
 <script setup>
 import AmountsByTypeBookMonthWidget from '@/components/dashboard/AmountsByTypeBookMonthWidget.vue';
 import BalancesByWeekWidget from '@/components/dashboard/BalancesByWeekWidget.vue';
-import BalancesBySourceWeekWidget from '@/components/dashboard/BalancesBySourceWeekWidget.vue';
 import StatsWidget from '@/components/dashboard/StatsWidget.vue';
 import { EntryType } from '@shared/enums';
 </script>
@@ -11,7 +10,6 @@ import { EntryType } from '@shared/enums';
         <StatsWidget />
 
         <BalancesByWeekWidget />
-        <BalancesBySourceWeekWidget />
 
         <AmountsByTypeBookMonthWidget title="Expenses - Refunds" :entry-types="[EntryType.EXPENSE.id, EntryType.REFUND.id]" />
         <AmountsByTypeBookMonthWidget title="Incomes - Taxes" :entry-types="[EntryType.INCOME.id, EntryType.TAX.id]" />
