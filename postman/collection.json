@@ -683,8 +683,25 @@
 			"name": "entries",
 			"item": [
 				{
-					"name": "getAll",
+					"name": "list",
 					"id": "9107a1b7-c800-4aa2-8784-33e04a3b92f1",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": "{{track}}/api/profiles/{{profileId}}/entries"
+					},
+					"response": []
+				},
+				{
+					"name": "list/sources",
+					"id": "1fb88521-f904-45b1-8838-5b9202044d34",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
