@@ -712,7 +712,25 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": "{{track}}/api/profiles/{{profileId}}/entries"
+						"url": {
+							"raw": "{{track}}/api/profiles/:profileId/entries/sources",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profileId",
+								"entries",
+								"sources"
+							],
+							"variable": [
+								{
+									"key": "profileId",
+									"value": "6939b520ad27169f5c7cd75e"
+								}
+							]
+						}
 					},
 					"response": []
 				},
