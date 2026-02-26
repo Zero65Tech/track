@@ -413,7 +413,24 @@
 							"mode": "raw",
 							"raw": ""
 						},
-						"url": "{{track}}/api/profiles/{{profileId}}/sources"
+						"url": {
+							"raw": "{{track}}/api/profiles/:profileId/sources",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profileId",
+								"sources"
+							],
+							"variable": [
+								{
+									"key": "profileId",
+									"value": "6939b520ad27169f5c7cd75e"
+								}
+							]
+						}
 					},
 					"response": []
 				},
@@ -713,7 +730,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{track}}/api/profiles/:profileId/entries/sources",
+							"raw": "{{track}}/api/profiles/:profileId/entries/sources?sourceId=6909e5537d0302d9b602d762",
 							"host": [
 								"{{track}}"
 							],
@@ -723,6 +740,13 @@
 								":profileId",
 								"entries",
 								"sources"
+							],
+							"query": [
+								{
+									"key": "sourceId",
+									"value": "6909e5537d0302d9b602d762",
+									"type": "text"
+								}
 							],
 							"variable": [
 								{
