@@ -2,7 +2,7 @@
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useSourceStore } from '@/stores/source.store';
-import { formatUtil } from '@shared/utils';
+import { dateUtil, formatUtil } from '@shared/utils';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
@@ -13,89 +13,91 @@ let resizeObserver = null;
 const sourceStore = useSourceStore();
 const aggregationStore = useAggregationStore();
 
-const aggregationName = 'balances_by_source_month';
+const aggregationName = 'balances_by_source_week';
 const aggregationState = aggregationStore.getAggregationState(aggregationName);
 
-const numBars = ref(12);
+const numDataPoints = ref(52);
 
-const sortedMonths = computed(() => {
-    const monthsSet = new Set();
-    aggregationState.data.value.forEach((item) => monthsSet.add(item.id.month));
-    return Array.from(monthsSet).sort();
+const sortedWeeks = computed(() => {
+    const weeksSet = new Set();
+    aggregationState.data.value.forEach((item) => weeksSet.add(item.id.week));
+    const weeks = Array.from(weeksSet).sort();
+    for (let i = 0; i < weeks.length - 1; i++) {
+        const nextWeek = dateUtil.getNext(weeks[i], 7);
+        if (weeks[i + 1] !== nextWeek) {
+            weeks.splice(i + 1, 0, nextWeek);
+        }
+    }
+    return weeks;
 });
 
-const amountsBySourceIdAndMonth = computed(() => {
-    const result = {};
+const amountsBySourceGroupAndWeek = computed(() => {
+    const sourcesMap = sourceStore.sourcesMap;
+
+    const amounts = {};
     aggregationState.data.value.forEach((item) => {
         const sourceId = item.id.sourceId;
-        const month = item.id.month;
-        if (!result[sourceId]) {
-            result[sourceId] = {};
+        const sourceGroup = sourcesMap[sourceId]?.group || 'Others';
+        const week = item.id.week;
+        if (!amounts[sourceGroup]) {
+            amounts[sourceGroup] = {};
         }
-        result[sourceId][month] = (result[sourceId][month] || 0) + item.balance;
+        amounts[sourceGroup][week] = (amounts[sourceGroup][week] || 0) + item.balance;
     });
-    return result;
+
+    return amounts;
 });
 
-const moving12MonthsAverage = computed(() => {
-    console.log(amountsBySourceIdAndMonth.value);
+const cumulativeAmountsBySourceGroupAndWeek = computed(() => {
+    const weeks = sortedWeeks.value;
 
-    const NUM_MONTHS = 12;
-
-    const totalAmountsByMonth = {};
-    for (const amountsByMonth of Object.values(amountsBySourceIdAndMonth.value)) {
-        for (const [month, balance] of Object.entries(amountsByMonth)) {
-            totalAmountsByMonth[month] = (totalAmountsByMonth[month] || 0) + balance;
+    const amounts = {};
+    for (const [sourceGroup, amountsByWeek] of Object.entries(amountsBySourceGroupAndWeek.value)) {
+        amounts[sourceGroup] = {};
+        amounts[sourceGroup][weeks[0]] = amountsByWeek[weeks[0]] || 0;
+        for (let i = 1; i < weeks.length; i++) {
+            amounts[sourceGroup][weeks[i]] = amounts[sourceGroup][weeks[i - 1]] + (amountsByWeek[weeks[i]] || 0);
         }
     }
 
-    const movingAverages = [];
-    for (let index = 0; index < sortedMonths.value.length; index++) {
-        const startIndex = Math.max(0, index + 1 - NUM_MONTHS);
-        const endIndex = index + 1;
-        const movingAverage =
-            sortedMonths.value
-                .slice(startIndex, endIndex)
-                .map((month) => totalAmountsByMonth[month])
-                .reduce((a, b) => a + b, 0) /
-            (endIndex - startIndex);
-        movingAverages.push(movingAverage);
-    }
-
-    return movingAverages;
+    return amounts;
 });
 
 const chartData = computed(() => {
-    const months = sortedMonths.value.slice(-numBars.value);
-    const amounts = amountsBySourceIdAndMonth.value;
-    const movingAverages = moving12MonthsAverage.value.slice(-numBars.value);
+    const weeks = sortedWeeks.value.slice(-numDataPoints.value);
+    const documentStyle = getComputedStyle(document.documentElement);
 
-    const lables = months.map(formatUtil.formatMonth);
-
-    const datasets = [
-        {
-            label: 'Average (12M)',
-            data: movingAverages,
-            type: 'line',
-            fill: false,
-            tension: 0.4,
-            borderWidth: 1,
-            pointRadius: 2.5,
-            pointHoverRadius: 4
-        }
-    ];
-
-    for (const source of sourceStore.sources) {
-        if (!amounts[source.id]) continue;
-        const data = months.map((month) => amounts[source.id][month] || null);
+    const labels = weeks.map((week) => formatUtil.formatDate(new Date(week)));
+    const datasets = [];
+    console.log(cumulativeAmountsBySourceGroupAndWeek.value);
+    for (const sourceGroup in cumulativeAmountsBySourceGroupAndWeek.value) {
+        // console.log(weeks.map((week) => cumulativeAmountsBySourceGroupAndWeek.value[sourceGroup][week]));
         datasets.push({
-            label: source.name,
-            data,
-            backgroundColor: source.color
+            label: sourceGroup,
+            data: weeks.map((week) => cumulativeAmountsBySourceGroupAndWeek.value[sourceGroup][week])
         });
     }
 
-    return { labels: lables, datasets };
+    return { labels, datasets };
+
+    return {
+        labels: weeks.map((week) => formatUtil.formatDate(new Date(week))),
+        datasets: [
+            {
+                label: 'Closing Balance',
+                data: data,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 1,
+                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
+                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
+                pointRadius: 2.5,
+                pointHoverRadius: 4,
+                pointBorderColor: '#ffffff',
+                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
+            }
+        ]
+    };
 });
 
 const chartOptions = ref(null);
@@ -110,14 +112,20 @@ function getChartOptions() {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false,
+                display: true,
                 labels: {
                     fontColor: textColor
                 }
             },
             tooltip: {
-                filter: (item) => item.parsed.y !== null, // Only show items with non-zero values
                 callbacks: {
+                    title: function (context) {
+                        const weekStart = context[0].label;
+                        const startDate = new Date(weekStart);
+                        const endDate = new Date(startDate);
+                        endDate.setDate(endDate.getDate() + 6);
+                        return [`${formatUtil.formatDate(startDate)} - ${formatUtil.formatDate(endDate)}`];
+                    },
                     label: (context) => context.dataset.label + ': ' + formatUtil.formatCurrency(context.parsed.y)
                 }
             }
@@ -138,6 +146,7 @@ function getChartOptions() {
             },
             y: {
                 stacked: true,
+                beginAtZero: true,
                 ticks: {
                     color: textColorSecondary,
                     callback: formatUtil.formatCurrencyNoDecimals
@@ -153,7 +162,8 @@ function getChartOptions() {
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => {
-        numBars.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 40);
+        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 40);
+        // numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 9.23);
     });
 
     if (widgetContainer.value) {
@@ -178,7 +188,7 @@ onBeforeUnmount(() => {
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
             <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">{{ title }}</div>
+                <div class="font-semibold text-xl">Closing Balances (Sources)</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}

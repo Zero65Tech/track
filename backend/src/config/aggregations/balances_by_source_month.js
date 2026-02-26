@@ -40,7 +40,7 @@ export default (profileId) => [
         {
           $group: {
             _id: {
-              week: {
+              month: {
                 $dateToString: {
                   format: "%Y-%m",
                   date: "$date",
@@ -78,7 +78,7 @@ export default (profileId) => [
         {
           $group: {
             _id: {
-              week: {
+              month: {
                 $dateToString: {
                   format: "%Y-%m",
                   date: "$date",
@@ -98,7 +98,7 @@ export default (profileId) => [
         {
           $group: {
             _id: {
-              week: {
+              month: {
                 $dateToString: {
                   format: "%Y-%m",
                   date: "$date",
@@ -131,6 +131,6 @@ export default (profileId) => [
     },
   },
   {
-    $sort: { "_id.week": 1 },
+    $sort: { "_id.month": 1 },
   },
 ];
