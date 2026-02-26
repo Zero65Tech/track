@@ -1,6 +1,7 @@
 import transaction from "../utils/transaction.js";
 
 import EntryModel from "../models/Entry.js";
+import { EntryType } from "@shared/enums";
 
 import {
   _logCreateAudit,
@@ -11,6 +12,52 @@ import {
 async function getEntries(profileId, filters) {
   const dataArr = await EntryModel.find({ profileId, ...filters })
     .limit(1000)
+    .lean();
+
+  for (let data of dataArr) {
+    data.id = data._id.toString();
+    delete data["_id"];
+    delete data["profileId"];
+  }
+
+  return dataArr;
+}
+
+async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
+  const query = {
+    profileId,
+    $or: [
+      {
+        type: {
+          $in: [
+            EntryType.CREDIT.id,
+            EntryType.DEBIT.id,
+            EntryType.INCOME.id,
+            EntryType.EXPENSE.id,
+            EntryType.REFUND.id,
+            EntryType.TAX.id,
+            EntryType.PAYMENT.id,
+            EntryType.RECEIPT.id,
+          ],
+        },
+        sourceId,
+      },
+      {
+        type: EntryType.TRANSFER.id,
+        $or: [{ sourceIdFrom: sourceId }, { sourceIdTo: sourceId }],
+      },
+    ],
+  };
+
+  if (fromDate || toDate) {
+    query.date = {};
+    if (fromDate) query.date.$gte = fromDate;
+    if (toDate) query.date.$lte = toDate;
+  }
+
+  const dataArr = await EntryModel.find(query)
+    .sort({ date: 1 })
+    .limit(1000) // Safety limit
     .lean();
 
   for (let data of dataArr) {
@@ -102,5 +149,5 @@ async function deleteEntry(userId, profileId, entryId) {
 }
 
 export { _aggregateEntries };
-  
-export default{ getEntries, createEntry, updateEntry, deleteEntry };
+
+export default { getEntries, getSourceEntries, createEntry, updateEntry, deleteEntry };

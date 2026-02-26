@@ -83,16 +83,14 @@ app.patch(`${API_PREFIX}/groups/:id`, groupController.updateGroup);
 app.delete(`${API_PREFIX}/groups/:id`, groupController.deleteGroup);
 
 app.get(`${API_PREFIX}/entries`, entryController.getEntries);
+app.get(`${API_PREFIX}/sources/:sourceId/entries`, entryController.getSourceEntries);
 app.post(`${API_PREFIX}/entries`, entryController.createEntry);
 app.patch(`${API_PREFIX}/entries/:id`, entryController.updateEntry);
 app.delete(`${API_PREFIX}/entries/:id`, entryController.deleteEntry);
 
 app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAuditLogs);
 
-app.post(
-  `${API_PREFIX}/triggers/data-aggregation`,
-  triggerController.createDataAggregationTrigger,
-);
+app.post(`${API_PREFIX}/triggers/data-aggregation`, triggerController.createDataAggregationTrigger);
 
 app.get(`${API_PREFIX}/aggregations/named/:name/result`, aggregationController.getNamedAggregationResult); // prettier-ignore
 app.get(`${API_PREFIX}/aggregations/custom/:id/result`, aggregationController.getCustomAggregationResult); // prettier-ignore

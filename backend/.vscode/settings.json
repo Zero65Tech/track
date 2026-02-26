@@ -5,6 +5,16 @@
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
     ".env": ".env.*",
+    "Profile.js": "AuditLog.js",
+    "Entry.js": "EntryFields.js, Folder.js, Group.js",
+    "Trigger.js": "Coin.js, Aggregation.js",
+    "userService.js": "deviceService.js",
+    "profileService.js": "auditLogService.js",
+    "entryService.js": "EntryFields.js, folderService.js, groupService.js",
+    "triggerService.js": "coinService.js, aggregationService.js",
+    "profileController.js": "auditLogController.js",
+    "entryController.js": "EntryFields.js, folderController.js, groupController.js",
+    "triggerController.js": "coinController.js, aggregationController.js",
     "package.json": "package-lock.json, eslint.config.js, prettier.config.js"
   },
   "editor.formatOnType": true,
