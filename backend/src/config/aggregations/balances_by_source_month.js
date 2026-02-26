@@ -42,14 +42,8 @@ export default (profileId) => [
             _id: {
               week: {
                 $dateToString: {
-                  format: "%Y-%m-%d",
-                  date: {
-                    $dateSubtract: {
-                      startDate: "$date",
-                      unit: "day",
-                      amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
-                    },
-                  },
+                  format: "%Y-%m",
+                  date: "$date",
                 },
               },
               sourceId: "$sourceId",
@@ -86,14 +80,8 @@ export default (profileId) => [
             _id: {
               week: {
                 $dateToString: {
-                  format: "%Y-%m-%d",
-                  date: {
-                    $dateSubtract: {
-                      startDate: "$date",
-                      unit: "day",
-                      amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
-                    },
-                  },
+                  format: "%Y-%m",
+                  date: "$date",
                 },
               },
               sourceId: "$sourceIdFrom",
@@ -112,14 +100,8 @@ export default (profileId) => [
             _id: {
               week: {
                 $dateToString: {
-                  format: "%Y-%m-%d",
-                  date: {
-                    $dateSubtract: {
-                      startDate: "$date",
-                      unit: "day",
-                      amount: { $subtract: [{ $isoDayOfWeek: "$date" }, 1] },
-                    },
-                  },
+                  format: "%Y-%m",
+                  date: "$date",
                 },
               },
               sourceId: "$sourceIdTo",
