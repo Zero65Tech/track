@@ -374,8 +374,8 @@ onBeforeUnmount(() => {
                 <div v-else-if="allWeeksDesc.length === 0" class="text-center text-muted-color py-8">No entries found for this source.</div>
 
                 <!-- Week sections -->
-                <div v-else>
-                    <table class="w-full text-sm">
+                <div v-else class="overflow-x-auto">
+                    <table class="w-full text-sm min-w-[800px]">
                         <thead>
                             <tr class="text-left text-muted-color border-b border-surface-200 dark:border-surface-700">
                                 <th class="py-2 px-2 font-medium">Date</th>
