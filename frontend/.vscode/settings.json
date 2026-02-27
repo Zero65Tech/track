@@ -6,6 +6,9 @@
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
         ".env": ".env.*",
+        "authService.js": "deviceService.js, fcmService.js",
+        "entryService.js": "bookService.js, headService.js, tagService.js, sourceService.js",
+        "triggerService.js": "aggregationService.js",
         ".gitignore": ".gitattributes",
         "tsconfig.json": "tsconfig.*.json, env.d.ts",
         "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",

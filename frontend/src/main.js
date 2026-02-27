@@ -15,8 +15,10 @@ import '@/assets/tailwind.css';
 import { useAuthStore } from '@/stores/auth.store';
 import { useBookStore } from '@/stores/book.store';
 import { useFcmStore } from '@/stores/fcm.store';
+import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';
+import { useTagStore } from '@/stores/tag.store';
 
 const app = createApp(App);
 app.use(router);
@@ -52,6 +54,14 @@ const profileStore = useProfileStore();
 // Initialize book store
 const bookStore = useBookStore();
 /* await */ bookStore.initialize();
+
+// Initialize head store
+const headStore = useHeadStore();
+/* await */ headStore.initialize();
+
+// Initialize tag store
+const tagStore = useTagStore();
+/* await */ tagStore.initialize();
 
 // Initialize source store
 const sourceStore = useSourceStore();
