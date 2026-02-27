@@ -437,14 +437,14 @@ onBeforeUnmount(() => {
                             </tr>
                         </tbody>
                     </table>
+                </div>
 
-                    <!-- Error loading entries -->
-                    <div v-if="error" class="text-center text-red-600 dark:text-red-400 text-sm mb-4">{{ error }}</div>
+                <!-- Error loading entries -->
+                <div v-if="error" class="text-center text-red-600 dark:text-red-400 text-sm mb-4">{{ error }}</div>
 
-                    <!-- Load More button -->
-                    <div v-if="hasMore" class="text-center mt-4">
-                        <Button label="Load More" icon="pi pi-arrow-down" :loading="isLoadingWeek" :disabled="isLoadingWeek" @click="loadMore" outlined />
-                    </div>
+                <!-- Load More button -->
+                <div v-if="hasMore" class="text-center mt-4">
+                    <Button label="Load More" icon="pi pi-arrow-down" :loading="isLoadingWeek" :disabled="isLoadingWeek" @click="loadMore" outlined />
                 </div>
             </div>
         </div>
