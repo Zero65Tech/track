@@ -14,6 +14,11 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
+                    path: '/sources/:sourceId',
+                    name: 'sourceEntries',
+                    component: () => import('@/views/SourceEntries.ai.vue')
+                },
+                {
                     path: '/dashboard',
                     name: 'dashboard',
                     component: () => import('@/views-demo/Dashboard.vue')
