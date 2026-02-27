@@ -1,9 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
+import { useSourceMenu } from './composables/sourceMenu.ai';
 
-const model = ref([
+const { sourceMenuSection } = useSourceMenu();
+
+const staticMenu = ref([
     {
         label: 'Home',
         items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/' }]
@@ -158,6 +161,15 @@ const model = ref([
         ]
     }
 ]);
+
+const model = computed(() => {
+    const menu = [staticMenu.value[0]]; // Home
+    if (sourceMenuSection.value.items.length > 0) {
+        menu.push(sourceMenuSection.value);
+    }
+    menu.push(...staticMenu.value.slice(1));
+    return menu;
+});
 </script>
 
 <template>
