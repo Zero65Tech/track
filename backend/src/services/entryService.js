@@ -24,7 +24,7 @@ async function getEntries(profileId, filters) {
 }
 
 async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
-  const query = {
+  const filter = {
     profileId,
     $or: [
       {
@@ -50,12 +50,12 @@ async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
   };
 
   if (fromDate || toDate) {
-    query.date = {};
-    if (fromDate) query.date.$gte = fromDate;
-    if (toDate) query.date.$lte = toDate;
+    filter.date = {};
+    if (fromDate) filter.date.$gte = fromDate;
+    if (toDate) filter.date.$lte = toDate;
   }
 
-  const dataArr = await EntryModel.find(query)
+  const dataArr = await EntryModel.find(filter)
     .sort({ date: 1 })
     .limit(1000) // Safety limit
     .lean();
