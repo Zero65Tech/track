@@ -8,7 +8,38 @@ import {
 import entryService from "../services/entryService.js";
 
 async function getEntries(req, res) {
-  const entries = await entryService.getEntries(req.params.profileId, req.query);
+  const entries = await entryService.getEntries(
+    req.params.profileId,
+    req.query,
+  );
+  sendData(res, { entries });
+}
+
+async function getHeadEntries(req, res) {
+  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
+  const headId = new mongoose.Types.ObjectId(req.params.headId);
+  const fromDate = req.query.fromDate;
+  const toDate = req.query.toDate;
+  const entries = await entryService.getHeadEntries(
+    profileId,
+    headId,
+    fromDate,
+    toDate,
+  );
+  sendData(res, { entries });
+}
+
+async function getTagEntries(req, res) {
+  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
+  const tagId = new mongoose.Types.ObjectId(req.params.tagId);
+  const fromDate = req.query.fromDate;
+  const toDate = req.query.toDate;
+  const entries = await entryService.getTagEntries(
+    profileId,
+    tagId,
+    fromDate,
+    toDate,
+  );
   sendData(res, { entries });
 }
 
@@ -17,7 +48,12 @@ async function getSourceEntries(req, res) {
   const sourceId = new mongoose.Types.ObjectId(req.params.sourceId);
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
-  const entries = await entryService.getSourceEntries(profileId, sourceId, fromDate, toDate);
+  const entries = await entryService.getSourceEntries(
+    profileId,
+    sourceId,
+    fromDate,
+    toDate,
+  );
   sendData(res, { entries });
 }
 
@@ -63,4 +99,12 @@ async function deleteEntry(req, res) {
   sendSuccess(res, "Entry deleted successfully");
 }
 
-export default { getEntries, getSourceEntries, createEntry, updateEntry, deleteEntry };
+export default {
+  getEntries,
+  getHeadEntries,
+  getTagEntries,
+  getSourceEntries,
+  createEntry,
+  updateEntry,
+  deleteEntry,
+};

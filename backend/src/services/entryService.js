@@ -9,53 +9,18 @@ import {
   _logDeleteAudit,
 } from "./auditLogService.js";
 
-async function getEntries(profileId, filters) {
-  const dataArr = await EntryModel.find({ profileId, ...filters })
-    .limit(1000)
-    .lean();
-
-  for (let data of dataArr) {
-    data.id = data._id.toString();
-    delete data["_id"];
-    delete data["profileId"];
-  }
-
-  return dataArr;
-}
-
-async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
-  const filter = {
-    profileId,
-    $or: [
-      {
-        type: {
-          $in: [
-            EntryType.CREDIT.id,
-            EntryType.DEBIT.id,
-            EntryType.INCOME.id,
-            EntryType.EXPENSE.id,
-            EntryType.REFUND.id,
-            EntryType.TAX.id,
-            EntryType.PAYMENT.id,
-            EntryType.RECEIPT.id,
-          ],
-        },
-        sourceId,
-      },
-      {
-        type: EntryType.TRANSFER.id,
-        $or: [{ sourceIdFrom: sourceId }, { sourceIdTo: sourceId }],
-      },
-    ],
-  };
-
+async function getEntries(profileId, filter, fromDate, toDate) {
   if (fromDate || toDate) {
     filter.date = {};
-    if (fromDate) filter.date.$gte = fromDate;
-    if (toDate) filter.date.$lte = toDate;
+    if (fromDate) {
+      filter.date.$gte = fromDate;
+    }
+    if (toDate) {
+      filter.date.$lte = toDate;
+    }
   }
 
-  const dataArr = await EntryModel.find(filter)
+  const dataArr = await EntryModel.find({ profileId, ...filter })
     .sort({ date: 1 })
     .limit(1000) // Safety limit
     .lean();
@@ -67,6 +32,79 @@ async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
   }
 
   return dataArr;
+}
+
+async function getHeadEntries(profileId, headId, fromDate, toDate) {
+  return await getEntries(
+    profileId,
+    {
+      type: {
+        $in: [
+          EntryType.CREDIT.id,
+          EntryType.DEBIT.id,
+          EntryType.INCOME.id,
+          EntryType.EXPENSE.id,
+          EntryType.REFUND.id,
+          EntryType.TAX.id,
+        ],
+      },
+      headId,
+    },
+    fromDate,
+    toDate,
+  );
+}
+
+async function getTagEntries(profileId, tagId, fromDate, toDate) {
+  return await getEntries(
+    profileId,
+    {
+      type: {
+        $in: [
+          EntryType.CREDIT.id,
+          EntryType.DEBIT.id,
+          EntryType.INCOME.id,
+          EntryType.EXPENSE.id,
+          EntryType.REFUND.id,
+          EntryType.TAX.id,
+        ],
+      },
+      tagId,
+    },
+    fromDate,
+    toDate,
+  );
+}
+
+async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
+  return await getEntries(
+    profileId,
+    {
+      $or: [
+        {
+          type: {
+            $in: [
+              EntryType.CREDIT.id,
+              EntryType.DEBIT.id,
+              EntryType.INCOME.id,
+              EntryType.EXPENSE.id,
+              EntryType.REFUND.id,
+              EntryType.TAX.id,
+              EntryType.PAYMENT.id,
+              EntryType.RECEIPT.id,
+            ],
+          },
+          sourceId,
+        },
+        {
+          type: EntryType.TRANSFER.id,
+          $or: [{ sourceIdFrom: sourceId }, { sourceIdTo: sourceId }],
+        },
+      ],
+    },
+    fromDate,
+    toDate,
+  );
 }
 
 async function _aggregateEntries(profileId, aggregationName) {
@@ -150,4 +188,12 @@ async function deleteEntry(userId, profileId, entryId) {
 
 export { _aggregateEntries };
 
-export default { getEntries, getSourceEntries, createEntry, updateEntry, deleteEntry };
+export default {
+  getEntries,
+  getHeadEntries,
+  getTagEntries,
+  getSourceEntries,
+  createEntry,
+  updateEntry,
+  deleteEntry,
+};
