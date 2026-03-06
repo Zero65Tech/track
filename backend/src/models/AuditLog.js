@@ -30,16 +30,17 @@ const auditLogSchema = new mongoose.Schema(
 
     dataBefore: {
       type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
 
     dataAfter: {
       type: mongoose.Schema.Types.Mixed,
+      default: null,
     },
 
     timestamp: {
       type: Date,
       default: Date.now,
-      required: true,
     },
   },
   {

@@ -15,6 +15,7 @@ function createSchema(collectionName) {
     },
     description: {
       type: String,
+      default: null,
     },
 
     icon: {
@@ -28,6 +29,7 @@ function createSchema(collectionName) {
 
     group: {
       type: String,
+      default: null,
     },
 
     sortOrder: {

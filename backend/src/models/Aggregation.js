@@ -17,6 +17,7 @@ const aggregationSchema = new mongoose.Schema(
 
     result: {
       type: mongoose.Schema.Types.Mixed,
+      required: true,
     },
   },
   {

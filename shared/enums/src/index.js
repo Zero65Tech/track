@@ -73,6 +73,25 @@ const EntryType = Object.freeze({
   TRANSFER: Object.freeze({ id: "transfer", name: "Transfer" }),
 });
 
+const EntryState = Object.freeze({
+  DRAFT: Object.freeze({
+    id: "draft",
+    name: "Draft",
+  }),
+  FORECAST: Object.freeze({
+    id: "forecast",
+    name: "Forecast",
+  }),
+  PLANNED: Object.freeze({
+    id: "planned",
+    name: "Planned",
+  }),
+  SETTLED: Object.freeze({
+    id: "settled",
+    name: "Settled",
+  }),
+});
+
 const EntryFieldState = Object.freeze({
   ACTIVE: Object.freeze({
     id: "active",
@@ -158,6 +177,7 @@ export {
   ProfileAccess,
   ProfileState,
   EntryType,
+  EntryState,
   EntryFieldState,
   TriggerType,
   TriggerState,

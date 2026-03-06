@@ -6,14 +6,17 @@ const profileSchema = new mongoose.Schema(
     owner: {
       type: String,
       required: true,
+      match: /^(system|[a-zA-Z0-9]{28})$/,
     },
     editors: {
       type: [String],
-      default: undefined,
+      default: [],
+      match: /^([a-zA-Z0-9]{28})$/,
     },
     viewers: {
       type: [String],
-      default: undefined,
+      default: [],
+      match: /^([a-zA-Z0-9]{28})$/,
     },
 
     name: {

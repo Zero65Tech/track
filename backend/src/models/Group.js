@@ -10,13 +10,16 @@ const groupSchema = new mongoose.Schema(
 
     name: {
       type: String,
+      default: null,
     },
     starred: {
       type: Boolean,
+      default: false,
     },
 
     folderIds: {
       type: [String],
+      default: [],
     },
   },
   {

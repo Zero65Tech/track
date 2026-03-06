@@ -11,6 +11,7 @@ const folderSchema = new mongoose.Schema(
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Folder",
+      default: null,
     },
 
     name: {

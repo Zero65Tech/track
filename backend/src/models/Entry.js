@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EntryType } from "@shared/enums";
+import { EntryType, EntryState } from "@shared/enums";
 
 const entrySchema = new mongoose.Schema(
   {
@@ -32,19 +32,28 @@ const entrySchema = new mongoose.Schema(
 
     note: {
       type: String,
+      default: null,
     },
 
     groupId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Group",
+      default: null,
     },
     folderId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Folder",
+      default: null,
     },
 
     sortOrder: {
       type: Number,
+      required: true,
+    },
+
+    state: {
+      type: String,
+      enum: Object.values(EntryState).map((s) => s.id),
       required: true,
     },
   },
@@ -75,6 +84,7 @@ const bookEntrySchema = new mongoose.Schema({
   sourceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Source",
+    default: null,
   },
 });
 
