@@ -5,6 +5,7 @@ const auditLogSchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true,
+      match: /^(system|[a-zA-Z0-9]{28})$/,
     },
 
     profileId: {
