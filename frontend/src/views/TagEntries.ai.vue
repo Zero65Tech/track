@@ -265,6 +265,27 @@ function buildChartData(monthHeadMap, sharedMonths) {
 const debitCreditMonthHeadMap = buildMonthHeadMap(DEBIT_CREDIT_TYPES, true);
 const incomeExpenseMonthHeadMap = buildMonthHeadMap(INCOME_TAX_TYPES);
 
+// Total (debit - credit) per head across all months
+const debitCreditByHead = computed(() => {
+    const totals = {};
+    for (const headAmounts of Object.values(debitCreditMonthHeadMap.value)) {
+        for (const [headId, amount] of Object.entries(headAmounts)) {
+            totals[headId] = (totals[headId] || 0) + amount;
+        }
+    }
+    const headsMap = headStore.headsMap;
+    return Object.entries(totals)
+        .map(([headId, amount]) => ({
+            headId,
+            name: headsMap[headId]?.name || headId,
+            color: headsMap[headId]?.color || '#94a3b8',
+            amount
+        }))
+        .sort((a, b) => b.amount - a.amount);
+});
+
+const debitCreditTotal = computed(() => debitCreditByHead.value.reduce((sum, item) => sum + item.amount, 0));
+
 // Shared month list across both charts, with gaps filled
 const chartMonths = computed(() => {
     const allKeys = new Set([...Object.keys(debitCreditMonthHeadMap.value), ...Object.keys(incomeExpenseMonthHeadMap.value)]);
@@ -332,6 +353,23 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <!-- Common Title -->
         <div class="col-span-12">
             <div class="font-semibold text-2xl">{{ tagName }}</div>
+        </div>
+
+        <!-- Debit - Credit by Head Summary -->
+        <div v-if="debitCreditByHead.length" class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="font-semibold text-xl">Debit - Credit by Head</div>
+                    <div class="font-semibold text-base" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(debitCreditTotal)) }}</div>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <div v-for="item in debitCreditByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Debit - Credit Chart -->
