@@ -3,7 +3,9 @@ import { computed, ref } from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
 import { useSourceMenu } from './composables/sourceMenu.ai';
+import { useTagMenu } from './composables/tagMenu.ai';
 
+const { tagMenuSection } = useTagMenu();
 const { sourceMenuSection } = useSourceMenu();
 
 const staticMenu = ref([
@@ -164,6 +166,9 @@ const staticMenu = ref([
 
 const model = computed(() => {
     const menu = [staticMenu.value[0]]; // Home
+    if (tagMenuSection.value.items.length > 0) {
+        menu.push(tagMenuSection.value);
+    }
     if (sourceMenuSection.value.items.length > 0) {
         menu.push(sourceMenuSection.value);
     }
