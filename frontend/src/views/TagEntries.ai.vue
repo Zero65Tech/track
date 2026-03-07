@@ -233,10 +233,12 @@ function buildMonthHeadMap(typeFilter, negate = false) {
     });
 }
 
-function buildChartData(monthHeadMap) {
+function buildChartData(monthHeadMap, sharedMonths) {
     return computed(() => {
         const map = monthHeadMap.value;
-        const months = Object.keys(map).sort();
+        const months = sharedMonths.value;
+        if (months.length === 0) return { labels: [], datasets: [] };
+
         const headIds = new Set();
         for (const headAmounts of Object.values(map)) {
             for (const headId of Object.keys(headAmounts)) headIds.add(headId);
@@ -263,8 +265,26 @@ function buildChartData(monthHeadMap) {
 const debitCreditMonthHeadMap = buildMonthHeadMap(DEBIT_CREDIT_TYPES, true);
 const incomeExpenseMonthHeadMap = buildMonthHeadMap(INCOME_TAX_TYPES);
 
-const debitCreditChartData = buildChartData(debitCreditMonthHeadMap);
-const incomeExpenseChartData = buildChartData(incomeExpenseMonthHeadMap);
+// Shared month list across both charts, with gaps filled
+const chartMonths = computed(() => {
+    const allKeys = new Set([...Object.keys(debitCreditMonthHeadMap.value), ...Object.keys(incomeExpenseMonthHeadMap.value)]);
+    const sorted = [...allKeys].sort();
+    if (sorted.length === 0) return [];
+
+    const months = [sorted[0]];
+    for (let i = 1; i < sorted.length; i++) {
+        let next = getNextMonth(months[months.length - 1]);
+        while (next < sorted[i]) {
+            months.push(next);
+            next = getNextMonth(next);
+        }
+        months.push(sorted[i]);
+    }
+    return months;
+});
+
+const debitCreditChartData = buildChartData(debitCreditMonthHeadMap, chartMonths);
+const incomeExpenseChartData = buildChartData(incomeExpenseMonthHeadMap, chartMonths);
 
 const chartOptions = ref(null);
 
