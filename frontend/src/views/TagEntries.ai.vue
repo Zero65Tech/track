@@ -355,17 +355,23 @@ const cumulativeChartData = computed(() => {
 
     // Build month -> head -> net amount (credit - debit only)
     const CUMULATIVE_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id]);
+    const ALL_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id, EntryType.INCOME.id, EntryType.TAX.id]);
     const monthHeadNet = {};
+    const monthAllNet = {};
     const allHeadIds = new Set();
     for (const item of chartAggregationState.data.value) {
         if (item.id.tagId !== tagId.value) continue;
-        if (!CUMULATIVE_TYPES.has(item.id.type)) continue;
+        if (!ALL_TYPES.has(item.id.type)) continue;
         const month = item.id.month;
         const headId = item.id.headId;
-        const sign = item.id.type === EntryType.CREDIT.id ? -1 : 1;
-        if (!monthHeadNet[month]) monthHeadNet[month] = {};
-        monthHeadNet[month][headId] = (monthHeadNet[month][headId] || 0) + sign * item.amount;
+        const sign = POSITIVE_TYPES.has(item.id.type) ? -1 : 1;
+        if (!monthAllNet[month]) monthAllNet[month] = {};
+        monthAllNet[month][headId] = (monthAllNet[month][headId] || 0) + sign * item.amount;
         allHeadIds.add(headId);
+        if (CUMULATIVE_TYPES.has(item.id.type)) {
+            if (!monthHeadNet[month]) monthHeadNet[month] = {};
+            monthHeadNet[month][headId] = (monthHeadNet[month][headId] || 0) + sign * item.amount;
+        }
     }
 
     const months = allMonthsAsc.value;
@@ -374,19 +380,26 @@ const cumulativeChartData = computed(() => {
     // Accumulate per head across ascending months
     const runningTotals = {};
     const cumulativeData = {};
+    const runningTotalsAll = {};
+    const cumulativeDataAll = {};
     for (const month of months) {
         const headAmounts = monthHeadNet[month] || {};
+        const allAmounts = monthAllNet[month] || {};
         for (const headId of allHeadIds) {
             if (headAmounts[headId]) {
                 runningTotals[headId] = (runningTotals[headId] || 0) + headAmounts[headId];
             }
+            if (allAmounts[headId]) {
+                runningTotalsAll[headId] = (runningTotalsAll[headId] || 0) + allAmounts[headId];
+            }
         }
         cumulativeData[month] = { ...runningTotals };
+        cumulativeDataAll[month] = { ...runningTotalsAll };
     }
 
     const headsMap = headStore.headsMap;
 
-    function buildDatasets(periods, getValue) {
+    function buildDatasets(periods, getValue, getValueAll) {
         const headDatasets = [...allHeadIds].map((headId) => {
             const head = headsMap[headId];
             return {
@@ -403,7 +416,7 @@ const cumulativeChartData = computed(() => {
             };
         });
         const totalDataset = {
-            label: 'Total',
+            label: 'Debit − Credit',
             data: periods.map((p) => [...allHeadIds].reduce((sum, hId) => sum + (getValue(p, hId) || 0), 0)),
             borderColor: '#6366f1',
             backgroundColor: '#6366f1',
@@ -413,7 +426,17 @@ const cumulativeChartData = computed(() => {
             pointRadius: 3,
             borderDash: [6, 3]
         };
-        return [...headDatasets, totalDataset];
+        const totalAllDataset = {
+            label: 'Including Income & Tax',
+            data: periods.map((p) => [...allHeadIds].reduce((sum, hId) => sum + (getValueAll(p, hId) || 0), 0)),
+            borderColor: '#f59e0b',
+            backgroundColor: '#f59e0b',
+            fill: false,
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 3
+        };
+        return [...headDatasets, totalDataset, totalAllDataset];
     }
 
     if (isYearly) {
@@ -424,13 +447,21 @@ const cumulativeChartData = computed(() => {
         const fys = Object.keys(fyLastMonth).sort();
         return {
             labels: fys.map(formatFinancialYear),
-            datasets: buildDatasets(fys, (fy, headId) => cumulativeData[fyLastMonth[fy]]?.[headId] || 0)
+            datasets: buildDatasets(
+                fys,
+                (fy, headId) => cumulativeData[fyLastMonth[fy]]?.[headId] || 0,
+                (fy, headId) => cumulativeDataAll[fyLastMonth[fy]]?.[headId] || 0
+            )
         };
     }
 
     return {
         labels: months.map(formatUtil.formatMonth),
-        datasets: buildDatasets(months, (month, headId) => cumulativeData[month]?.[headId] || 0)
+        datasets: buildDatasets(
+            months,
+            (month, headId) => cumulativeData[month]?.[headId] || 0,
+            (month, headId) => cumulativeDataAll[month]?.[headId] || 0
+        )
     };
 });
 
@@ -473,21 +504,28 @@ function getLineChartOptions() {
         ...base,
         plugins: {
             ...base.plugins,
-            legend: { display: false },
+            legend: {
+                display: true,
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 8,
+                    filter: (item) => item.text === 'Debit − Credit' || item.text === 'Including Income & Tax'
+                }
+            },
             tooltip: {
                 mode: 'index',
                 intersect: false,
                 filter: (item) => item.parsed.y !== 0,
                 callbacks: {
-                    label: (context) => {
-                        const color = context.dataset.backgroundColor;
-                        const prefix = context.dataset.label === 'Total' ? '  Total' : `  ${context.dataset.label}`;
-                        return `${prefix}: ${formatUtil.formatCurrency(context.parsed.y)}`;
-                    }
+                    label: (context) => `  ${context.dataset.label}: ${formatUtil.formatCurrency(context.parsed.y)}`
                 },
                 itemSort: (a, b) => {
-                    if (a.dataset.label === 'Total') return 1;
-                    if (b.dataset.label === 'Total') return -1;
+                    const TOTAL_LABELS = new Set(['Debit − Credit', 'Including Income & Tax']);
+                    const aIsTotal = TOTAL_LABELS.has(a.dataset.label);
+                    const bIsTotal = TOTAL_LABELS.has(b.dataset.label);
+                    if (aIsTotal && !bIsTotal) return 1;
+                    if (!aIsTotal && bIsTotal) return -1;
+                    if (aIsTotal && bIsTotal) return a.dataset.label === 'Debit − Credit' ? -1 : 1;
                     return Math.abs(b.parsed.y) - Math.abs(a.parsed.y);
                 }
             }
