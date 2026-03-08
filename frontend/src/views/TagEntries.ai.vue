@@ -212,6 +212,12 @@ function getEntryTypeName(typeId) {
 
 // Charts
 
+const chartMode = ref('yearly');
+const chartModeOptions = [
+    { label: 'Yearly (FY)', value: 'yearly' },
+    { label: 'Monthly', value: 'monthly' }
+];
+
 const DEBIT_CREDIT_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id, EntryType.REFUND.id]);
 const INCOME_TAX_TYPES = new Set([EntryType.INCOME.id, EntryType.TAX.id, EntryType.EXPENSE.id]);
 
@@ -233,11 +239,38 @@ function buildMonthHeadMap(typeFilter, negate = false) {
     });
 }
 
-function buildChartData(monthHeadMap, sharedMonths) {
+function getFinancialYear(monthStr) {
+    const [year, month] = monthStr.split('-').map(Number);
+    return month >= 4 ? `FY${year}` : `FY${year - 1}`;
+}
+
+function formatFinancialYear(fyKey) {
+    const year = parseInt(fyKey.slice(2));
+    return `FY ${year}-${String(year + 1).slice(2)}`;
+}
+
+function aggregateToYearly(monthHeadMapRef) {
     return computed(() => {
-        const map = monthHeadMap.value;
-        const months = sharedMonths.value;
-        if (months.length === 0) return { labels: [], datasets: [] };
+        const result = {};
+        for (const [month, headAmounts] of Object.entries(monthHeadMapRef.value)) {
+            const fy = getFinancialYear(month);
+            if (!result[fy]) result[fy] = {};
+            for (const [headId, amount] of Object.entries(headAmounts)) {
+                result[fy][headId] = (result[fy][headId] || 0) + amount;
+            }
+        }
+        return result;
+    });
+}
+
+function buildChartData(monthHeadMap, yearlyHeadMap, sharedMonths, sharedYears) {
+    return computed(() => {
+        const isYearly = chartMode.value === 'yearly';
+        const map = isYearly ? yearlyHeadMap.value : monthHeadMap.value;
+        const periods = isYearly ? sharedYears.value : sharedMonths.value;
+        const formatLabel = isYearly ? formatFinancialYear : formatUtil.formatMonth;
+
+        if (periods.length === 0) return { labels: [], datasets: [] };
 
         const headIds = new Set();
         for (const headAmounts of Object.values(map)) {
@@ -249,14 +282,14 @@ function buildChartData(monthHeadMap, sharedMonths) {
             const head = headsMap[headId];
             return {
                 label: head?.name || headId,
-                data: months.map((month) => map[month]?.[headId] || 0),
+                data: periods.map((period) => map[period]?.[headId] || 0),
                 backgroundColor: head?.color || '#94a3b8',
                 borderWidth: 0
             };
         });
 
         return {
-            labels: months.map((month) => formatUtil.formatMonth(month)),
+            labels: periods.map(formatLabel),
             datasets
         };
     });
@@ -264,6 +297,9 @@ function buildChartData(monthHeadMap, sharedMonths) {
 
 const debitCreditMonthHeadMap = buildMonthHeadMap(DEBIT_CREDIT_TYPES, true);
 const incomeExpenseMonthHeadMap = buildMonthHeadMap(INCOME_TAX_TYPES);
+
+const debitCreditYearlyMap = aggregateToYearly(debitCreditMonthHeadMap);
+const incomeExpenseYearlyMap = aggregateToYearly(incomeExpenseMonthHeadMap);
 
 // Total (debit - credit) per head across all months
 const debitCreditByHead = computed(() => {
@@ -304,8 +340,13 @@ const chartMonths = computed(() => {
     return months;
 });
 
-const debitCreditChartData = buildChartData(debitCreditMonthHeadMap, chartMonths);
-const incomeExpenseChartData = buildChartData(incomeExpenseMonthHeadMap, chartMonths);
+const chartYears = computed(() => {
+    const allKeys = new Set([...Object.keys(debitCreditYearlyMap.value), ...Object.keys(incomeExpenseYearlyMap.value)]);
+    return [...allKeys].sort();
+});
+
+const debitCreditChartData = buildChartData(debitCreditMonthHeadMap, debitCreditYearlyMap, chartMonths, chartYears);
+const incomeExpenseChartData = buildChartData(incomeExpenseMonthHeadMap, incomeExpenseYearlyMap, chartMonths, chartYears);
 
 const chartOptions = ref(null);
 
@@ -352,7 +393,10 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
     <div class="grid grid-cols-12 gap-8">
         <!-- Common Title -->
         <div class="col-span-12">
-            <div class="font-semibold text-2xl">{{ tagName }}</div>
+            <div class="flex justify-between items-center">
+                <div class="font-semibold text-2xl">{{ tagName }}</div>
+                <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+            </div>
         </div>
 
         <!-- Debit - Credit by Head Summary -->
