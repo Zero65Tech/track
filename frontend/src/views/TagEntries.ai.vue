@@ -315,7 +315,7 @@ const debitCreditByHead = computed(() => {
             headId,
             name: headsMap[headId]?.name || headId,
             color: headsMap[headId]?.color || '#94a3b8',
-            amount
+            amount: -amount
         }))
         .sort((a, b) => b.amount - a.amount);
 });
@@ -348,7 +348,94 @@ const chartYears = computed(() => {
 const debitCreditChartData = buildChartData(debitCreditMonthHeadMap, debitCreditYearlyMap, chartMonths, chartYears);
 const incomeExpenseChartData = buildChartData(incomeExpenseMonthHeadMap, incomeExpenseYearlyMap, chartMonths, chartYears);
 
+// Cumulative balance per head over time
+const cumulativeChartData = computed(() => {
+    const isYearly = chartMode.value === 'yearly';
+    if (!chartAggregationState.data.value) return { labels: [], datasets: [] };
+
+    // Build month -> head -> net amount (credit - debit only)
+    const CUMULATIVE_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id]);
+    const monthHeadNet = {};
+    const allHeadIds = new Set();
+    for (const item of chartAggregationState.data.value) {
+        if (item.id.tagId !== tagId.value) continue;
+        if (!CUMULATIVE_TYPES.has(item.id.type)) continue;
+        const month = item.id.month;
+        const headId = item.id.headId;
+        const sign = item.id.type === EntryType.CREDIT.id ? -1 : 1;
+        if (!monthHeadNet[month]) monthHeadNet[month] = {};
+        monthHeadNet[month][headId] = (monthHeadNet[month][headId] || 0) + sign * item.amount;
+        allHeadIds.add(headId);
+    }
+
+    const months = allMonthsAsc.value;
+    if (months.length === 0) return { labels: [], datasets: [] };
+
+    // Accumulate per head across ascending months
+    const runningTotals = {};
+    const cumulativeData = {};
+    for (const month of months) {
+        const headAmounts = monthHeadNet[month] || {};
+        for (const headId of allHeadIds) {
+            if (headAmounts[headId]) {
+                runningTotals[headId] = (runningTotals[headId] || 0) + headAmounts[headId];
+            }
+        }
+        cumulativeData[month] = { ...runningTotals };
+    }
+
+    const headsMap = headStore.headsMap;
+
+    function buildDatasets(periods, getValue) {
+        const headDatasets = [...allHeadIds].map((headId) => {
+            const head = headsMap[headId];
+            return {
+                label: head?.name || headId,
+                data: periods.map((p) => getValue(p, headId)),
+                borderColor: 'transparent',
+                backgroundColor: head?.color || '#94a3b8',
+                fill: false,
+                tension: 0.4,
+                borderWidth: 0,
+                pointRadius: 0,
+                pointHitRadius: 0,
+                hidden: false
+            };
+        });
+        const totalDataset = {
+            label: 'Total',
+            data: periods.map((p) => [...allHeadIds].reduce((sum, hId) => sum + (getValue(p, hId) || 0), 0)),
+            borderColor: '#6366f1',
+            backgroundColor: '#6366f1',
+            fill: false,
+            tension: 0.4,
+            borderWidth: 3,
+            pointRadius: 3,
+            borderDash: [6, 3]
+        };
+        return [...headDatasets, totalDataset];
+    }
+
+    if (isYearly) {
+        const fyLastMonth = {};
+        for (const month of months) {
+            fyLastMonth[getFinancialYear(month)] = month;
+        }
+        const fys = Object.keys(fyLastMonth).sort();
+        return {
+            labels: fys.map(formatFinancialYear),
+            datasets: buildDatasets(fys, (fy, headId) => cumulativeData[fyLastMonth[fy]]?.[headId] || 0)
+        };
+    }
+
+    return {
+        labels: months.map(formatUtil.formatMonth),
+        datasets: buildDatasets(months, (month, headId) => cumulativeData[month]?.[headId] || 0)
+    };
+});
+
 const chartOptions = ref(null);
+const lineChartOptions = ref(null);
 
 function getChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
@@ -380,12 +467,46 @@ function getChartOptions() {
     };
 }
 
+function getLineChartOptions() {
+    const base = getChartOptions();
+    return {
+        ...base,
+        plugins: {
+            ...base.plugins,
+            legend: { display: false },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                filter: (item) => item.parsed.y !== 0,
+                callbacks: {
+                    label: (context) => {
+                        const color = context.dataset.backgroundColor;
+                        const prefix = context.dataset.label === 'Total' ? '  Total' : `  ${context.dataset.label}`;
+                        return `${prefix}: ${formatUtil.formatCurrency(context.parsed.y)}`;
+                    }
+                },
+                itemSort: (a, b) => {
+                    if (a.dataset.label === 'Total') return 1;
+                    if (b.dataset.label === 'Total') return -1;
+                    return Math.abs(b.parsed.y) - Math.abs(a.parsed.y);
+                }
+            }
+        },
+        scales: {
+            x: { ...base.scales.x, stacked: false },
+            y: { ...base.scales.y, stacked: false }
+        }
+    };
+}
+
 onMounted(() => {
     chartOptions.value = getChartOptions();
+    lineChartOptions.value = getLineChartOptions();
 });
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
     chartOptions.value = getChartOptions();
+    lineChartOptions.value = getLineChartOptions();
 });
 </script>
 
@@ -403,7 +524,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <div v-if="debitCreditByHead.length" class="col-span-12">
             <div class="card">
                 <div class="flex justify-between items-center mb-4">
-                    <div class="font-semibold text-xl">Debit - Credit by Head</div>
+                    <div class="font-semibold text-xl">Amount by Head <span class="text-muted-color text-sm font-normal">(Debit − Credit)</span></div>
                     <div class="font-semibold text-base" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(debitCreditTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
@@ -413,6 +534,40 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Cumulative by Head Line Chart -->
+        <div class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="font-semibold text-xl">Cumulative by Head</div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : cumulativeChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="chartAggregationState.error.value" class="mb-4">
+                    <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                </div>
+                <div v-else-if="cumulativeChartData.labels.length === 0" class="mb-4">
+                    <div class="text-center text-muted-color">No data available !</div>
+                </div>
+                <Chart v-else type="line" :data="cumulativeChartData" :options="lineChartOptions" class="h-80" />
             </div>
         </div>
 
