@@ -298,7 +298,7 @@ function buildChartData(monthHeadMap, yearlyHeadMap, sharedMonths, sharedYears) 
 
 const debitCreditMonthHeadMap = buildMonthHeadMap(DEBIT_CREDIT_TYPES, true);
 const incomeTaxMonthHeadMap = buildMonthHeadMap(INCOME_TAX_TYPES);
-const expenseRefundMonthHeadMap = buildMonthHeadMap(EXPENSE_REFUND_TYPES);
+const expenseRefundMonthHeadMap = buildMonthHeadMap(EXPENSE_REFUND_TYPES, true);
 
 const debitCreditYearlyMap = aggregateToYearly(debitCreditMonthHeadMap);
 const incomeTaxYearlyMap = aggregateToYearly(incomeTaxMonthHeadMap);
