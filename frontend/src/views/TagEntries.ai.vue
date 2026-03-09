@@ -656,7 +656,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         </div>
 
         <!-- Cumulative by Head Line Chart -->
-        <div class="col-span-12">
+        <div v-if="Object.keys(debitCreditMonthHeadMap || {}).length > 0" class="col-span-12">
             <div class="card">
                 <div class="flex justify-between items-center mb-6">
                     <div class="font-semibold text-xl">Cumulative by Head</div>
@@ -690,7 +690,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         </div>
 
         <!-- Debit - Credit Chart -->
-        <div class="col-span-12">
+        <div v-if="Object.keys(debitCreditMonthHeadMap || {}).length > 0" class="col-span-12">
             <div class="card">
                 <div class="flex justify-between items-center mb-6">
                     <div class="font-semibold text-xl">Debit - Credit</div>
@@ -724,7 +724,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         </div>
 
         <!-- Income - Tax Chart -->
-        <div class="col-span-12">
+        <div v-if="Object.keys(incomeTaxMonthHeadMap || {}).length > 0" class="col-span-12">
             <div class="card">
                 <div class="flex justify-between items-center mb-6">
                     <div class="font-semibold text-xl">Income - Tax</div>
@@ -758,7 +758,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         </div>
 
         <!-- Expense & Refund Chart -->
-        <div class="col-span-12">
+        <div v-if="Object.keys(expenseRefundMonthHeadMap || {}).length > 0" class="col-span-12">
             <div class="card">
                 <div class="flex justify-between items-center mb-6">
                     <div class="font-semibold text-xl">Expense & Refund</div>
