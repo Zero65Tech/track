@@ -218,8 +218,9 @@ const chartModeOptions = [
     { label: 'Monthly', value: 'monthly' }
 ];
 
-const DEBIT_CREDIT_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id, EntryType.REFUND.id]);
-const INCOME_TAX_TYPES = new Set([EntryType.INCOME.id, EntryType.TAX.id, EntryType.EXPENSE.id]);
+const DEBIT_CREDIT_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id]);
+const INCOME_TAX_TYPES = new Set([EntryType.INCOME.id, EntryType.TAX.id]);
+const EXPENSE_REFUND_TYPES = new Set([EntryType.EXPENSE.id, EntryType.REFUND.id]);
 
 function buildMonthHeadMap(typeFilter, negate = false) {
     return computed(() => {
@@ -296,10 +297,12 @@ function buildChartData(monthHeadMap, yearlyHeadMap, sharedMonths, sharedYears) 
 }
 
 const debitCreditMonthHeadMap = buildMonthHeadMap(DEBIT_CREDIT_TYPES, true);
-const incomeExpenseMonthHeadMap = buildMonthHeadMap(INCOME_TAX_TYPES);
+const incomeTaxMonthHeadMap = buildMonthHeadMap(INCOME_TAX_TYPES);
+const expenseRefundMonthHeadMap = buildMonthHeadMap(EXPENSE_REFUND_TYPES);
 
 const debitCreditYearlyMap = aggregateToYearly(debitCreditMonthHeadMap);
-const incomeExpenseYearlyMap = aggregateToYearly(incomeExpenseMonthHeadMap);
+const incomeTaxYearlyMap = aggregateToYearly(incomeTaxMonthHeadMap);
+const expenseRefundYearlyMap = aggregateToYearly(expenseRefundMonthHeadMap);
 
 // Total (debit - credit) per head across all months
 const debitCreditByHead = computed(() => {
@@ -322,9 +325,51 @@ const debitCreditByHead = computed(() => {
 
 const debitCreditTotal = computed(() => debitCreditByHead.value.reduce((sum, item) => sum + item.amount, 0));
 
-// Shared month list across both charts, with gaps filled
+// Total income - tax per head across all months
+const incomeTaxByHead = computed(() => {
+    const totals = {};
+    for (const headAmounts of Object.values(incomeTaxMonthHeadMap.value)) {
+        for (const [headId, amount] of Object.entries(headAmounts)) {
+            totals[headId] = (totals[headId] || 0) + amount;
+        }
+    }
+    const headsMap = headStore.headsMap;
+    return Object.entries(totals)
+        .map(([headId, amount]) => ({
+            headId,
+            name: headsMap[headId]?.name || headId,
+            color: headsMap[headId]?.color || '#94a3b8',
+            amount
+        }))
+        .sort((a, b) => b.amount - a.amount);
+});
+
+const incomeTaxTotal = computed(() => incomeTaxByHead.value.reduce((sum, item) => sum + item.amount, 0));
+
+// Total expense & refund per head across all months
+const expenseRefundByHead = computed(() => {
+    const totals = {};
+    for (const headAmounts of Object.values(expenseRefundMonthHeadMap.value)) {
+        for (const [headId, amount] of Object.entries(headAmounts)) {
+            totals[headId] = (totals[headId] || 0) + amount;
+        }
+    }
+    const headsMap = headStore.headsMap;
+    return Object.entries(totals)
+        .map(([headId, amount]) => ({
+            headId,
+            name: headsMap[headId]?.name || headId,
+            color: headsMap[headId]?.color || '#94a3b8',
+            amount
+        }))
+        .sort((a, b) => b.amount - a.amount);
+});
+
+const expenseRefundTotal = computed(() => expenseRefundByHead.value.reduce((sum, item) => sum + item.amount, 0));
+
+// Shared month list across all charts, with gaps filled
 const chartMonths = computed(() => {
-    const allKeys = new Set([...Object.keys(debitCreditMonthHeadMap.value), ...Object.keys(incomeExpenseMonthHeadMap.value)]);
+    const allKeys = new Set([...Object.keys(debitCreditMonthHeadMap.value), ...Object.keys(incomeTaxMonthHeadMap.value), ...Object.keys(expenseRefundMonthHeadMap.value)]);
     const sorted = [...allKeys].sort();
     if (sorted.length === 0) return [];
 
@@ -341,12 +386,13 @@ const chartMonths = computed(() => {
 });
 
 const chartYears = computed(() => {
-    const allKeys = new Set([...Object.keys(debitCreditYearlyMap.value), ...Object.keys(incomeExpenseYearlyMap.value)]);
+    const allKeys = new Set([...Object.keys(debitCreditYearlyMap.value), ...Object.keys(incomeTaxYearlyMap.value), ...Object.keys(expenseRefundYearlyMap.value)]);
     return [...allKeys].sort();
 });
 
 const debitCreditChartData = buildChartData(debitCreditMonthHeadMap, debitCreditYearlyMap, chartMonths, chartYears);
-const incomeExpenseChartData = buildChartData(incomeExpenseMonthHeadMap, incomeExpenseYearlyMap, chartMonths, chartYears);
+const incomeTaxChartData = buildChartData(incomeTaxMonthHeadMap, incomeTaxYearlyMap, chartMonths, chartYears);
+const expenseRefundChartData = buildChartData(expenseRefundMonthHeadMap, expenseRefundYearlyMap, chartMonths, chartYears);
 
 // Cumulative balance per head over time
 const cumulativeChartData = computed(() => {
@@ -575,6 +621,40 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
             </div>
         </div>
 
+        <!-- Income - Tax by Head Summary -->
+        <div v-if="incomeTaxByHead.length" class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="font-semibold text-xl">Amount by Head <span class="text-muted-color text-sm font-normal">(Income − Tax)</span></div>
+                    <div class="font-semibold text-base" :class="incomeTaxTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">Total: {{ formatUtil.formatCurrency(Math.abs(incomeTaxTotal)) }}</div>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <div v-for="item in incomeTaxByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense & Refund by Head Summary -->
+        <div v-if="expenseRefundByHead.length" class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="font-semibold text-xl">Amount by Head <span class="text-muted-color text-sm font-normal">(Expense & Refund)</span></div>
+                    <div class="font-semibold text-base" :class="expenseRefundTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(expenseRefundTotal)) }}</div>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <div v-for="item in expenseRefundByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Cumulative by Head Line Chart -->
         <div class="col-span-12">
             <div class="card">
@@ -650,7 +730,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Income - Tax</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : incomeExpenseChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : incomeTaxChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
@@ -670,10 +750,44 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
                     <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
                 </div>
-                <div v-else-if="incomeExpenseChartData.labels.length === 0" class="mb-4">
+                <div v-else-if="incomeTaxChartData.labels.length === 0" class="mb-4">
                     <div class="text-center text-muted-color">No data available !</div>
                 </div>
-                <Chart v-else type="bar" :data="incomeExpenseChartData" :options="chartOptions" class="h-80" />
+                <Chart v-else type="bar" :data="incomeTaxChartData" :options="chartOptions" class="h-80" />
+            </div>
+        </div>
+
+        <!-- Expense & Refund Chart -->
+        <div class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="font-semibold text-xl">Expense & Refund</div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : expenseRefundChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="chartAggregationState.error.value" class="mb-4">
+                    <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                </div>
+                <div v-else-if="expenseRefundChartData.labels.length === 0" class="mb-4">
+                    <div class="text-center text-muted-color">No data available !</div>
+                </div>
+                <Chart v-else type="bar" :data="expenseRefundChartData" :options="chartOptions" class="h-80" />
             </div>
         </div>
 
