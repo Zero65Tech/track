@@ -730,7 +730,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{track}}/api/profiles/:profileId/sources/:sourceId/entries",
+							"raw": "{{track}}/api/profiles/:profileId/sources/:sourceId/entries?fromDate=2025-01-03&toDate=2026-01-03",
 							"host": [
 								"{{track}}"
 							],
@@ -742,14 +742,24 @@
 								":sourceId",
 								"entries"
 							],
+							"query": [
+								{
+									"key": "fromDate",
+									"value": "2025-01-03"
+								},
+								{
+									"key": "toDate",
+									"value": "2026-01-03"
+								}
+							],
 							"variable": [
 								{
 									"key": "profileId",
-									"value": "6939b520ad27169f5c7cd75e"
+									"value": ""
 								},
 								{
 									"key": "sourceId",
-									"value": "6909e5537d0302d9b602d762"
+									"value": ""
 								}
 							]
 						}
