@@ -14,6 +14,16 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
+                    path: '/books/:bookId',
+                    name: 'bookEntries',
+                    component: () => import('@/views/BookEntries.ai.vue')
+                },
+                {
+                    path: '/heads/:headId',
+                    name: 'headEntries',
+                    component: () => import('@/views/HeadEntries.ai.vue')
+                },
+                {
                     path: '/tags/:tagId',
                     name: 'tagEntries',
                     component: () => import('@/views/TagEntries.ai.vue')
