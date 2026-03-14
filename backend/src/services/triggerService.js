@@ -39,11 +39,14 @@ async function createDataAggregationTrigger(
   userId,
   profileId,
   aggregationName,
+  aggregationParams = {},
 ) {
+  const params = { aggregationName, ...aggregationParams };
+
   let data = await TriggerModel.findOne({
     profileId,
     type: TriggerType.DATA_AGGREGATION.id,
-    params: { aggregationName },
+    params,
     state: { $in: [TriggerState.QUEUED.id, TriggerState.RUNNING.id] },
   }).lean();
 
@@ -52,7 +55,7 @@ async function createDataAggregationTrigger(
       userId,
       profileId,
       type: TriggerType.DATA_AGGREGATION.id,
-      params: { aggregationName },
+      params,
       state: TriggerState.QUEUED.id,
     });
     data = doc.toObject();
@@ -208,9 +211,11 @@ async function _processProfileCreatedTrigger(triggerData) {
 }
 
 async function _processNamedDataAggregationTrigger(triggerData) {
+  const { aggregationName, ...aggregationParams } = triggerData.params;
   const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
-    triggerData.params.aggregationName,
+    aggregationName,
+    aggregationParams,
   );
 
   const entriesProcessed = aggregationResult.reduce(

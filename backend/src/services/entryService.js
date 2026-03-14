@@ -107,11 +107,11 @@ async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
   );
 }
 
-async function _aggregateEntries(profileId, aggregationName) {
+async function _aggregateEntries(profileId, aggregationName, aggregationParams = {}) {
   const { default: pipelineBuilder } = await import(
     `../config/aggregations/${aggregationName}.js`
   );
-  const aggregationPipeline = pipelineBuilder(profileId);
+  const aggregationPipeline = pipelineBuilder(profileId, aggregationParams);
   return await EntryModel.aggregate(aggregationPipeline);
 }
 
