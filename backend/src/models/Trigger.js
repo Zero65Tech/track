@@ -44,9 +44,9 @@ triggerSchema.discriminator(
     },
     aggregationParams: {
       type: { type: String, default: null },
-      bookId: { type: String, default: null },
-      headId: { type: String, default: null },
-      tagId: { type: String, default: null },
+      bookId: { type: mongoose.Schema.Types.ObjectId, ref: "Book" },
+      headId: { type: mongoose.Schema.Types.ObjectId, ref: "Head" },
+      tagId: { type: mongoose.Schema.Types.ObjectId, ref: "Tag" },
     },
     aggregationResult: {
       type: String,
