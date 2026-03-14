@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { createEntrySchema, updateEntrySchema } from "@shared/schemas";
 import {
   sendData,
@@ -16,8 +15,8 @@ async function getEntries(req, res) {
 }
 
 async function getHeadEntries(req, res) {
-  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
-  const headId = new mongoose.Types.ObjectId(req.params.headId);
+  const profileId = req.params.profileId;
+  const headId = req.params.headId;
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getHeadEntries(
@@ -30,8 +29,8 @@ async function getHeadEntries(req, res) {
 }
 
 async function getTagEntries(req, res) {
-  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
-  const tagId = new mongoose.Types.ObjectId(req.params.tagId);
+  const profileId = req.params.profileId;
+  const tagId = req.params.tagId;
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getTagEntries(
@@ -44,8 +43,8 @@ async function getTagEntries(req, res) {
 }
 
 async function getSourceEntries(req, res) {
-  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
-  const sourceId = new mongoose.Types.ObjectId(req.params.sourceId);
+  const profileId = req.params.profileId;
+  const sourceId = req.params.sourceId;
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getSourceEntries(
