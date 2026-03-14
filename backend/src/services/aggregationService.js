@@ -4,10 +4,15 @@ import AggregationModel from "../models/Aggregation.js";
 
 // Named
 
-async function getNamedAggregation(profileId, aggregationName) {
+async function getNamedAggregation(
+  profileId,
+  aggregationName,
+  aggregationParams,
+) {
   const data = await AggregationModel.findOne({
     profileId,
     name: aggregationName,
+    params: aggregationParams,
   }).lean();
 
   if (!data) {
@@ -26,11 +31,11 @@ async function getNamedAggregation(profileId, aggregationName) {
 }
 
 async function _setNamedAggregationResult(
-  { profileId, aggregationName, aggregationResult },
+  { profileId, aggregationName, aggregationParams, aggregationResult },
   session,
 ) {
   await AggregationModel.updateOne(
-    { profileId, name: aggregationName },
+    { profileId, name: aggregationName, params: aggregationParams },
     { $set: { result: aggregationResult } },
     { upsert: true },
   ).session(session);

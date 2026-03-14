@@ -39,7 +39,7 @@ async function createDataAggregationTrigger(
   userId,
   profileId,
   aggregationName,
-  aggregationParams = {},
+  aggregationParams,
 ) {
   let data = await TriggerModel.findOne({
     profileId,
@@ -229,6 +229,7 @@ async function _processNamedDataAggregationTrigger(triggerData) {
       {
         profileId: triggerData.profileId,
         aggregationName: triggerData.aggregationName,
+        aggregationParam: triggerData.aggregationParam,
         aggregationResult: aggregationResult,
       },
       session,
