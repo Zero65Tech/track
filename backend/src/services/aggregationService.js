@@ -9,10 +9,17 @@ async function getNamedAggregation(
   aggregationName,
   aggregationParams,
 ) {
+  // Dot-notation is required because Mongoose only auto-casts field values
+  // (e.g. string → ObjectId) when querying by individual path ("params.bookId"),
+  // not when matching the whole subdocument ({ params: { bookId: "..." } }).
+  const paramsFilter = Object.fromEntries(
+    Object.entries(aggregationParams).map(([k, v]) => [`params.${k}`, v]),
+  );
+
   const data = await AggregationModel.findOne({
     profileId,
     name: aggregationName,
-    params: aggregationParams,
+    ...paramsFilter,
   }).lean();
 
   if (!data) {
@@ -21,12 +28,6 @@ async function getNamedAggregation(
 
   data.id = data._id.toString();
   delete data["_id"];
-
-  data.result.forEach((item) => {
-    item.id = item._id;
-    delete item["_id"];
-  });
-
   return data;
 }
 

@@ -5,14 +5,24 @@ import aggregationService from "../services/aggregationService.js";
 // Named
 
 async function getNamedAggregationResult(req, res) {
-  const data = await aggregationService.getNamedAggregation(req.params.profileId, req.params.name);
-  sendData(res, { result: data?.result || [], timestamp: data?.updatedAt || null });
+  const data = await aggregationService.getNamedAggregation(
+    req.params.profileId,
+    req.params.name,
+    req.query,
+  );
+  sendData(res, {
+    result: data?.result || [],
+    timestamp: data?.updatedAt || null,
+  });
 }
 
 // Custom
 
 async function getCustomAggregationResult(req, res) {
-  const result = await aggregationService.getCustomAggregation(req.params.profileId, req.params.id);
+  const result = await aggregationService.getCustomAggregation(
+    req.params.profileId,
+    req.params.id,
+  );
   sendData(res, { result });
 }
 
@@ -22,7 +32,10 @@ async function createCustomAggregation(req, res) {
     return sendBadRequestError(res, error);
   }
 
-  const result = await aggregationService.createCustomAggregation(req.params.profileId, req.body);
+  const result = await aggregationService.createCustomAggregation(
+    req.params.profileId,
+    req.body,
+  );
   sendData(res, { result });
 }
 
