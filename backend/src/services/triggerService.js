@@ -41,12 +41,11 @@ async function createDataAggregationTrigger(
   aggregationName,
   aggregationParams = {},
 ) {
-  const params = { aggregationName, ...aggregationParams };
-
   let data = await TriggerModel.findOne({
     profileId,
     type: TriggerType.DATA_AGGREGATION.id,
-    params,
+    aggregationName,
+    aggregationParams,
     state: { $in: [TriggerState.QUEUED.id, TriggerState.RUNNING.id] },
   }).lean();
 
@@ -55,7 +54,8 @@ async function createDataAggregationTrigger(
       userId,
       profileId,
       type: TriggerType.DATA_AGGREGATION.id,
-      params,
+      aggregationName,
+      aggregationParams,
       state: TriggerState.QUEUED.id,
     });
     data = doc.toObject();
@@ -144,7 +144,7 @@ async function _processTrigger(triggerData) {
         {
           $set: {
             state: TriggerState.FAILED.id,
-            result: { message: "Insufficient Coins." }, // TOOD: Move this to i18n
+            aggregationResult: "Insufficient Coins.",
           },
         },
       );
@@ -158,7 +158,7 @@ async function _processTrigger(triggerData) {
           triggerId: triggerData._id.toString(),
           triggerType: triggerData.type,
           triggerState: TriggerState.FAILED.id,
-          aggregationName: triggerData.params.aggregationName,
+          aggregationName: triggerData.aggregationName,
           message: "Insufficient Coins.",
         },
       );
@@ -166,7 +166,7 @@ async function _processTrigger(triggerData) {
       return;
     }
 
-    if (triggerData.params.name === "custom") {
+    if (triggerData.aggregationName === "custom") {
       // TODO: TriggerType.DATA_AGGREGATION, custom
     } else {
       await _processNamedDataAggregationTrigger(triggerData, profile);
@@ -180,7 +180,7 @@ async function _processTrigger(triggerData) {
         triggerId: triggerData._id.toString(),
         triggerType: triggerData.type,
         triggerState: TriggerState.COMPLETED.id,
-        aggregationName: triggerData.params.aggregationName,
+        aggregationName: triggerData.aggregationName,
       },
     );
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
@@ -211,11 +211,10 @@ async function _processProfileCreatedTrigger(triggerData) {
 }
 
 async function _processNamedDataAggregationTrigger(triggerData) {
-  const { aggregationName, ...aggregationParams } = triggerData.params;
   const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
-    aggregationName,
-    aggregationParams,
+    triggerData.aggregationName,
+    triggerData.aggregationParams,
   );
 
   const entriesProcessed = aggregationResult.reduce(
@@ -229,7 +228,7 @@ async function _processNamedDataAggregationTrigger(triggerData) {
     await _setNamedAggregationResult(
       {
         profileId: triggerData.profileId,
-        aggregationName: triggerData.params.aggregationName,
+        aggregationName: triggerData.aggregationName,
         aggregationResult: aggregationResult,
       },
       session,
@@ -254,9 +253,7 @@ async function _processNamedDataAggregationTrigger(triggerData) {
       {
         $set: {
           state: TriggerState.COMPLETED.id,
-          result: {
-            message: `Aggregated ${entriesProcessed} entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed .`,
-          },
+          aggregationResult: `Aggregated ${entriesProcessed} entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed.`,
         },
       },
     ).session(session);

@@ -38,21 +38,19 @@ const triggerSchema = new mongoose.Schema(
 triggerSchema.discriminator(
   TriggerType.DATA_AGGREGATION.id,
   new mongoose.Schema({
-    params: {
-      aggregationName: {
-        type: String,
-        required: true,
-      },
+    aggregationName: {
+      type: String,
+      required: true,
+    },
+    aggregationParams: {
       type: { type: String, default: null },
       bookId: { type: String, default: null },
       headId: { type: String, default: null },
       tagId: { type: String, default: null },
     },
-    result: {
-      message: {
-        type: String,
-        default: null,
-      },
+    aggregationResult: {
+      type: String,
+      default: null,
     },
   }),
 );
