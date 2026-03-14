@@ -83,6 +83,8 @@ app.patch(`${API_PREFIX}/groups/:id`, groupController.updateGroup);
 app.delete(`${API_PREFIX}/groups/:id`, groupController.deleteGroup);
 
 app.get(`${API_PREFIX}/entries`, entryController.getEntries);
+app.get(`${API_PREFIX}/books/:bookId/entries`, entryController.getBookEntries);
+app.get(`${API_PREFIX}/heads/:headId/entries`, entryController.getHeadEntries);
 app.get(`${API_PREFIX}/tags/:tagId/entries`, entryController.getTagEntries);
 app.get(
   `${API_PREFIX}/sources/:sourceId/entries`,

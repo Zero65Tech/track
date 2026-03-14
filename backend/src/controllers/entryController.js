@@ -14,6 +14,20 @@ async function getEntries(req, res) {
   sendData(res, { entries });
 }
 
+async function getBookEntries(req, res) {
+  const profileId = req.params.profileId;
+  const bookId = req.params.bookId;
+  const fromDate = req.query.fromDate;
+  const toDate = req.query.toDate;
+  const entries = await entryService.getBookEntries(
+    profileId,
+    bookId,
+    fromDate,
+    toDate,
+  );
+  sendData(res, { entries });
+}
+
 async function getHeadEntries(req, res) {
   const profileId = req.params.profileId;
   const headId = req.params.headId;
@@ -100,6 +114,7 @@ async function deleteEntry(req, res) {
 
 export default {
   getEntries,
+  getBookEntries,
   getHeadEntries,
   getTagEntries,
   getSourceEntries,
