@@ -1,27 +1,15 @@
-import { EntryType } from "@shared/enums";
-
-export default (profileId, bookId) => [
+export default (profileId, type) => [
   {
     $match: {
       profileId,
-      bookId,
-      type: {
-        $in: [
-          EntryType.CREDIT.id,
-          EntryType.DEBIT.id,
-          EntryType.INCOME.id,
-          EntryType.EXPENSE.id,
-          EntryType.REFUND.id,
-          EntryType.TAX.id,
-        ],
-      },
+      type,
     },
   },
   {
     $group: {
       _id: {
         month: { $substr: ["$date", 0, 7] },
-        type: "$type",
+        bookId: "$bookId",
         headId: "$headId",
         tagId: "$tagId",
       },
@@ -33,7 +21,7 @@ export default (profileId, bookId) => [
     $project: {
       _id: 0,
       month: "$_id.month",
-      type: "$_id.type",
+      bookId: "$_id.bookId",
       headId: "$_id.headId",
       tagId: "$_id.tagId",
       amount: 1,

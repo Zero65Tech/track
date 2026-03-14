@@ -1,10 +1,10 @@
 import { EntryType } from "@shared/enums";
 
-export default (profileId, bookId) => [
+export default (profileId, tagId) => [
   {
     $match: {
       profileId,
-      bookId,
+      tagId,
       type: {
         $in: [
           EntryType.CREDIT.id,
@@ -22,8 +22,8 @@ export default (profileId, bookId) => [
       _id: {
         month: { $substr: ["$date", 0, 7] },
         type: "$type",
+        bookId: "$bookId",
         headId: "$headId",
-        tagId: "$tagId",
       },
       amount: { $sum: "$amount" },
       count: { $sum: 1 },
@@ -34,8 +34,8 @@ export default (profileId, bookId) => [
       _id: 0,
       month: "$_id.month",
       type: "$_id.type",
+      bookId: "$_id.bookId",
       headId: "$_id.headId",
-      tagId: "$_id.tagId",
       amount: 1,
       count: 1,
     },
