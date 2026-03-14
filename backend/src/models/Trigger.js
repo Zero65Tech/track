@@ -43,6 +43,10 @@ triggerSchema.discriminator(
         type: String,
         required: true,
       },
+      type: { type: String, default: null },
+      bookId: { type: String, default: null },
+      headId: { type: String, default: null },
+      tagId: { type: String, default: null },
     },
     result: {
       message: {

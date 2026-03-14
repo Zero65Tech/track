@@ -10,10 +10,12 @@ async function createDataAggregationTrigger(req, res) {
     return sendBadRequestError(res, error);
   }
 
+  const { aggregationName, ...aggregationParams } = data;
   const result = await triggerService.createDataAggregationTrigger(
     req.user.uid,
     req.params.profileId,
-    data.aggregationName,
+    aggregationName,
+    aggregationParams,
   );
 
   sendData(res, result, "Trigger created successfully");
