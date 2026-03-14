@@ -1,4 +1,4 @@
-export default (profileId, type) => [
+export default (profileId, { type }) => [
   {
     $match: {
       profileId,

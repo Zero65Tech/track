@@ -1,6 +1,6 @@
 import { EntryType } from "@shared/enums";
 
-export default (profileId, headId) => [
+export default (profileId, { headId }) => [
   {
     $match: {
       profileId,
