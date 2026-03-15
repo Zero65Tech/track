@@ -1,8 +1,9 @@
 import apiClient from '@/service/apiClient';
 
 export const aggregationService = {
-    async getNamedAggregationResult({ profileId, aggregationName }, abortControllerSignal) {
+    async getNamedAggregationResult({ profileId, aggregationName, aggregationParams }, abortControllerSignal) {
         const apiResponse = await apiClient.get(`/profiles/${profileId}/aggregations/named/${aggregationName}/result`, {
+            params: aggregationParams,
             signal: abortControllerSignal
         });
         const apiResponseData = apiResponse.data.data;

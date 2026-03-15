@@ -2,11 +2,15 @@
 import { computed, ref } from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
+import { useBookMenu } from './composables/bookMenu.ai';
+import { useHeadMenu } from './composables/headMenu.ai';
 import { useSourceMenu } from './composables/sourceMenu.ai';
 import { useTagMenu } from './composables/tagMenu.ai';
 
 const { tagMenuSection } = useTagMenu();
 const { sourceMenuSection } = useSourceMenu();
+const { bookMenuSection } = useBookMenu();
+const { headMenuSection } = useHeadMenu();
 
 const staticMenu = ref([
     {
@@ -166,6 +170,12 @@ const staticMenu = ref([
 
 const model = computed(() => {
     const menu = [staticMenu.value[0]]; // Home
+    if (bookMenuSection.value.items.length > 0) {
+        menu.push(bookMenuSection.value);
+    }
+    if (headMenuSection.value.items.length > 0) {
+        menu.push(headMenuSection.value);
+    }
     if (tagMenuSection.value.items.length > 0) {
         menu.push(tagMenuSection.value);
     }

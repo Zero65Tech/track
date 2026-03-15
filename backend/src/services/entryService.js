@@ -34,6 +34,27 @@ async function getEntries(profileId, filter, fromDate, toDate) {
   return dataArr;
 }
 
+async function getBookEntries(profileId, bookId, fromDate, toDate) {
+  return await getEntries(
+    profileId,
+    {
+      type: {
+        $in: [
+          EntryType.CREDIT.id,
+          EntryType.DEBIT.id,
+          EntryType.INCOME.id,
+          EntryType.EXPENSE.id,
+          EntryType.REFUND.id,
+          EntryType.TAX.id,
+        ],
+      },
+      bookId,
+    },
+    fromDate,
+    toDate,
+  );
+}
+
 async function getHeadEntries(profileId, headId, fromDate, toDate) {
   return await getEntries(
     profileId,
@@ -107,11 +128,15 @@ async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
   );
 }
 
-async function _aggregateEntries(profileId, aggregationName) {
+async function _aggregateEntries(
+  profileId,
+  aggregationName,
+  aggregationParams,
+) {
   const { default: pipelineBuilder } = await import(
     `../config/aggregations/${aggregationName}.js`
   );
-  const aggregationPipeline = pipelineBuilder(profileId);
+  const aggregationPipeline = pipelineBuilder(profileId, aggregationParams);
   return await EntryModel.aggregate(aggregationPipeline);
 }
 
@@ -191,6 +216,7 @@ export { _aggregateEntries };
 export default {
   getEntries,
   getHeadEntries,
+  getBookEntries,
   getTagEntries,
   getSourceEntries,
   createEntry,

@@ -15,16 +15,23 @@ export const useAggregationStore = defineStore('aggregation', () => {
     let abortController = new AbortController();
     let globalIntervalId = null;
 
+    function _stateKey(aggregationName, params) {
+        return params ? `${aggregationName}:${JSON.stringify(params)}` : aggregationName;
+    }
+
     // States
 
-    const aggregations = {}; // State structure: { aggregationName: { data, dataTimestamp, dataUpdatedTimeAgo, isUpdating, isLoading, error, _timeoutId } }
+    const aggregations = {}; // State structure: { stateKey: { _timeoutId, _name, _params, data, dataTimestamp, dataUpdatedTimeAgo, isUpdating, isLoading, error } }
 
     // Getters
 
-    function getAggregationState(aggregationName) {
-        if (!aggregations[aggregationName]) {
-            aggregations[aggregationName] = {
+    function getAggregationState(aggregationName, params) {
+        const key = _stateKey(aggregationName, params);
+        if (!aggregations[key]) {
+            aggregations[key] = {
                 _timeoutId: null,
+                _name: aggregationName,
+                _params: params,
                 data: ref([]),
                 dataTimestamp: ref(null),
                 dataUpdatedTimeAgo: ref(null),
@@ -44,10 +51,10 @@ export const useAggregationStore = defineStore('aggregation', () => {
             }
 
             if (profileStore.activeProfile) {
-                fetchAggregation(aggregationName);
+                fetchAggregation(key);
             }
         }
-        return aggregations[aggregationName];
+        return { key, ...aggregations[key] };
     }
 
     // Actions
@@ -59,11 +66,11 @@ export const useAggregationStore = defineStore('aggregation', () => {
             abortController.abort();
             abortController = new AbortController();
 
-            Object.keys(aggregations).forEach((aggregationName) => {
-                const state = aggregations[aggregationName];
-                _clearPendingTrigger(aggregationName);
+            Object.entries(aggregations).forEach((entry) => {
+                const [key, state] = entry;
+                _clearPendingTrigger(key);
                 if (profileStore.activeProfile) {
-                    fetchAggregation(aggregationName);
+                    fetchAggregation(key);
                 } else {
                     state.data.value = null;
                     state.dataTimestamp.value = null;
@@ -75,7 +82,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
     );
 
-    async function fetchAggregation(aggregationName) {
+    async function fetchAggregation(stateKey) {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
             toast.add({
@@ -87,12 +94,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
             return;
         }
 
-        const state = aggregations[aggregationName];
+        const state = aggregations[stateKey];
         state.isLoading.value = true;
         state.error.value = null;
 
         try {
-            const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName }, abortController.signal);
+            const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName: state._name, aggregationParams: state._params }, abortController.signal);
             state.data.value = result;
             state.dataTimestamp.value = timestamp;
             state.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(timestamp);
@@ -104,7 +111,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
     }
 
-    async function triggerAggregationUpdate(aggregationName) {
+    async function triggerAggregationUpdate(stateKey) {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
             toast.add({
@@ -116,11 +123,13 @@ export const useAggregationStore = defineStore('aggregation', () => {
             return;
         }
 
+        const state = aggregations[stateKey];
+
         try {
-            _setPendingTrigger(aggregationName);
-            await triggerService.createDataAggregationTrigger(profileId, aggregationName);
+            _setPendingTrigger(stateKey);
+            await triggerService.createDataAggregationTrigger(profileId, state._name, state._params);
         } catch (err) {
-            _clearPendingTrigger(aggregationName);
+            _clearPendingTrigger(stateKey);
             toast.add({
                 severity: 'error',
                 summary: 'Update failed',
@@ -131,25 +140,29 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
     }
 
-    function notifyTriggerFailed(aggregationName, message) {
-        _clearPendingTrigger(aggregationName);
-        toast.add({
-            severity: 'error',
-            summary: 'Update failed',
-            detail: message,
-            life: 3000
-        });
-    }
-
-    async function notifyTriggerCompleted(aggregationName) {
-        _clearPendingTrigger(aggregationName);
-        if (aggregations[aggregationName]) {
-            await fetchAggregation(aggregationName);
+    function notifyTriggerFailed(aggregationName, aggregationParams, message) {
+        const stateKey = _stateKey(aggregationName, aggregationParams);
+        if (aggregations[stateKey]) {
+            _clearPendingTrigger(stateKey);
+            toast.add({
+                severity: 'error',
+                summary: 'Update failed',
+                detail: message,
+                life: 3000
+            });
         }
     }
 
-    function _setPendingTrigger(aggregationName) {
-        const state = aggregations[aggregationName];
+    async function notifyTriggerCompleted(aggregationName, aggregationParams) {
+        const stateKey = _stateKey(aggregationName, aggregationParams);
+        if (aggregations[stateKey]) {
+            _clearPendingTrigger(stateKey);
+            await fetchAggregation(stateKey);
+        }
+    }
+
+    function _setPendingTrigger(stateKey) {
+        const state = aggregations[stateKey];
         state.isUpdating.value = true;
 
         if (state._timeoutId) {
@@ -157,12 +170,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
 
         state._timeoutId = setTimeout(() => {
-            _clearPendingTrigger(aggregationName);
+            _clearPendingTrigger(stateKey);
         }, PENDING_TRIGGER_TIMEOUT_MS);
     }
 
-    function _clearPendingTrigger(aggregationName) {
-        const state = aggregations[aggregationName];
+    function _clearPendingTrigger(stateKey) {
+        const state = aggregations[stateKey];
         state.isUpdating.value = false;
 
         if (state._timeoutId) {

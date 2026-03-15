@@ -44,11 +44,11 @@ export const useFcmStore = defineStore('fcm', () => {
                 if (data.profileId === profileStore.activeProfile?.id) {
                     if (data.triggerState === TriggerState.COMPLETED.id) {
                         if (data.triggerType === 'data_aggregation') {
-                            await aggregationStore.notifyTriggerCompleted(data.aggregationName);
+                            await aggregationStore.notifyTriggerCompleted(data.aggregationName, data.aggregationParams);
                         }
                     } else if (data.triggerState === TriggerState.FAILED.id) {
                         if (data.triggerType === 'data_aggregation') {
-                            aggregationStore.notifyTriggerFailed(data.aggregationName, data.message);
+                            aggregationStore.notifyTriggerFailed(data.aggregationName, data.aggregationParams, data.message);
                         }
                     }
                 }

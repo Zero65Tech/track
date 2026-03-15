@@ -1,8 +1,16 @@
 import apiClient from '@/service/apiClient';
 
 export const entryService = {
+    async getBookEntries({ profileId, bookId, fromDate, toDate }, abortControllerSignal) {
+        const apiResponse = await apiClient.get(`/profiles/${profileId}/books/${bookId}/entries`, {
+            params: { fromDate, toDate },
+            signal: abortControllerSignal
+        });
+        return apiResponse.data.data.entries;
+    },
+
     async getHeadEntries({ profileId, headId, fromDate, toDate }, abortControllerSignal) {
-        const apiResponse = await apiClient.get(`/profiles/${profileId}/sources/${headId}/entries`, {
+        const apiResponse = await apiClient.get(`/profiles/${profileId}/heads/${headId}/entries`, {
             params: { fromDate, toDate },
             signal: abortControllerSignal
         });

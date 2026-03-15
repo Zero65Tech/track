@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { TriggerType, TriggerState } from "@shared/enums";
+import { EntryType } from "@shared/enums";
 
 const triggerSchema = new mongoose.Schema(
   {
@@ -38,17 +39,35 @@ const triggerSchema = new mongoose.Schema(
 triggerSchema.discriminator(
   TriggerType.DATA_AGGREGATION.id,
   new mongoose.Schema({
-    params: {
-      aggregationName: {
+    aggregationName: {
+      type: String,
+      required: true,
+    },
+    aggregationParams: {
+      type: {
         type: String,
-        required: true,
+        enum: Object.values(EntryType).map((t) => t.id),
+        required: false,
+      },
+      bookId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Book",
+        required: false,
+      },
+      headId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Head",
+        required: false,
+      },
+      tagId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tag",
+        required: false,
       },
     },
-    result: {
-      message: {
-        type: String,
-        default: null,
-      },
+    aggregationResult: {
+      type: String,
+      default: null,
     },
   }),
 );

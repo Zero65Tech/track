@@ -4,10 +4,22 @@ import AggregationModel from "../models/Aggregation.js";
 
 // Named
 
-async function getNamedAggregation(profileId, aggregationName) {
+async function getNamedAggregation(
+  profileId,
+  aggregationName,
+  aggregationParams,
+) {
+  // Dot-notation is required because Mongoose only auto-casts field values
+  // (e.g. string → ObjectId) when querying by individual path ("params.bookId"),
+  // not when matching the whole subdocument ({ params: { bookId: "..." } }).
+  const paramsFilter = Object.fromEntries(
+    Object.entries(aggregationParams).map(([k, v]) => [`params.${k}`, v]),
+  );
+
   const data = await AggregationModel.findOne({
     profileId,
     name: aggregationName,
+    ...paramsFilter,
   }).lean();
 
   if (!data) {
@@ -16,21 +28,15 @@ async function getNamedAggregation(profileId, aggregationName) {
 
   data.id = data._id.toString();
   delete data["_id"];
-
-  data.result.forEach((item) => {
-    item.id = item._id;
-    delete item["_id"];
-  });
-
   return data;
 }
 
 async function _setNamedAggregationResult(
-  { profileId, aggregationName, aggregationResult },
+  { profileId, aggregationName, aggregationParams, aggregationResult },
   session,
 ) {
   await AggregationModel.updateOne(
-    { profileId, name: aggregationName },
+    { profileId, name: aggregationName, params: aggregationParams },
     { $set: { result: aggregationResult } },
     { upsert: true },
   ).session(session);
