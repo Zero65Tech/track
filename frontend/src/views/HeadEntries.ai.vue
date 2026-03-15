@@ -21,8 +21,9 @@ const sourceStore = useSourceStore();
 const tagStore = useTagStore();
 const aggregationStore = useAggregationStore();
 
-const chartAggregationName = 'amounts_by_type_head_tag_month';
-const chartAggregationState = aggregationStore.getAggregationState(chartAggregationName);
+const chartAggregationName = 'amounts_for_a_head';
+const chartAggregationParams = computed(() => ({ headId: headId.value }));
+const chartAggregationState = computed(() => aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams.value));
 
 const headId = computed(() => route.params.headId);
 const headName = computed(() => headStore.headsMap[headId.value]?.name || 'Head');
@@ -50,15 +51,14 @@ function getMonthDateRange(monthStr) {
     return { fromDate: `${monthStr}-01`, toDate: `${monthStr}-${String(lastDay).padStart(2, '0')}` };
 }
 
-// Filter aggregation data for current headId, keyed by month
+// Build month map from aggregation data (already filtered by headId server-side)
 const headMonthsMap = computed(() => {
     const map = {};
-    if (!chartAggregationState.data.value) return map;
-    for (const item of chartAggregationState.data.value) {
-        if (item.id.headId !== headId.value) continue;
-        const month = item.id.month;
+    if (!chartAggregationState.value.data.value) return map;
+    for (const item of chartAggregationState.value.data.value) {
+        const month = item.month;
         if (!map[month]) map[month] = { balance: 0, count: 0 };
-        const sign = POSITIVE_TYPES.has(item.id.type) ? 1 : -1;
+        const sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
         map[month].balance += sign * item.amount;
         map[month].count += item.count;
     }
@@ -182,7 +182,7 @@ async function loadInitial() {
 
 // Re-load when aggregation data becomes available or headId changes
 watch(
-    [() => chartAggregationState.data.value, headId],
+    () => chartAggregationState.value.data.value,
     () => {
         loadInitial();
     },
@@ -225,13 +225,12 @@ const EXPENSE_REFUND_TYPES = new Set([EntryType.EXPENSE.id, EntryType.REFUND.id]
 function buildMonthTagMap(typeFilter, negate = false) {
     return computed(() => {
         const map = {};
-        if (!chartAggregationState.data.value) return map;
-        for (const item of chartAggregationState.data.value) {
-            if (item.id.headId !== headId.value) continue;
-            if (!typeFilter.has(item.id.type)) continue;
-            const month = item.id.month;
-            const tagId = item.id.tagId;
-            let sign = POSITIVE_TYPES.has(item.id.type) ? 1 : -1;
+        if (!chartAggregationState.value.data.value) return map;
+        for (const item of chartAggregationState.value.data.value) {
+            if (!typeFilter.has(item.type)) continue;
+            const month = item.month;
+            const tagId = item.tagId;
+            let sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
             if (negate) sign = -sign;
             if (!map[month]) map[month] = {};
             map[month][tagId] = (map[month][tagId] || 0) + sign * item.amount;
@@ -494,7 +493,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : debitCreditChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -527,7 +526,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : incomeChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -560,7 +559,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : taxChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -593,7 +592,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : expenseRefundChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -627,7 +626,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : allMonthsAsc.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',

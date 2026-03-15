@@ -21,11 +21,30 @@ const sourceStore = useSourceStore();
 const tagStore = useTagStore();
 const aggregationStore = useAggregationStore();
 
-const chartAggregationName = 'amounts_by_type_book_month';
-const chartAggregationState = aggregationStore.getAggregationState(chartAggregationName);
+const chartAggregationName = 'amounts_for_a_book';
+const chartAggregationParams = computed(() => ({ bookId: bookId.value }));
+const chartAggregationState = computed(() => aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams.value));
+const chartData = computed(() => chartAggregationState.value.data.value);
+const isChartDataLoading = computed(() => chartAggregationState.value.isLoading.value);
+function refreshChartData() {
+    aggregationStore.fetchAggregation(chartAggregationState.value.key);
+}
 
 const bookId = computed(() => route.params.bookId);
 const bookName = computed(() => bookStore.booksMap[bookId.value]?.name || 'Book');
+
+const selectedFY = ref(null);
+
+function getFinancialYear(monthStr) {
+    const [year, month] = monthStr.split('-').map(Number);
+    return month >= 4 ? `FY${year}` : `FY${year - 1}`;
+}
+
+const filteredChartData = computed(() => {
+    if (!chartData.value) return null;
+    if (!selectedFY.value) return chartData.value;
+    return chartData.value.filter((item) => getFinancialYear(item.month) === selectedFY.value);
+});
 
 let abortController = new AbortController();
 const loadedMonthCount = ref(0);
@@ -50,15 +69,14 @@ function getMonthDateRange(monthStr) {
     return { fromDate: `${monthStr}-01`, toDate: `${monthStr}-${String(lastDay).padStart(2, '0')}` };
 }
 
-// Filter aggregation data for current bookId, keyed by month
+// Filter aggregation data keyed by month (data is already filtered by bookId server-side)
 const bookMonthsMap = computed(() => {
     const map = {};
-    if (!chartAggregationState.data.value) return map;
-    for (const item of chartAggregationState.data.value) {
-        if (item.id.bookId !== bookId.value) continue;
-        const month = item.id.month;
+    if (!filteredChartData.value) return map;
+    for (const item of filteredChartData.value) {
+        const month = item.month;
         if (!map[month]) map[month] = { balance: 0, count: 0 };
-        const sign = POSITIVE_TYPES.has(item.id.type) ? 1 : -1;
+        const sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
         map[month].balance += sign * item.amount;
         map[month].count += item.count;
     }
@@ -182,9 +200,9 @@ async function loadInitial() {
     await loadMore();
 }
 
-// Re-load when aggregation data becomes available or bookId changes
+// Re-load when aggregation data becomes available, bookId changes, or FY filter changes
 watch(
-    [() => chartAggregationState.data.value, bookId],
+    [chartData, bookId, selectedFY],
     () => {
         loadInitial();
     },
@@ -218,6 +236,13 @@ const chartModeOptions = [
     { label: 'Monthly', value: 'monthly' }
 ];
 
+const fyOptions = computed(() => {
+    if (!chartData.value) return [{ label: 'All FY', value: null }];
+    const allFYs = new Set(chartData.value.map((item) => getFinancialYear(item.month)));
+    const sorted = [...allFYs].sort();
+    return [{ label: 'All FY', value: null }, ...sorted.map((fy) => ({ label: formatFinancialYear(fy), value: fy }))];
+});
+
 const DEBIT_CREDIT_TYPES = new Set([EntryType.DEBIT.id, EntryType.CREDIT.id]);
 const INCOME_TYPES = new Set([EntryType.INCOME.id]);
 const TAX_TYPES = new Set([EntryType.TAX.id]);
@@ -227,22 +252,16 @@ const EXPENSE_REFUND_TYPES = new Set([EntryType.EXPENSE.id, EntryType.REFUND.id]
 function buildMonthAmountMap(typeFilter, negate = false) {
     return computed(() => {
         const map = {};
-        if (!chartAggregationState.data.value) return map;
-        for (const item of chartAggregationState.data.value) {
-            if (item.id.bookId !== bookId.value) continue;
-            if (!typeFilter.has(item.id.type)) continue;
-            const month = item.id.month;
-            let sign = POSITIVE_TYPES.has(item.id.type) ? 1 : -1;
+        if (!filteredChartData.value) return map;
+        for (const item of filteredChartData.value) {
+            if (!typeFilter.has(item.type)) continue;
+            const month = item.month;
+            let sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
             if (negate) sign = -sign;
             map[month] = (map[month] || 0) + sign * item.amount;
         }
         return map;
     });
-}
-
-function getFinancialYear(monthStr) {
-    const [year, month] = monthStr.split('-').map(Number);
-    return month >= 4 ? `FY${year}` : `FY${year - 1}`;
 }
 
 function formatFinancialYear(fyKey) {
@@ -327,6 +346,94 @@ const debitCreditTotal = computed(() => Object.values(debitCreditMonthMap.value)
 const incomeTotal = computed(() => Object.values(incomeMonthMap.value).reduce((s, v) => s + v, 0));
 const taxTotal = computed(() => Object.values(taxMonthMap.value).reduce((s, v) => s + v, 0));
 const expenseRefundTotal = computed(() => Object.values(expenseRefundMonthMap.value).reduce((s, v) => s + v, 0));
+// balance = credit - debit + income - tax - expense + refund
+const balance = computed(() => -debitCreditTotal.value + incomeTotal.value + taxTotal.value - expenseRefundTotal.value);
+
+// Debit-Credit breakdown by head and tag
+const debitCreditByHead = computed(() => {
+    if (!filteredChartData.value) return [];
+    const map = {};
+    for (const item of filteredChartData.value) {
+        if (!DEBIT_CREDIT_TYPES.has(item.type) || !item.headId) continue;
+        const sign = POSITIVE_TYPES.has(item.type) ? -1 : 1; // negate=true: debit positive, credit negative
+        map[item.headId] = (map[item.headId] || 0) + sign * item.amount;
+    }
+    return Object.entries(map)
+        .map(([headId, amount]) => ({
+            headId,
+            name: headStore.headsMap[headId]?.name || headId,
+            color: headStore.headsMap[headId]?.color || '#94a3b8',
+            amount
+        }))
+        .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
+});
+
+const debitCreditByTag = computed(() => {
+    if (!filteredChartData.value) return [];
+    const tagMap = {};
+    for (const item of filteredChartData.value) {
+        if (!DEBIT_CREDIT_TYPES.has(item.type) || !item.tagId) continue;
+        const sign = POSITIVE_TYPES.has(item.type) ? -1 : 1; // negate=true
+        if (!tagMap[item.tagId]) tagMap[item.tagId] = { total: 0, heads: {} };
+        tagMap[item.tagId].total += sign * item.amount;
+        if (item.headId) {
+            tagMap[item.tagId].heads[item.headId] = (tagMap[item.tagId].heads[item.headId] || 0) + sign * item.amount;
+        }
+    }
+    return Object.entries(tagMap)
+        .map(([tagId, data]) => ({
+            tagId,
+            name: tagStore.tagsMap[tagId]?.name || tagId,
+            color: tagStore.tagsMap[tagId]?.color || '#94a3b8',
+            amount: data.total,
+            heads: Object.entries(data.heads)
+                .map(([headId, amount]) => ({
+                    headId,
+                    name: headStore.headsMap[headId]?.name || headId,
+                    color: headStore.headsMap[headId]?.color || '#94a3b8',
+                    amount
+                }))
+                .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+        }))
+        .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
+});
+
+function buildTagBreakdown(typeFilter, negate = false) {
+    return computed(() => {
+        if (!filteredChartData.value) return [];
+        const tagMap = {};
+        for (const item of filteredChartData.value) {
+            if (!typeFilter.has(item.type) || !item.tagId) continue;
+            let sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
+            if (negate) sign = -sign;
+            if (!tagMap[item.tagId]) tagMap[item.tagId] = { total: 0, heads: {} };
+            tagMap[item.tagId].total += sign * item.amount;
+            if (item.headId) {
+                tagMap[item.tagId].heads[item.headId] = (tagMap[item.tagId].heads[item.headId] || 0) + sign * item.amount;
+            }
+        }
+        return Object.entries(tagMap)
+            .map(([tagId, data]) => ({
+                tagId,
+                name: tagStore.tagsMap[tagId]?.name || tagId,
+                color: tagStore.tagsMap[tagId]?.color || '#94a3b8',
+                amount: data.total,
+                heads: Object.entries(data.heads)
+                    .map(([headId, amount]) => ({
+                        headId,
+                        name: headStore.headsMap[headId]?.name || headId,
+                        color: headStore.headsMap[headId]?.color || '#94a3b8',
+                        amount
+                    }))
+                    .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+            }))
+            .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
+    });
+}
+
+const incomeByTag = buildTagBreakdown(INCOME_TYPES);
+const taxByTag = buildTagBreakdown(TAX_TYPES);
+const expenseRefundByTag = buildTagBreakdown(EXPENSE_REFUND_TYPES, true);
 
 const chartOptions = ref(null);
 
@@ -373,17 +480,100 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <div class="col-span-12">
             <div class="flex justify-between items-center">
                 <div class="font-semibold text-2xl">{{ bookName }}</div>
-                <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+                <div class="flex items-center gap-3">
+                    <Select v-model="selectedFY" :options="fyOptions" optionLabel="label" optionValue="value" placeholder="All FY" class="text-sm" />
+                    <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Summary -->
+        <div class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-xl">Balance</span>
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : chartAggregationState.dataUpdatedTimeAgo.value }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                    <div class="text-3xl font-bold" :class="balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ balance >= 0 ? '+' : '-' }}{{ formatUtil.formatCurrency(Math.abs(balance)) }}</div>
+                </div>
+                <div class="flex flex-wrap gap-x-6 gap-y-1 mt-3 text-sm text-muted-color">
+                    <span v-if="debitCreditTotal !== 0"
+                        >Debit − Credit: <span class="font-semibold" :class="debitCreditTotal >= 0 ? 'text-red-500' : 'text-green-500'">{{ debitCreditTotal >= 0 ? '-' : '+' }}{{ formatUtil.formatCurrency(Math.abs(debitCreditTotal)) }}</span></span
+                    >
+                    <span v-if="incomeTotal !== 0"
+                        >Income: <span class="font-semibold text-green-500">+{{ formatUtil.formatCurrency(Math.abs(incomeTotal)) }}</span></span
+                    >
+                    <span v-if="taxTotal !== 0"
+                        >Tax: <span class="font-semibold text-red-500">-{{ formatUtil.formatCurrency(Math.abs(taxTotal)) }}</span></span
+                    >
+                    <span v-if="expenseRefundTotal !== 0"
+                        >Expense − Refund:
+                        <span class="font-semibold" :class="expenseRefundTotal >= 0 ? 'text-red-500' : 'text-green-500'">{{ expenseRefundTotal >= 0 ? '-' : '+' }}{{ formatUtil.formatCurrency(Math.abs(expenseRefundTotal)) }}</span></span
+                    >
+                </div>
             </div>
         </div>
 
         <!-- Debit - Credit Summary -->
         <div v-if="debitCreditTotal !== 0" class="col-span-12">
             <div class="card">
-                <div class="flex justify-between items-center">
-                    <div class="font-semibold text-xl">Debit − Credit</div>
-                    <div class="font-semibold text-base" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-5">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-xl">Debit − Credit</span>
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : chartAggregationState.dataUpdatedTimeAgo.value }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                    <div class="text-2xl font-bold" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
                         {{ formatUtil.formatCurrency(Math.abs(debitCreditTotal)) }}
+                    </div>
+                </div>
+
+                <!-- By Tag -->
+                <div v-if="debitCreditByTag.length" class="flex flex-col divide-y divide-surface-200 dark:divide-surface-700">
+                    <div v-for="item in debitCreditByTag" :key="item.tagId" class="py-3 first:pt-0 last:pb-0">
+                        <!-- Tag row -->
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="pi pi-tag text-xs" :style="{ color: item.color }"></i>
+                            <span class="font-semibold text-sm">{{ item.name }}</span>
+                            <span class="ml-auto font-bold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                                {{ formatUtil.formatCurrency(Math.abs(item.amount)) }}
+                            </span>
+                        </div>
+                        <!-- Head breakdown under this tag -->
+                        <div v-if="item.heads.length" class="flex flex-wrap gap-1.5 mt-1 pl-5">
+                            <div v-for="head in item.heads" :key="head.headId" class="flex items-center gap-1 px-2 py-1 rounded-border bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700">
+                                <i class="pi pi-clipboard text-xs" :style="{ color: head.color }"></i>
+                                <span class="text-xs">{{ head.name }}</span>
+                                <span class="font-semibold text-xs" :class="head.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(head.amount)) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -392,10 +582,45 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <!-- Income Summary -->
         <div v-if="incomeTotal !== 0" class="col-span-12">
             <div class="card">
-                <div class="flex justify-between items-center">
-                    <div class="font-semibold text-xl">Income</div>
-                    <div class="font-semibold text-base" :class="incomeTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                <div class="flex justify-between items-center mb-5">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-xl">Income</span>
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : chartAggregationState.dataUpdatedTimeAgo.value }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                    <div class="text-2xl font-bold" :class="incomeTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                         {{ formatUtil.formatCurrency(Math.abs(incomeTotal)) }}
+                    </div>
+                </div>
+                <!-- By Tag -->
+                <div v-if="incomeByTag.length" class="flex flex-col divide-y divide-surface-200 dark:divide-surface-700">
+                    <div v-for="item in incomeByTag" :key="item.tagId" class="py-3 first:pt-0 last:pb-0">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="pi pi-tag text-xs" :style="{ color: item.color }"></i>
+                            <span class="font-semibold text-sm">{{ item.name }}</span>
+                            <span class="ml-auto font-bold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                {{ formatUtil.formatCurrency(Math.abs(item.amount)) }}
+                            </span>
+                        </div>
+                        <div v-if="item.heads.length" class="flex flex-wrap gap-1.5 mt-1 pl-5">
+                            <div v-for="head in item.heads" :key="head.headId" class="flex items-center gap-1 px-2 py-1 rounded-border bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700">
+                                <i class="pi pi-clipboard text-xs" :style="{ color: head.color }"></i>
+                                <span class="text-xs">{{ head.name }}</span>
+                                <span class="font-semibold text-xs" :class="head.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(head.amount)) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -404,10 +629,45 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <!-- Tax Summary -->
         <div v-if="taxTotal !== 0" class="col-span-12">
             <div class="card">
-                <div class="flex justify-between items-center">
-                    <div class="font-semibold text-xl">Tax</div>
-                    <div class="font-semibold text-base" :class="taxTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                <div class="flex justify-between items-center mb-5">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-xl">Tax</span>
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : chartAggregationState.dataUpdatedTimeAgo.value }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                    <div class="text-2xl font-bold" :class="taxTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                         {{ formatUtil.formatCurrency(Math.abs(taxTotal)) }}
+                    </div>
+                </div>
+                <!-- By Tag -->
+                <div v-if="taxByTag.length" class="flex flex-col divide-y divide-surface-200 dark:divide-surface-700">
+                    <div v-for="item in taxByTag" :key="item.tagId" class="py-3 first:pt-0 last:pb-0">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="pi pi-tag text-xs" :style="{ color: item.color }"></i>
+                            <span class="font-semibold text-sm">{{ item.name }}</span>
+                            <span class="ml-auto font-bold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                {{ formatUtil.formatCurrency(Math.abs(item.amount)) }}
+                            </span>
+                        </div>
+                        <div v-if="item.heads.length" class="flex flex-wrap gap-1.5 mt-1 pl-5">
+                            <div v-for="head in item.heads" :key="head.headId" class="flex items-center gap-1 px-2 py-1 rounded-border bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700">
+                                <i class="pi pi-clipboard text-xs" :style="{ color: head.color }"></i>
+                                <span class="text-xs">{{ head.name }}</span>
+                                <span class="font-semibold text-xs" :class="head.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(head.amount)) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -416,10 +676,45 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <!-- Expense & Refund Summary -->
         <div v-if="expenseRefundTotal !== 0" class="col-span-12">
             <div class="card">
-                <div class="flex justify-between items-center">
-                    <div class="font-semibold text-xl">Expense & Refund</div>
-                    <div class="font-semibold text-base" :class="expenseRefundTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                <div class="flex justify-between items-center mb-5">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-xl">Expense &amp; Refund</span>
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : chartAggregationState.dataUpdatedTimeAgo.value }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                    <div class="text-2xl font-bold" :class="expenseRefundTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
                         {{ formatUtil.formatCurrency(Math.abs(expenseRefundTotal)) }}
+                    </div>
+                </div>
+                <!-- By Tag -->
+                <div v-if="expenseRefundByTag.length" class="flex flex-col divide-y divide-surface-200 dark:divide-surface-700">
+                    <div v-for="item in expenseRefundByTag" :key="item.tagId" class="py-3 first:pt-0 last:pb-0">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="pi pi-tag text-xs" :style="{ color: item.color }"></i>
+                            <span class="font-semibold text-sm">{{ item.name }}</span>
+                            <span class="ml-auto font-bold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
+                                {{ formatUtil.formatCurrency(Math.abs(item.amount)) }}
+                            </span>
+                        </div>
+                        <div v-if="item.heads.length" class="flex flex-wrap gap-1.5 mt-1 pl-5">
+                            <div v-for="head in item.heads" :key="head.headId" class="flex items-center gap-1 px-2 py-1 rounded-border bg-surface-50 dark:bg-surface-900 border border-surface-200 dark:border-surface-700">
+                                <i class="pi pi-clipboard text-xs" :style="{ color: head.color }"></i>
+                                <span class="text-xs">{{ head.name }}</span>
+                                <span class="font-semibold text-xs" :class="head.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(head.amount)) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -435,7 +730,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : debitCreditChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -469,7 +764,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : incomeChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -503,7 +798,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : taxChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -537,7 +832,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : expenseRefundChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -572,7 +867,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : allMonthsAsc.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationName) : aggregationStore.triggerAggregationUpdate(chartAggregationName)"
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
