@@ -435,8 +435,10 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in debitCreditByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <router-link :to="{ name: 'tagEntries', params: { tagId: item.tagId } }" class="flex items-center gap-1 group">
+                            <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            <span class="font-medium text-sm group-hover:underline">{{ item.name }}</span>
+                        </router-link>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -452,8 +454,10 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in incomeByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <router-link :to="{ name: 'tagEntries', params: { tagId: item.tagId } }" class="flex items-center gap-1 group">
+                            <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            <span class="font-medium text-sm group-hover:underline">{{ item.name }}</span>
+                        </router-link>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -469,8 +473,10 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in taxByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <router-link :to="{ name: 'tagEntries', params: { tagId: item.tagId } }" class="flex items-center gap-1 group">
+                            <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            <span class="font-medium text-sm group-hover:underline">{{ item.name }}</span>
+                        </router-link>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -486,8 +492,10 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in expenseRefundByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <router-link :to="{ name: 'tagEntries', params: { tagId: item.tagId } }" class="flex items-center gap-1 group">
+                            <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            <span class="font-medium text-sm group-hover:underline">{{ item.name }}</span>
+                        </router-link>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -702,15 +710,19 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                                 <td class="py-2 px-2">{{ getEntryTypeName(row.type) }}</td>
                                 <td class="py-2 px-2 text-muted-color">
                                     <template v-if="bookStore.booksMap[row.bookId]">
-                                        <i class="pi pi-book mr-1" :style="{ color: bookStore.booksMap[row.bookId].color }"></i>
-                                        {{ bookStore.booksMap[row.bookId].name }}
+                                        <router-link :to="{ name: 'bookEntries', params: { bookId: row.bookId } }" class="inline-flex items-center gap-1 group">
+                                            <i :class="['pi pi-book', 'mr-1', 'group-hover:underline']" :style="{ color: bookStore.booksMap[row.bookId].color }"></i>
+                                            <span class="group-hover:underline">{{ bookStore.booksMap[row.bookId].name }}</span>
+                                        </router-link>
                                     </template>
                                     <template v-else>—</template>
                                 </td>
                                 <td class="py-2 px-2 text-muted-color">
                                     <template v-if="tagStore.tagsMap[row.tagId]">
-                                        <i class="pi pi-tag mr-1" :style="{ color: tagStore.tagsMap[row.tagId].color }"></i>
-                                        {{ tagStore.tagsMap[row.tagId].name }}
+                                        <router-link :to="{ name: 'tagEntries', params: { tagId: row.tagId } }" class="inline-flex items-center gap-1 group">
+                                            <i :class="['pi pi-tag', 'mr-1', 'group-hover:underline']" :style="{ color: tagStore.tagsMap[row.tagId].color }"></i>
+                                            <span class="group-hover:underline">{{ tagStore.tagsMap[row.tagId].name }}</span>
+                                        </router-link>
                                     </template>
                                     <template v-else>—</template>
                                 </td>

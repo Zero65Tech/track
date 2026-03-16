@@ -603,8 +603,14 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in debitCreditByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="flex items-center gap-1">
+                            <router-link :to="{ name: 'bookEntries', params: { bookId: item.bookId } }" class="group">
+                                <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            </router-link>
+                            <router-link :to="{ name: 'headEntries', params: { headId: item.headId } }" class="font-medium text-sm group-hover:underline">
+                                {{ item.name }}
+                            </router-link>
+                        </span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -620,8 +626,14 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in incomeByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="flex items-center gap-1">
+                            <router-link :to="{ name: 'bookEntries', params: { bookId: item.bookId } }" class="group">
+                                <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            </router-link>
+                            <router-link :to="{ name: 'headEntries', params: { headId: item.headId } }" class="font-medium text-sm group-hover:underline">
+                                {{ item.name }}
+                            </router-link>
+                        </span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -637,8 +649,14 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in taxByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="flex items-center gap-1">
+                            <router-link :to="{ name: 'bookEntries', params: { bookId: item.bookId } }" class="group">
+                                <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            </router-link>
+                            <router-link :to="{ name: 'headEntries', params: { headId: item.headId } }" class="font-medium text-sm group-hover:underline">
+                                {{ item.name }}
+                            </router-link>
+                        </span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -654,8 +672,14 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 </div>
                 <div class="flex flex-wrap gap-4">
                     <div v-for="item in expenseRefundByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-book" :style="{ color: item.color }"></i>
-                        <span class="font-medium text-sm">{{ item.name }}</span>
+                        <span class="flex items-center gap-1">
+                            <router-link :to="{ name: 'bookEntries', params: { bookId: item.bookId } }" class="group">
+                                <i :class="['pi pi-book', 'group-hover:underline']" :style="{ color: item.color }"></i>
+                            </router-link>
+                            <router-link :to="{ name: 'headEntries', params: { headId: item.headId } }" class="font-medium text-sm group-hover:underline">
+                                {{ item.name }}
+                            </router-link>
+                        </span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
                 </div>
@@ -908,15 +932,19 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                                 <td class="py-2 px-2">{{ getEntryTypeName(row.type) }}</td>
                                 <td class="py-2 px-2 text-muted-color">
                                     <template v-if="bookStore.booksMap[row.bookId]">
-                                        <i class="pi pi-book mr-1" :style="{ color: bookStore.booksMap[row.bookId].color }"></i>
-                                        {{ bookStore.booksMap[row.bookId].name }}
+                                        <router-link :to="{ name: 'bookEntries', params: { bookId: row.bookId } }" class="inline-flex items-center gap-1 group">
+                                            <i :class="['pi pi-book', 'mr-1', 'group-hover:underline']" :style="{ color: bookStore.booksMap[row.bookId].color }"></i>
+                                            <span class="group-hover:underline">{{ bookStore.booksMap[row.bookId].name }}</span>
+                                        </router-link>
                                     </template>
                                     <template v-else>—</template>
                                 </td>
                                 <td class="py-2 px-2 text-muted-color">
                                     <template v-if="headStore.headsMap[row.headId]">
-                                        <i class="pi pi-clipboard mr-1" :style="{ color: headStore.headsMap[row.headId].color }"></i>
-                                        {{ headStore.headsMap[row.headId].name }}
+                                        <router-link :to="{ name: 'headEntries', params: { headId: row.headId } }" class="inline-flex items-center gap-1 group">
+                                            <i :class="['pi pi-clipboard', 'mr-1', 'group-hover:underline']" :style="{ color: headStore.headsMap[row.headId].color }"></i>
+                                            <span class="group-hover:underline">{{ headStore.headsMap[row.headId].name }}</span>
+                                        </router-link>
                                     </template>
                                     <template v-else>—</template>
                                 </td>
