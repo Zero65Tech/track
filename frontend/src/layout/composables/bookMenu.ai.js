@@ -10,6 +10,7 @@ export function useBookMenu() {
         const items = activeBooks.map((book) => ({
             label: book.name,
             icon: book.icon || 'pi pi-fw pi-book',
+            iconStyle: book.color ? { color: book.color } : undefined,
             to: `/books/${book.id}`
         }));
 
