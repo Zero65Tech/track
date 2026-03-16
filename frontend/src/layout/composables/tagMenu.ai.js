@@ -50,6 +50,7 @@ export function useTagMenu() {
 
         return {
             label: 'Tags',
+            to: '/tags',
             items
         };
     });

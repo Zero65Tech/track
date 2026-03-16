@@ -50,6 +50,7 @@ export function useSourceMenu() {
 
         return {
             label: 'Sources',
+            to: '/sources',
             items
         };
     });

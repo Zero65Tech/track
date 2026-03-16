@@ -50,6 +50,7 @@ export function useHeadMenu() {
 
         return {
             label: 'Heads',
+            to: '/heads',
             items
         };
     });
