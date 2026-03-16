@@ -304,113 +304,56 @@ const incomeYearlyMap = aggregateToYearly(incomeMonthHeadMap);
 const taxYearlyMap = aggregateToYearly(taxMonthHeadMap);
 const expenseRefundYearlyMap = aggregateToYearly(expenseRefundMonthHeadMap);
 
-// Total (debit - credit) per head across all months
-const debitCreditByHead = computed(() => {
-    const totals = {};
-    for (const headAmounts of Object.values(debitCreditMonthHeadMap.value)) {
-        for (const [headId, amount] of Object.entries(headAmounts)) {
-            totals[headId] = (totals[headId] || 0) + amount;
+function buildSummaryByHeadBook(typeFilter, amountTransform = (amount) => amount) {
+    return computed(() => {
+        const totals = {};
+        if (!chartAggregationState.value.data.value) return [];
+
+        for (const item of chartAggregationState.value.data.value) {
+            if (!typeFilter.has(item.type) || !item.headId) continue;
+            const sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
+            const key = `${item.headId}::${item.bookId || ''}`;
+            totals[key] = (totals[key] || 0) + sign * item.amount;
         }
-    }
-    const headsMap = headStore.headsMap;
-    return Object.entries(totals)
-        .map(([headId, amount]) => ({
-            headId,
-            name: headsMap[headId]?.name || headId,
-            color: headsMap[headId]?.color || '#94a3b8',
-            amount: -amount
-        }))
-        .sort((a, b) => b.amount - a.amount);
-});
+
+        const headsMap = headStore.headsMap;
+        const booksMap = bookStore.booksMap;
+        return Object.entries(totals)
+            .map(([key, amount]) => {
+                const [headId, bookId = ''] = key.split('::');
+                const head = headsMap[headId];
+                const book = booksMap[bookId];
+                return {
+                    key,
+                    headId,
+                    bookId,
+                    name: head?.name || headId,
+                    bookName: book?.name || bookId,
+                    color: book?.color || head?.color || '#94a3b8',
+                    amount: amountTransform(amount)
+                };
+            })
+            .sort((a, b) => b.amount - a.amount);
+    });
+}
+
+// Total (debit - credit) per head across all months
+const debitCreditByHead = buildSummaryByHeadBook(DEBIT_CREDIT_TYPES, (amount) => -amount);
 
 const debitCreditTotal = computed(() => debitCreditByHead.value.reduce((sum, item) => sum + item.amount, 0));
 
 // Total income per head across all months
-const incomeByHead = computed(() => {
-    const totals = {};
-    for (const headAmounts of Object.values(incomeMonthHeadMap.value)) {
-        for (const [headId, amount] of Object.entries(headAmounts)) {
-            totals[headId] = (totals[headId] || 0) + amount;
-        }
-    }
-    const headsMap = headStore.headsMap;
-    return Object.entries(totals)
-        .map(([headId, amount]) => ({
-            headId,
-            name: headsMap[headId]?.name || headId,
-            color: headsMap[headId]?.color || '#94a3b8',
-            amount
-        }))
-        .sort((a, b) => b.amount - a.amount);
-});
+const incomeByHead = buildSummaryByHeadBook(INCOME_TYPES);
 
 const incomeTotal = computed(() => incomeByHead.value.reduce((sum, item) => sum + item.amount, 0));
 
 // Total tax per head across all months
-const taxByHead = computed(() => {
-    const totals = {};
-    for (const headAmounts of Object.values(taxMonthHeadMap.value)) {
-        for (const [headId, amount] of Object.entries(headAmounts)) {
-            totals[headId] = (totals[headId] || 0) + amount;
-        }
-    }
-    const headsMap = headStore.headsMap;
-    return Object.entries(totals)
-        .map(([headId, amount]) => ({
-            headId,
-            name: headsMap[headId]?.name || headId,
-            color: headsMap[headId]?.color || '#94a3b8',
-            amount
-        }))
-        .sort((a, b) => b.amount - a.amount);
-});
+const taxByHead = buildSummaryByHeadBook(TAX_TYPES);
 
 const taxTotal = computed(() => taxByHead.value.reduce((sum, item) => sum + item.amount, 0));
 
-// Total income - tax per head across all months
-const incomeTaxByHead = computed(() => {
-    const totals = {};
-    for (const headAmounts of Object.values(incomeMonthHeadMap.value)) {
-        for (const [headId, amount] of Object.entries(headAmounts)) {
-            totals[headId] = (totals[headId] || 0) + amount;
-        }
-    }
-    for (const headAmounts of Object.values(taxMonthHeadMap.value)) {
-        for (const [headId, amount] of Object.entries(headAmounts)) {
-            totals[headId] = (totals[headId] || 0) - amount;
-        }
-    }
-    const headsMap = headStore.headsMap;
-    return Object.entries(totals)
-        .map(([headId, amount]) => ({
-            headId,
-            name: headsMap[headId]?.name || headId,
-            color: headsMap[headId]?.color || '#94a3b8',
-            amount
-        }))
-        .sort((a, b) => b.amount - a.amount);
-});
-
-const incomeTaxTotal = computed(() => incomeTaxByHead.value.reduce((sum, item) => sum + item.amount, 0));
-
 // Total expense & refund per head across all months
-const expenseRefundByHead = computed(() => {
-    const totals = {};
-    for (const headAmounts of Object.values(expenseRefundMonthHeadMap.value)) {
-        for (const [headId, amount] of Object.entries(headAmounts)) {
-            totals[headId] = (totals[headId] || 0) + amount;
-        }
-    }
-    const headsMap = headStore.headsMap;
-    return Object.entries(totals)
-        .map(([headId, amount]) => ({
-            headId,
-            name: headsMap[headId]?.name || headId,
-            color: headsMap[headId]?.color || '#94a3b8',
-            amount
-        }))
-        .sort((a, b) => b.amount - a.amount);
-});
+const expenseRefundByHead = buildSummaryByHeadBook(EXPENSE_REFUND_TYPES, (amount) => -amount);
 
 const expenseRefundTotal = computed(() => expenseRefundByHead.value.reduce((sum, item) => sum + item.amount, 0));
 
@@ -659,8 +602,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(debitCreditTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in debitCreditByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                    <div v-for="item in debitCreditByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
@@ -676,8 +619,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="incomeTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">Total: {{ formatUtil.formatCurrency(Math.abs(incomeTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in incomeByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                    <div v-for="item in incomeByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
@@ -693,8 +636,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="taxTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">Total: {{ formatUtil.formatCurrency(Math.abs(taxTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in taxByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                    <div v-for="item in taxByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
@@ -710,8 +653,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="expenseRefundTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(expenseRefundTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in expenseRefundByHead" :key="item.headId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-clipboard" :style="{ color: item.color }"></i>
+                    <div v-for="item in expenseRefundByHead" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
