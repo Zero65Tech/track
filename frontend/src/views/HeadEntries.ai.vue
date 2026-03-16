@@ -305,31 +305,42 @@ const incomeYearlyMap = aggregateToYearly(incomeMonthTagMap);
 const taxYearlyMap = aggregateToYearly(taxMonthTagMap);
 const expenseRefundYearlyMap = aggregateToYearly(expenseRefundMonthTagMap);
 
-// Total per tag across all months for summary cards
-function buildTagTotals(monthTagMapRef) {
+// Total per tag+book across all months for summary cards
+function buildTagBookTotals(typeFilter, amountTransform = (amount) => amount) {
     return computed(() => {
         const totals = {};
-        for (const tagAmounts of Object.values(monthTagMapRef.value)) {
-            for (const [tagId, amount] of Object.entries(tagAmounts)) {
-                totals[tagId] = (totals[tagId] || 0) + amount;
-            }
+        if (!chartAggregationState.value.data.value) return [];
+
+        for (const item of chartAggregationState.value.data.value) {
+            if (!typeFilter.has(item.type) || !item.tagId) continue;
+            const sign = POSITIVE_TYPES.has(item.type) ? 1 : -1;
+            const key = `${item.tagId}::${item.bookId || ''}`;
+            totals[key] = (totals[key] || 0) + sign * item.amount;
         }
+
         const tagsMap = tagStore.tagsMap;
+        const booksMap = bookStore.booksMap;
         return Object.entries(totals)
-            .map(([tagId, amount]) => ({
-                tagId,
-                name: tagsMap[tagId]?.name || tagId,
-                color: tagsMap[tagId]?.color || '#94a3b8',
-                amount
-            }))
+            .map(([key, amount]) => {
+                const [tagId, bookId = ''] = key.split('::');
+                const book = booksMap[bookId];
+                return {
+                    key,
+                    tagId,
+                    bookId,
+                    name: tagsMap[tagId]?.name || tagId,
+                    color: book?.color || tagsMap[tagId]?.color || '#94a3b8',
+                    amount: amountTransform(amount)
+                };
+            })
             .sort((a, b) => b.amount - a.amount);
     });
 }
 
-const debitCreditByTag = buildTagTotals(debitCreditMonthTagMap);
-const incomeByTag = buildTagTotals(incomeMonthTagMap);
-const taxByTag = buildTagTotals(taxMonthTagMap);
-const expenseRefundByTag = buildTagTotals(expenseRefundMonthTagMap);
+const debitCreditByTag = buildTagBookTotals(DEBIT_CREDIT_TYPES, (amount) => -amount);
+const incomeByTag = buildTagBookTotals(INCOME_TYPES);
+const taxByTag = buildTagBookTotals(TAX_TYPES);
+const expenseRefundByTag = buildTagBookTotals(EXPENSE_REFUND_TYPES, (amount) => -amount);
 
 const debitCreditTotal = computed(() => debitCreditByTag.value.reduce((sum, item) => sum + item.amount, 0));
 const incomeTotal = computed(() => incomeByTag.value.reduce((sum, item) => sum + item.amount, 0));
@@ -423,8 +434,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(debitCreditTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in debitCreditByTag" :key="item.tagId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-tag" :style="{ color: item.color }"></i>
+                    <div v-for="item in debitCreditByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
@@ -440,8 +451,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="incomeTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">Total: {{ formatUtil.formatCurrency(Math.abs(incomeTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in incomeByTag" :key="item.tagId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-tag" :style="{ color: item.color }"></i>
+                    <div v-for="item in incomeByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
@@ -457,8 +468,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="taxTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">Total: {{ formatUtil.formatCurrency(Math.abs(taxTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in taxByTag" :key="item.tagId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-tag" :style="{ color: item.color }"></i>
+                    <div v-for="item in taxByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
@@ -474,8 +485,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-base" :class="expenseRefundTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">Total: {{ formatUtil.formatCurrency(Math.abs(expenseRefundTotal)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-4">
-                    <div v-for="item in expenseRefundByTag" :key="item.tagId" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
-                        <i class="pi pi-tag" :style="{ color: item.color }"></i>
+                    <div v-for="item in expenseRefundByTag" :key="item.key" class="flex items-center gap-2 px-3 py-2 rounded-border bg-surface-100 dark:bg-surface-800">
+                        <i class="pi pi-book" :style="{ color: item.color }"></i>
                         <span class="font-medium text-sm">{{ item.name }}</span>
                         <span class="font-semibold text-sm" :class="item.amount >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">{{ formatUtil.formatCurrency(Math.abs(item.amount)) }}</span>
                     </div>
