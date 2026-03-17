@@ -10,17 +10,19 @@ import {
 } from "./auditLogService.js";
 
 async function getEntries(profileId, filter, fromDate, toDate) {
+  const query = { profileId, ...filter };
+
   if (fromDate || toDate) {
-    filter.date = {};
+    query.date = {};
     if (fromDate) {
-      filter.date.$gte = fromDate;
+      query.date.$gte = fromDate;
     }
     if (toDate) {
-      filter.date.$lte = toDate;
+      query.date.$lte = toDate;
     }
   }
 
-  const dataArr = await EntryModel.find({ profileId, ...filter })
+  const dataArr = await EntryModel.find(query)
     .sort({ date: 1 })
     .limit(1000) // Safety limit
     .lean();
@@ -117,10 +119,8 @@ async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
           },
           sourceId,
         },
-        {
-          type: EntryType.TRANSFER.id,
-          $or: [{ sourceIdFrom: sourceId }, { sourceIdTo: sourceId }],
-        },
+        { type: EntryType.TRANSFER.id, sourceIdFrom: sourceId },
+        { type: EntryType.TRANSFER.id, sourceIdTo: sourceId },
       ],
     },
     fromDate,

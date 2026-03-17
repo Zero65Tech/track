@@ -5,18 +5,19 @@ import {
   sendBadRequestError,
 } from "../utils/response.js";
 import entryService from "../services/entryService.js";
+import mongoose from "mongoose";
 
 async function getEntries(req, res) {
   const entries = await entryService.getEntries(
-    req.params.profileId,
+    new mongoose.Types.ObjectId(req.params.profileId),
     req.query,
   );
   sendData(res, { entries });
 }
 
 async function getBookEntries(req, res) {
-  const profileId = req.params.profileId;
-  const bookId = req.params.bookId;
+  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
+  const bookId = new mongoose.Types.ObjectId(req.params.bookId);
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getBookEntries(
@@ -29,8 +30,8 @@ async function getBookEntries(req, res) {
 }
 
 async function getHeadEntries(req, res) {
-  const profileId = req.params.profileId;
-  const headId = req.params.headId;
+  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
+  const headId = new mongoose.Types.ObjectId(req.params.headId);
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getHeadEntries(
@@ -43,8 +44,8 @@ async function getHeadEntries(req, res) {
 }
 
 async function getTagEntries(req, res) {
-  const profileId = req.params.profileId;
-  const tagId = req.params.tagId;
+  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
+  const tagId = new mongoose.Types.ObjectId(req.params.tagId);
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getTagEntries(
@@ -57,8 +58,8 @@ async function getTagEntries(req, res) {
 }
 
 async function getSourceEntries(req, res) {
-  const profileId = req.params.profileId;
-  const sourceId = req.params.sourceId;
+  const profileId = new mongoose.Types.ObjectId(req.params.profileId);
+  const sourceId = new mongoose.Types.ObjectId(req.params.sourceId);
   const fromDate = req.query.fromDate;
   const toDate = req.query.toDate;
   const entries = await entryService.getSourceEntries(
