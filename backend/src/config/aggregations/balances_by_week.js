@@ -37,6 +37,7 @@ export default (profileId) => [
           },
         },
       },
+      count: { $sum: 1 },
       balance: {
         $sum: {
           $cond: [
@@ -51,7 +52,6 @@ export default (profileId) => [
           ],
         },
       },
-      count: { $sum: 1 },
     },
   },
   {

@@ -54,6 +54,7 @@ export default (profileId) => [
               },
               sourceId: "$sourceId",
             },
+            count: { $sum: 1 },
             balance: {
               $sum: {
                 $cond: [
@@ -73,7 +74,6 @@ export default (profileId) => [
                 ],
               },
             },
-            count: { $sum: 1 },
           },
         },
       ],
@@ -98,8 +98,8 @@ export default (profileId) => [
               },
               sourceId: "$sourceIdFrom",
             },
-            balance: { $sum: { $multiply: ["$amount", -1] } },
             count: { $sum: 1 },
+            balance: { $sum: { $multiply: ["$amount", -1] } },
           },
         },
       ],
@@ -124,8 +124,8 @@ export default (profileId) => [
               },
               sourceId: "$sourceIdTo",
             },
-            balance: { $sum: "$amount" },
             count: { $sum: 1 },
+            balance: { $sum: "$amount" },
           },
         },
       ],
@@ -144,11 +144,17 @@ export default (profileId) => [
   {
     $group: {
       _id: "$allResults._id",
-      balance: { $sum: "$allResults.balance" },
       count: { $sum: "$allResults.count" },
+      balance: { $sum: "$allResults.balance" },
     },
   },
   {
-    $sort: { "_id.week": 1 },
+    $project: {
+      _id: 0,
+      week: "$_id.week",
+      sourceId: "$_id.sourceId",
+      count: 1,
+      balance: 1,
+    },
   },
 ];

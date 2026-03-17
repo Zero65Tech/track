@@ -21,8 +21,7 @@ const headStore = useHeadStore();
 const tagStore = useTagStore();
 const aggregationStore = useAggregationStore();
 
-const aggregationName = 'balances_by_source_week';
-const aggregationState = aggregationStore.getAggregationState(aggregationName);
+const aggregationState = aggregationStore.getAggregationState('balances_by_source_week');
 
 const sourceId = computed(() => route.params.sourceId);
 const sourceName = computed(() => sourceStore.sourcesMap[sourceId.value]?.name || 'Source');
@@ -47,8 +46,8 @@ const sourceWeeksMap = computed(() => {
     const map = {};
     if (!aggregationState.data.value) return map;
     for (const item of aggregationState.data.value) {
-        if (item.id.sourceId === sourceId.value) {
-            map[item.id.week] = { balance: item.balance, count: item.count };
+        if (item.sourceId === sourceId.value) {
+            map[item.week] = { balance: item.balance, count: item.count };
         }
     }
     return map;
@@ -310,7 +309,7 @@ onBeforeUnmount(() => {
                             {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
+                            @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
                             :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -345,7 +344,7 @@ onBeforeUnmount(() => {
                             {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : allWeeksAsc.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
                         </span>
                         <button
-                            @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
+                            @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
                             :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
