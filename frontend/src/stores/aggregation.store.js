@@ -100,6 +100,9 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         try {
             const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName: state._name, aggregationParams: state._params }, abortController.signal);
+            if (timestamp === null) {
+                triggerAggregationUpdate(stateKey);
+            }
             state.data.value = result;
             state.dataTimestamp.value = timestamp;
             state.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(timestamp);
