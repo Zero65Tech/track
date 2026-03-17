@@ -17,26 +17,14 @@ export default (profileId) => [
     },
   },
   {
-    $addFields: {
-      date: {
-        $dateFromString: { dateString: "$date" },
-      },
-    },
-  },
-  {
     $group: {
       _id: {
-        month: {
-          $dateToString: {
-            format: "%Y-%m",
-            date: "$date",
-          },
-        },
+        month: { $substr: ["$date", 0, 7] },
         type: "$type",
         bookId: "$bookId",
       },
-      amount: { $sum: "$amount" },
       count: { $sum: 1 },
+      amount: { $sum: "$amount" },
     },
   },
   {
@@ -45,8 +33,8 @@ export default (profileId) => [
       month: "$_id.month",
       type: "$_id.type",
       bookId: "$_id.bookId",
-      amount: 1,
       count: 1,
+      amount: 1,
     },
   },
 ];

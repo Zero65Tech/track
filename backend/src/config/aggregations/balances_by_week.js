@@ -58,8 +58,8 @@ export default (profileId) => [
     $project: {
       _id: 0,
       week: "$_id",
-      balance: 1,
       count: 1,
+      balance: 1,
     },
   },
 ];

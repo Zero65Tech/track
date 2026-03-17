@@ -13,8 +13,8 @@ export default (profileId, { type }) => [
         headId: "$headId",
         tagId: "$tagId",
       },
-      amount: { $sum: "$amount" },
       count: { $sum: 1 },
+      amount: { $sum: "$amount" },
     },
   },
   {
@@ -24,8 +24,8 @@ export default (profileId, { type }) => [
       bookId: "$_id.bookId",
       headId: "$_id.headId",
       tagId: "$_id.tagId",
-      amount: 1,
       count: 1,
+      amount: 1,
     },
   },
 ];
