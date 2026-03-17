@@ -6,4 +6,5 @@ export const createDataAggregationTriggerSchema = z.object({
   bookId: z.string().trim().optional(),
   headId: z.string().trim().optional(),
   tagId: z.string().trim().optional(),
+  sourceId: z.string().trim().optional(),
 }).strict();

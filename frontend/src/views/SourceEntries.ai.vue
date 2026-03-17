@@ -21,10 +21,10 @@ const headStore = useHeadStore();
 const tagStore = useTagStore();
 const aggregationStore = useAggregationStore();
 
-const aggregationState = aggregationStore.getAggregationState('balances_by_source_week');
-
 const sourceId = computed(() => route.params.sourceId);
 const sourceName = computed(() => sourceStore.sourcesMap[sourceId.value]?.name || 'Source');
+
+const aggregationState = computed(() => aggregationStore.getAggregationState('amounts_for_a_source', { sourceId: sourceId.value }));
 
 let abortController = new AbortController();
 const loadedWeekCount = ref(0);
@@ -44,11 +44,9 @@ function getEntryNetAmount(entry) {
 // Filter aggregation data for current sourceId, keyed by week start
 const sourceWeeksMap = computed(() => {
     const map = {};
-    if (!aggregationState.data.value) return map;
-    for (const item of aggregationState.data.value) {
-        if (item.sourceId === sourceId.value) {
-            map[item.week] = { balance: item.balance, count: item.count };
-        }
+    if (!aggregationState.value.data.value) return map;
+    for (const item of aggregationState.value.data.value) {
+        map[item.week] = { balance: item.amount, count: item.count };
     }
     return map;
 });
@@ -175,7 +173,7 @@ async function loadInitial() {
 
 // Re-load when aggregation data becomes available or sourceId changes
 watch(
-    [() => aggregationState.data.value, sourceId],
+    [() => aggregationState.value.data.value, sourceId],
     () => {
         loadInitial();
     },

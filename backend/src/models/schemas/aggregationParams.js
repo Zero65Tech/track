@@ -23,6 +23,11 @@ const aggregationParamsSchema = new mongoose.Schema(
       ref: "Tag",
       required: false,
     },
+    sourceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tag",
+      required: false,
+    },
   },
   { _id: false },
 );

@@ -4,7 +4,6 @@ export default (profileId, { headId }) => [
   {
     $match: {
       profileId,
-      headId,
       type: {
         $in: [
           EntryType.CREDIT.id,
@@ -15,6 +14,7 @@ export default (profileId, { headId }) => [
           EntryType.TAX.id,
         ],
       },
+      headId,
     },
   },
   {
