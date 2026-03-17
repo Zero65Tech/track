@@ -40,6 +40,13 @@ export default (profileId) => [
     },
   },
   {
-    $sort: { "_id.month": 1, "_id.type": 1, "_id.bookId": 1 },
+    $project: {
+      _id: 0,
+      month: "$_id.month",
+      type: "$_id.type",
+      bookId: "$_id.bookId",
+      amount: 1,
+      count: 1,
+    },
   },
 ];

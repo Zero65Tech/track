@@ -41,7 +41,10 @@ export default (profileId) => [
         $sum: {
           $cond: [
             {
-              $in: ["$type", [EntryType.CREDIT.id, EntryType.INCOME.id, EntryType.REFUND.id]],
+              $in: [
+                "$type",
+                [EntryType.CREDIT.id, EntryType.INCOME.id, EntryType.REFUND.id],
+              ],
             },
             "$amount",
             { $multiply: ["$amount", -1] },
@@ -52,6 +55,11 @@ export default (profileId) => [
     },
   },
   {
-    $sort: { _id: 1 },
+    $project: {
+      _id: 0,
+      week: "$_id",
+      balance: 1,
+      count: 1,
+    },
   },
 ];

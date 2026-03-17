@@ -17,7 +17,7 @@ const numDataPoints = ref(52);
 
 const sortedWeeks = computed(() => {
     const weeksSet = new Set();
-    aggregationState.data.value.forEach((item) => weeksSet.add(item.id));
+    aggregationState.data.value.forEach((item) => weeksSet.add(item.week));
     const weeks = Array.from(weeksSet).sort();
     for (let i = 0; i < weeks.length - 1; i++) {
         const nextWeek = dateUtil.getNext(weeks[i], 7);
@@ -33,7 +33,7 @@ const cumulativeAmountsByWeek = computed(() => {
 
     const amounts = {};
     aggregationState.data.value.forEach((item) => {
-        amounts[item.id] = item.balance;
+        amounts[item.week] = item.balance;
     });
 
     for (let i = 1; i < weeks.length; i++) {
