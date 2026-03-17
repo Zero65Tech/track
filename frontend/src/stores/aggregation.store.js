@@ -15,8 +15,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
     let abortController = new AbortController();
     let globalIntervalId = null;
 
-    function _stateKey(aggregationName, params) {
-        return params ? `${aggregationName}:${JSON.stringify(params)}` : aggregationName;
+    function _stateKey(aggregationName, params = {}) {
+        return `${aggregationName}:${JSON.stringify(params)}`;
     }
 
     // States

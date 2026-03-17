@@ -49,11 +49,11 @@ const aggregations = AGGREGATIONS.map((agg) => {
     });
 
     const handleRetry = async () => {
-        await aggregationStore.fetchAggregation(agg.name);
+        await aggregationStore.fetchAggregation(aggState.key);
     };
 
     const handleUpdate = async () => {
-        await aggregationStore.triggerAggregationUpdate(agg.name);
+        await aggregationStore.triggerAggregationUpdate(aggState.key);
     };
 
     return {

@@ -25,8 +25,7 @@ let resizeObserver = null;
 const bookStore = useBookStore();
 const aggregationStore = useAggregationStore();
 
-const aggregationName = 'amounts_by_type_book_month';
-const aggregationState = aggregationStore.getAggregationState(aggregationName);
+const aggregationState = aggregationStore.getAggregationState('amounts_by_type_book_month');
 
 const numBars = ref(12);
 
@@ -200,7 +199,7 @@ onBeforeUnmount(() => {
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
                     </span>
                     <button
-                        @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationName) : aggregationStore.triggerAggregationUpdate(aggregationName)"
+                        @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
                         :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',

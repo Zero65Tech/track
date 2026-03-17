@@ -12,7 +12,7 @@ async function getNamedAggregation(
   const query = { profileId, name: aggregationName };
 
   if (Object.keys(aggregationParams).length === 0) {
-    query.params = null;
+    query.params = {};
   } else {
     // Dot-notation is required because Mongoose only auto-casts field values
     // (e.g. string → ObjectId) when querying by individual path ("params.bookId"),
