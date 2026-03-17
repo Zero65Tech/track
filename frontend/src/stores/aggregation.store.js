@@ -8,6 +8,7 @@ import { ref, watch } from 'vue';
 
 const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
 const TIME_UPDATE_INTERVAL_MS = 60 * 1000;
+const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 export const useAggregationStore = defineStore('aggregation', () => {
     const toast = useToast();
@@ -17,6 +18,10 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     function _stateKey(aggregationName, params = {}) {
         return `${aggregationName}:${JSON.stringify(params)}`;
+    }
+
+    function _isStale(timestamp) {
+        return timestamp && Date.now() - timestamp.getTime() > STALE_THRESHOLD_MS;
     }
 
     // States
@@ -42,9 +47,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
             if (!globalIntervalId) {
                 globalIntervalId = setInterval(() => {
-                    Object.values(aggregations).forEach((aggregation) => {
+                    Object.entries(aggregations).forEach(([key, aggregation]) => {
                         if (aggregation.dataTimestamp.value) {
                             aggregation.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(aggregation.dataTimestamp.value);
+                            if (_isStale(aggregation.dataTimestamp.value) && !aggregation.isUpdating.value && !aggregation.isLoading.value) {
+                                triggerAggregationUpdate(key);
+                            }
                         }
                     });
                 }, TIME_UPDATE_INTERVAL_MS);
@@ -100,7 +108,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         try {
             const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName: state._name, aggregationParams: state._params }, abortController.signal);
-            if (timestamp === null) {
+            if (timestamp === null || _isStale(timestamp)) {
                 triggerAggregationUpdate(stateKey);
             }
             state.data.value = result;
