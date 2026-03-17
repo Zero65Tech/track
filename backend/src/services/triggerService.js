@@ -159,6 +159,7 @@ async function _processTrigger(triggerData) {
           triggerType: triggerData.type,
           triggerState: TriggerState.FAILED.id,
           aggregationName: triggerData.aggregationName,
+          aggregationParams: JSON.stringify(triggerData.aggregationParams),
           message: "Insufficient Coins.",
         },
       );
@@ -181,6 +182,7 @@ async function _processTrigger(triggerData) {
         triggerType: triggerData.type,
         triggerState: TriggerState.COMPLETED.id,
         aggregationName: triggerData.aggregationName,
+        aggregationParams: JSON.stringify(triggerData.aggregationParams),
       },
     );
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {

@@ -1,11 +1,11 @@
-import { ref, watch } from 'vue';
-import { defineStore } from 'pinia';
-import { TriggerState } from '@shared/enums';
+import { deviceService } from '@/service/deviceService';
+import { fcmService } from '@/service/fcmService';
+import { useAggregationStore } from '@/stores/aggregation.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfileStore } from '@/stores/profile.store';
-import { useAggregationStore } from '@/stores/aggregation.store';
-import { fcmService } from '@/service/fcmService';
-import { deviceService } from '@/service/deviceService';
+import { TriggerState } from '@shared/enums';
+import { defineStore } from 'pinia';
+import { ref, watch } from 'vue';
 
 export const useFcmStore = defineStore('fcm', () => {
     const authStore = useAuthStore();
@@ -44,11 +44,11 @@ export const useFcmStore = defineStore('fcm', () => {
                 if (data.profileId === profileStore.activeProfile?.id) {
                     if (data.triggerState === TriggerState.COMPLETED.id) {
                         if (data.triggerType === 'data_aggregation') {
-                            await aggregationStore.notifyTriggerCompleted(data.aggregationName, data.aggregationParams);
+                            await aggregationStore.notifyTriggerCompleted(data.aggregationName, JSON.parse(data.aggregationParams));
                         }
                     } else if (data.triggerState === TriggerState.FAILED.id) {
                         if (data.triggerType === 'data_aggregation') {
-                            aggregationStore.notifyTriggerFailed(data.aggregationName, data.aggregationParams, data.message);
+                            aggregationStore.notifyTriggerFailed(data.aggregationName, JSON.parse(data.aggregationParams), data.message);
                         }
                     }
                 }
