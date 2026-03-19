@@ -56,6 +56,19 @@ const entrySchema = new mongoose.Schema(
       enum: Object.values(EntryState).map((s) => s.id),
       required: true,
     },
+
+    // Meta fields - not used for querying, just for storing additional info related to the entry
+
+    breakdown: {
+      type: [
+        {
+          _id: false,
+          amount: { type: Number, required: true },
+          note: { type: String, required: true },
+        },
+      ],
+      required: false,
+    },
   },
   {
     collection: "entries",
