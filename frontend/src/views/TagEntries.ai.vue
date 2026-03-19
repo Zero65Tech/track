@@ -25,6 +25,7 @@ const chartAggregationState = computed(() => aggregationStore.getAggregationStat
 
 const tagId = computed(() => route.params.tagId);
 const tagName = computed(() => tagStore.tagsMap[tagId.value]?.name || 'Tag');
+const tagGroup = computed(() => tagStore.tagsMap[tagId.value]?.group || null);
 
 let abortController = new AbortController();
 const loadedMonthCount = ref(0);
@@ -589,7 +590,9 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <!-- Common Title -->
         <div class="col-span-12">
             <div class="flex justify-between items-center">
-                <div class="font-semibold text-2xl">{{ tagName }}</div>
+                <div class="font-semibold text-2xl">
+                    <span v-if="tagGroup" class="text-muted-color font-normal">{{ tagGroup }} / </span>{{ tagName }}
+                </div>
                 <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
             </div>
         </div>

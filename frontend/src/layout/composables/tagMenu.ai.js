@@ -24,7 +24,6 @@ export function useTagMenu() {
 
         const toMenuItem = (tag) => ({
             label: tag.name,
-            icon: tag.icon || 'pi pi-fw pi-wallet',
             to: `/tags/${tag.id}`
         });
 
