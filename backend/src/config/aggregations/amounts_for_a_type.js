@@ -1,8 +1,11 @@
+import { EntryState } from "@shared/enums";
+
 export default (profileId, { type }) => [
   {
     $match: {
       profileId,
       type,
+      state: EntryState.SETTLED.id,
     },
   },
   {

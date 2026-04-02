@@ -1,4 +1,4 @@
-import { EntryType } from "@shared/enums";
+import { EntryState, EntryType } from "@shared/enums";
 
 export default (profileId, { headId }) => [
   {
@@ -15,6 +15,7 @@ export default (profileId, { headId }) => [
         ],
       },
       headId,
+      state: EntryState.SETTLED.id,
     },
   },
   {
