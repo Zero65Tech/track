@@ -12,6 +12,10 @@ const groupSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    description: {
+      type: String,
+      default: null,
+    },
     starred: {
       type: Boolean,
       default: false,
