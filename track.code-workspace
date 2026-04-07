@@ -22,13 +22,6 @@
     },
   ],
   "settings": {
-    "files.exclude": {
-      "frontend/": true,
-      "shared/": true,
-      "backend/": true,
-      "infrastructure/": true,
-      "node_modules/": true,
-    },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
       "README.md": "PULL_REQUEST_TEMPLATE.md",
