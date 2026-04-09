@@ -31,6 +31,10 @@ function createSchema(collectionName) {
       type: String,
       default: null,
     },
+    assessee: {
+      type: String,
+      default: null,
+    },
 
     sortOrder: {
       type: Number,
@@ -46,6 +50,10 @@ function createSchema(collectionName) {
 
   if (collectionName === "books") {
     delete fields["group"];
+  }
+
+  if (collectionName === "books" || collectionName === "tags") {
+    delete fields["assessee"];
   }
 
   return new mongoose.Schema(fields, {
