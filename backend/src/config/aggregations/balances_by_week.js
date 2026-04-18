@@ -63,4 +63,7 @@ export default (profileId) => [
       balance: 1,
     },
   },
+  {
+    $sort: { week: 1 },
+  },
 ];
