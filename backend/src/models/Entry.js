@@ -99,11 +99,6 @@ const bookEntrySchema = new mongoose.Schema({
 });
 
 const sourceEntrySchema = new mongoose.Schema({
-  bookId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Book",
-    required: true,
-  },
   sourceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Source",
