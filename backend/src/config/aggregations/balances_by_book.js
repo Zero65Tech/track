@@ -96,4 +96,7 @@ export default (profileId) => [
       count: { $sum: "$allResults.count" },
     },
   },
+  {
+    $sort: { _id: 1 },
+  },
 ];
