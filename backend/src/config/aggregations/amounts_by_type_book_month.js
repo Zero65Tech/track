@@ -38,4 +38,7 @@ export default (profileId) => [
       amount: 1,
     },
   },
+  {
+    $sort: { "_id.month": 1, "_id.type": 1, "_id.bookId": 1 },
+  },
 ];
