@@ -2,12 +2,10 @@ import { EntryFieldState } from "@shared/enums";
 
 import transaction from "../utils/transaction.js";
 
-import {
-  BookModel,
-  HeadModel,
-  TagModel,
-  SourceModel,
-} from "../models/EntryFields.js";
+import BookModel from "../models/Book.js";
+import HeadModel from "../models/Head.js";
+import TagModel from "../models/Tag.js";
+import SourceModel from "../models/Source.js";
 
 import {
   _logCreateAudit,

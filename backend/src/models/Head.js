@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { EntryFieldState } from "@shared/enums";
 
-function createSchema(collectionName) {
-  const fields = {
+const headSchema = new mongoose.Schema(
+  {
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",
@@ -46,26 +46,12 @@ function createSchema(collectionName) {
       enum: Object.values(EntryFieldState).map((s) => s.id),
       required: true,
     },
-  };
-
-  if (collectionName === "books") {
-    delete fields["group"];
-  }
-
-  if (collectionName === "books" || collectionName === "tags") {
-    delete fields["assessee"];
-  }
-
-  return new mongoose.Schema(fields, {
-    collection: collectionName,
+  },
+  {
+    collection: "heads",
     versionKey: false,
     timestamps: true,
-  });
-}
+  },
+);
 
-const BookModel = mongoose.model("Book", createSchema("books"));
-const HeadModel = mongoose.model("Head", createSchema("heads"));
-const TagModel = mongoose.model("Tag", createSchema("tags"));
-const SourceModel = mongoose.model("Source", createSchema("sources"));
-
-export { BookModel, HeadModel, TagModel, SourceModel };
+export default mongoose.model("Head", headSchema);
