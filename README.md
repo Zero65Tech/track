@@ -5,7 +5,7 @@
 - Database - snake_case
 - Collection - snake_case, plural nouns
 - Field - camelCase
-- consider profileId as sub-collection name
+- Treak *profileId* as sub-collection name
 - Attributes == Entry Fields == Book, Head, Tag, Source
 - Attribute Items = Book Collection, Head Collection, Tag Collection, Source Collection
 
@@ -34,7 +34,7 @@ There is no difference between development and production in Node.js, i.e., ther
 
 function names starting with '\_' are meant to be used internally, i.e. not called by any controller, to be called only by other services. private functions typically have session as one of the argument
 
-### NodeJs Version (22)
+### NodeJs Version (24)
 
 - Devcontainer
 - GitHub Workflows
