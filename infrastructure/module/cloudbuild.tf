@@ -63,12 +63,12 @@ resource "google_cloudbuild_trigger" "frontend" {
       args = [ "-c", "mv frontend/firebase.json firebase.json" ]
     }
     step {
-      name = "node:22-alpine"
+      name = "node:24-alpine"
       entrypoint = "npm"
       args = [ "install", "--workspace=frontend" ]
     }
     step {
-      name = "node:22-alpine"
+      name = "node:24-alpine"
       entrypoint = "npm"
       args = [ "run", "build", "--workspace=frontend" ]
       env  = [ "STAGE=${var.stage}" ]
@@ -106,7 +106,7 @@ resource "google_cloudbuild_trigger" "backend" {
       args = [ "-c", "mv backend/.dockerignore .dockerignore && mv backend/Dockerfile Dockerfile" ]
     }
     step {
-      name = "node:22-alpine"
+      name = "node:24-alpine"
       entrypoint = "npm"
       args = [ "install", "--omit=dev", "--workspace=backend" ]
     }

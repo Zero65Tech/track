@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/javascript-node:22
+FROM mcr.microsoft.com/devcontainers/javascript-node:24
 
 # Install Graphviz and Madge
 RUN apt update
@@ -19,7 +19,7 @@ RUN wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud
 ENV PATH=$PATH:/usr/local/google-cloud-sdk/bin
 
 # Install Terraform CLI
-RUN wget https://releases.hashicorp.com/terraform/1.14.0/terraform_1.14.0_linux_amd64.zip \
-    && unzip terraform_1.14.0_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/1.15.5/terraform_1.15.5_linux_amd64.zip \
+    && unzip terraform_1.15.5_linux_amd64.zip \
     && mv terraform /usr/local/bin/ \
-    && rm terraform_1.14.0_linux_amd64.zip
+    && rm terraform_1.15.5_linux_amd64.zip

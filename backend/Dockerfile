@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/nodejs22-debian12
+FROM gcr.io/distroless/nodejs24-debian13
 
 WORKDIR /app
 COPY package.json .
