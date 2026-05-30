@@ -57,6 +57,7 @@ export default (profileId) => [
                       "$type",
                       [
                         EntryType.CREDIT.id,
+                        EntryType.EXPENSE.id,
                         EntryType.INCOME.id,
                         EntryType.REFUND.id,
                         EntryType.RECEIPT.id,
