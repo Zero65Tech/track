@@ -136,4 +136,7 @@ export default (profileId, { sourceId }) => [
       amount: 1,
     },
   },
+  {
+    $sort: { "_id.week": 1 },
+  },
 ];
