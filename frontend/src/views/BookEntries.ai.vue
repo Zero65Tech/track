@@ -32,6 +32,7 @@ function refreshChartData() {
 
 const bookId = computed(() => route.params.bookId);
 const bookName = computed(() => bookStore.booksMap[bookId.value]?.name || 'Book');
+const bookColor = computed(() => bookStore.booksMap[bookId.value]?.color || '#94a3b8');
 
 const selectedFY = ref(null);
 
@@ -341,6 +342,84 @@ const incomeChartData = buildChartData(incomeMonthMap, incomeYearlyMap, chartMon
 const taxChartData = buildChartData(taxMonthMap, taxYearlyMap, chartMonths, chartYears, 'Tax', '#f59e0b');
 const expenseRefundChartData = buildChartData(expenseRefundMonthMap, expenseRefundYearlyMap, chartMonths, chartYears, 'Expense & Refund', '#ef4444');
 
+// Balance line chart - month over month cumulative balance
+const balanceLineMonthMap = computed(() => {
+    const map = {};
+    for (const month of allMonthsAsc.value) {
+        map[month] = cumulativeBalanceMap.value[month] || 0;
+    }
+    return map;
+});
+
+const balanceLineYearlyMap = computed(() => {
+    const result = {};
+    for (const month of allMonthsAsc.value) {
+        const fy = getFinancialYear(month);
+        result[fy] = cumulativeBalanceMap.value[month] || 0;
+    }
+    return result;
+});
+
+// Build line chart data structure
+function buildLineChartData(monthMapRef, yearlyMapRef, sharedMonths, sharedYears, label, color) {
+    return computed(() => {
+        const isYearly = chartMode.value === 'yearly';
+        const map = isYearly ? yearlyMapRef.value : monthMapRef.value;
+        const periods = isYearly ? sharedYears.value : sharedMonths.value;
+        const formatLabel = isYearly ? formatFinancialYear : formatUtil.formatMonth;
+
+        if (periods.length === 0) return { labels: [], datasets: [] };
+
+        return {
+            labels: periods.map(formatLabel),
+            datasets: [
+                {
+                    label,
+                    data: periods.map((period) => map[period] || 0),
+                    borderColor: color,
+                    backgroundColor: color + '15',
+                    borderWidth: 1,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2.5,
+                    pointHoverRadius: 4,
+                    pointBackgroundColor: color,
+                    pointBorderColor: '#ffffff'
+                }
+            ]
+        };
+    });
+}
+
+const balanceLineChartData = computed(() => {
+    const color = bookColor.value;
+    const isYearly = chartMode.value === 'yearly';
+    const map = isYearly ? balanceLineYearlyMap.value : balanceLineMonthMap.value;
+    const periods = isYearly ? chartYears.value : allMonthsAsc.value;
+    const formatLabel = isYearly ? formatFinancialYear : formatUtil.formatMonth;
+
+    if (periods.length === 0) return { labels: [], datasets: [] };
+
+    return {
+        labels: periods.map(formatLabel),
+        datasets: [
+            {
+                label: 'Cumulative Balance',
+                data: periods.map((period) => map[period] || 0),
+                borderColor: color,
+                backgroundColor: color + '15',
+                borderWidth: 1,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 2.5,
+                pointHoverRadius: 4,
+                pointBackgroundColor: color,
+                pointBorderColor: '#ffffff'
+            }
+        ]
+    };
+});
+
 // Summary totals
 const debitCreditTotal = computed(() => Object.values(debitCreditMonthMap.value).reduce((s, v) => s + v, 0));
 const incomeTotal = computed(() => Object.values(incomeMonthMap.value).reduce((s, v) => s + v, 0));
@@ -484,6 +563,40 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <Select v-model="selectedFY" :options="fyOptions" optionLabel="label" optionValue="value" placeholder="All FY" class="text-sm" />
                     <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
                 </div>
+            </div>
+        </div>
+
+        <!-- Balance Trend Line Chart -->
+        <div v-if="allMonthsAsc.length > 0" class="col-span-12">
+            <div class="card">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="font-semibold text-xl">Balance Trend</div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-primary font-medium text-sm">
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : balanceLineChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                        </span>
+                        <button
+                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            :class="[
+                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            ]"
+                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                        >
+                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="chartAggregationState.error.value" class="mb-4">
+                    <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                </div>
+                <div v-else-if="balanceLineChartData.labels.length === 0" class="mb-4">
+                    <div class="text-center text-muted-color">No data available !</div>
+                </div>
+                <Chart v-else type="line" :data="balanceLineChartData" :options="chartOptions" class="h-80" />
             </div>
         </div>
 

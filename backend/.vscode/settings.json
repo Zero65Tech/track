@@ -6,7 +6,7 @@
   "explorer.fileNesting.patterns": {
     ".env": ".env.*",
     "Profile.js": "AuditLog.js",
-    "Entry.js": "EntryFields.js, Folder.js, Group.js",
+    "Entry.js": "Book.js, Head.js, Tag.js, Source.js, Folder.js, Group.js",
     "Trigger.js": "Coin.js, Aggregation.js",
     "userService.js": "deviceService.js",
     "profileService.js": "auditLogService.js",
