@@ -34,26 +34,7 @@ export default (profileId) => [
         {
           $group: {
             _id: "$sourceId",
-            balance: {
-              $sum: {
-                $cond: [
-                  {
-                    $in: [
-                      "$type",
-                      [
-                        EntryType.CREDIT.id,
-                        EntryType.INCOME.id,
-                        EntryType.EXPENSE.id,
-                        EntryType.REFUND.id,
-                        EntryType.RECEIPT.id,
-                      ],
-                    ],
-                  },
-                  "$amount",
-                  { $multiply: ["$amount", -1] },
-                ],
-              },
-            },
+            balance: { $sum: "$amount" },
             count: { $sum: 1 },
           },
         },
