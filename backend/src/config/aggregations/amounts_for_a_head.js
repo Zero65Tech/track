@@ -42,6 +42,6 @@ export default (profileId, { headId }) => [
     },
   },
   {
-    $sort: { "_id.month": 1, "_id.type": 1, "_id.bookId": 1, "_id.tagId": 1 },
+    $sort: { "month": 1, "type": 1, "bookId": 1, "tagId": 1 },
   },
 ];
