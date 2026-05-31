@@ -26,10 +26,6 @@ const chartAggregationName = 'amounts_for_a_book';
 const chartAggregationParams = computed(() => ({ bookId: bookId.value }));
 const chartAggregationState = computed(() => aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams.value));
 const chartData = computed(() => chartAggregationState.value.data.value);
-const isChartDataLoading = computed(() => chartAggregationState.value.isLoading.value);
-function refreshChartData() {
-    aggregationStore.fetchAggregation(chartAggregationState.value.key);
-}
 
 const bookId = computed(() => route.params.bookId);
 const bookName = computed(() => bookStore.booksMap[bookId.value]?.name || 'Book');
@@ -482,7 +478,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         <!-- Title -->
         <div class="col-span-12">
             <div class="flex justify-between items-center">
-                <div class="font-semibold text-2xl">{{ bookName }}</div>
+                <div class="font-semibold text-2xl">Book: {{ bookName }}</div>
                 <div class="flex items-center gap-3">
                     <Select v-model="selectedFY" :options="fyOptions" optionLabel="label" optionValue="value" placeholder="All FY" class="text-sm" />
                     <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />

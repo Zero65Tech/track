@@ -1,5 +1,5 @@
 <script setup>
-import { useLayout } from '@/layout/composables/layout';
+import BalancesByWeekWidget from '@/components/BalancesByWeekWidget.vue';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
@@ -9,11 +9,10 @@ import { useSourceStore } from '@/stores/source.store';
 import { useTagStore } from '@/stores/tag.store';
 import { EntryType } from '@shared/enums';
 import { dateUtil, formatUtil } from '@shared/utils';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const { getPrimary, getSurface, isDarkTheme } = useLayout();
 const profileStore = useProfileStore();
 const sourceStore = useSourceStore();
 const bookStore = useBookStore();
@@ -198,138 +197,17 @@ function getEntryTypeName(typeId) {
     }
     return typeId;
 }
-
-// Chart
-
-const numDataPoints = ref(52);
-const chartContainer = ref(null);
-let resizeObserver = null;
-
-const chartData = computed(() => {
-    const weeks = allWeeksAsc.value.slice(-numDataPoints.value);
-    const balanceMap = cumulativeBalanceMap.value;
-    const documentStyle = getComputedStyle(document.documentElement);
-    return {
-        labels: weeks.map((week) => formatUtil.formatDate(new Date(week))),
-        datasets: [
-            {
-                label: 'Closing Balance',
-                data: weeks.map((week) => balanceMap[week]),
-                fill: true,
-                tension: 0.4,
-                borderWidth: 1,
-                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
-                pointRadius: 2.5,
-                pointHoverRadius: 4,
-                pointBorderColor: '#ffffff',
-                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
-            }
-        ]
-    };
-});
-
-const chartOptions = ref(null);
-
-function getChartOptions() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-
-    return {
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    title: function (context) {
-                        const weekStart = context[0].label;
-                        const startDate = new Date(weekStart);
-                        const endDate = new Date(startDate);
-                        endDate.setDate(endDate.getDate() + 6);
-                        return [`${formatUtil.formatDate(startDate)} - ${formatUtil.formatDate(endDate)}`];
-                    },
-                    label: (context) => 'Closing Balance: ' + formatUtil.formatCurrency(context.parsed.y)
-                }
-            }
-        },
-        scales: {
-            x: {
-                ticks: { color: textColorSecondary, font: { weight: 500 } },
-                grid: { display: false, drawBorder: false }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: { color: textColorSecondary, callback: formatUtil.formatCurrencyNoDecimals },
-                grid: { color: surfaceBorder, drawBorder: false }
-            }
-        }
-    };
-}
-
-onMounted(() => {
-    resizeObserver = new ResizeObserver(() => {
-        if (chartContainer.value) {
-            numDataPoints.value = Math.round((chartContainer.value.offsetWidth - 2 * 28 - 60) / 9.23);
-        }
-    });
-    if (chartContainer.value) {
-        resizeObserver.observe(chartContainer.value);
-    }
-    chartOptions.value = getChartOptions();
-});
-
-watch([getPrimary, getSurface, isDarkTheme], () => {
-    chartOptions.value = getChartOptions();
-});
-
-onBeforeUnmount(() => {
-    if (resizeObserver) {
-        resizeObserver.disconnect();
-    }
-});
 </script>
 
 <template>
     <div class="grid grid-cols-12 gap-8">
         <!-- Common Title -->
         <div class="col-span-12">
-            <div class="font-semibold text-2xl">{{ sourceName }}</div>
+            <div class="font-semibold text-2xl">Source: {{ sourceName }}</div>
         </div>
 
-        <!-- Chart -->
-        <div class="col-span-12" ref="chartContainer">
-            <div class="card">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="font-semibold text-xl">Closing Balances</div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-primary font-medium text-sm">
-                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
-                        </span>
-                        <button
-                            @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
-                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
-                            :class="[
-                                'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
-                            ]"
-                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
-                        >
-                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div v-if="aggregationState.error.value" class="mb-4">
-                    <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                    <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
-                </div>
-                <div v-else-if="chartData.labels.length === 0" class="mb-4">
-                    <div class="text-center text-muted-color">No data available !</div>
-                </div>
-                <Chart v-else type="line" :data="chartData" :options="chartOptions" class="h-80" />
-            </div>
-        </div>
+        <!-- Balance Trend Line Chart -->
+        <BalancesByWeekWidget :aggregationState="aggregationState" />
 
         <!-- Entries -->
         <div class="col-span-12">

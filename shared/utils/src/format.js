@@ -34,6 +34,9 @@ function formatMonth(month) {
 };
 
 function formatDate(date) {
+    if(typeof date === 'string') {
+        date = new Date(date);
+    }
     return DATE_FORMATTER.format(date);
 }
 

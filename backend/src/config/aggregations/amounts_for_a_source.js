@@ -63,26 +63,7 @@ export default (profileId, { sourceId }) => [
           $group: {
             _id: "$week",
             count: { $sum: 1 },
-            amount: {
-              $sum: {
-                $cond: [
-                  {
-                    $in: [
-                      "$type",
-                      [
-                        EntryType.CREDIT.id,
-                        EntryType.INCOME.id,
-                        EntryType.EXPENSE.id,
-                        EntryType.REFUND.id,
-                        EntryType.RECEIPT.id,
-                      ],
-                    ],
-                  },
-                  "$amount",
-                  { $multiply: ["$amount", -1] },
-                ],
-              },
-            },
+            amount: { $sum: "$amount" },
           },
         },
       ],
