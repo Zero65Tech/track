@@ -1,4 +1,5 @@
 <script setup>
+import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
 import { useLayout } from '@/layout/composables/layout';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -596,6 +597,9 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
             </div>
         </div>
+
+        <!-- Balance Trend Line Chart -->
+        <BalancesByMonthWidget :aggregationState="chartAggregationState" />
 
         <!-- Debit - Credit by Head Summary -->
         <div v-if="debitCreditByHead.length" class="col-span-12">
