@@ -39,7 +39,7 @@ export default (profileId) => [
         },
       },
       count: { $sum: 1 },
-      balance: { $sum: "$amount" },
+      amount: { $sum: "$amount" },
     },
   },
   {
@@ -47,7 +47,7 @@ export default (profileId) => [
       _id: 0,
       week: "$_id",
       count: 1,
-      balance: 1,
+      amount: 1,
     },
   },
   {
