@@ -15,7 +15,10 @@ const { headMenuSection } = useHeadMenu();
 const staticMenu = ref([
     {
         label: 'Home',
-        items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/' }]
+        items: [
+            { label: 'Home', icon: 'pi pi-fw pi-home', to: '/' },
+            { label: 'Incomes', icon: 'pi pi-fw pi-arrow-up-right', to: '/incomes' }
+        ]
     },
     {
         label: 'Demo',
