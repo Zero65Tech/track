@@ -45,10 +45,10 @@ const amountsByBookIdAndMonth = computed(() => {
             if (!result[bookId]) {
                 result[bookId] = {};
             }
-            if ([EntryType.DEBIT.id, EntryType.INCOME.id, EntryType.EXPENSE.id].includes(item.type)) {
-                result[bookId][month] = (result[bookId][month] || 0) + item.amount;
-            } else {
+            if ([EntryType.CREDIT.id, EntryType.DEBIT.id, EntryType.EXPENSE.id, EntryType.REFUND.id].includes(item.type)) {
                 result[bookId][month] = (result[bookId][month] || 0) - item.amount;
+            } else {
+                result[bookId][month] = (result[bookId][month] || 0) + item.amount;
             }
         });
     return result;
