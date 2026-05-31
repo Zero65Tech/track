@@ -21,13 +21,12 @@ const props = defineProps({
 });
 
 const aggregationStore = useAggregationStore();
-const aggregationState = props.aggregationState;
 
 const numDataPoints = ref(60);
 
 const sortedMonths = computed(() => {
     const monthsSet = new Set();
-    aggregationState.data.value.forEach((item) => monthsSet.add(item.month));
+    props.aggregationState.data.value.forEach((item) => monthsSet.add(item.month));
     const months = Array.from(monthsSet).sort();
     for (let i = 0; i < months.length - 1; i++) {
         const nextMonth = monthUtil.getNext(months[i]);
@@ -42,7 +41,7 @@ const balancesByMonth = computed(() => {
     const months = sortedMonths.value;
 
     const amounts = {};
-    aggregationState.data.value.forEach((item) => {
+    props.aggregationState.data.value.forEach((item) => {
         amounts[item.month] = (amounts[item.month] || 0) + item.amount;
     });
 
@@ -160,25 +159,25 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl">Balance Trend</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
-                        {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
+                        {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? props.aggregationState.dataUpdatedTimeAgo.value : '' }}
                     </span>
                     <button
-                        @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
-                        :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
+                        @click="props.aggregationState.error.value ? aggregationStore.fetchAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"
+                        :disabled="props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                            aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                         ]"
-                        :title="aggregationState.error.value ? 'Retry' : 'Update'"
+                        :title="props.aggregationState.error.value ? 'Retry' : 'Update'"
                     >
-                        <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        <i :class="['pi', props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                     </button>
                 </div>
             </div>
 
-            <div v-if="aggregationState.error.value" class="mb-4">
+            <div v-if="props.aggregationState.error.value" class="mb-4">
                 <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
+                <div class="text-red-500 dark:text-red-300 text-xs">{{ props.aggregationState.error.value }}</div>
             </div>
 
             <div v-else-if="chartData.labels.length === 0" class="mb-4">
