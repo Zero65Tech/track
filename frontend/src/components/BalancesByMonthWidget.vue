@@ -1,7 +1,7 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
-import { monthUtil, formatUtil } from '@shared/utils';
+import { colorUtil, formatUtil, monthUtil } from '@shared/utils';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
@@ -13,13 +13,17 @@ const props = defineProps({
     aggregationState: {
         type: Object,
         required: true
+    },
+    accentColor: {
+        type: String,
+        required: false
     }
 });
 
 const aggregationStore = useAggregationStore();
 const aggregationState = props.aggregationState;
 
-const numDataPoints = ref(52);
+const numDataPoints = ref(60);
 
 const sortedMonths = computed(() => {
     const monthsSet = new Set();
@@ -34,7 +38,7 @@ const sortedMonths = computed(() => {
     return months;
 });
 
-const cumulativeAmountsByMonth = computed(() => {
+const balancesByMonth = computed(() => {
     const months = sortedMonths.value;
 
     const amounts = {};
@@ -51,23 +55,25 @@ const cumulativeAmountsByMonth = computed(() => {
 
 const chartData = computed(() => {
     const months = sortedMonths.value.slice(-numDataPoints.value);
-    const dataMap = cumulativeAmountsByMonth.value;
+    const dataMap = balancesByMonth.value;
     const documentStyle = getComputedStyle(document.documentElement);
+    const primary = props.accentColor || documentStyle.getPropertyValue('--p-primary-500');
+    const bg = colorUtil.hexToRgba(primary, 0.08);
     return {
         labels: months.map((month) => formatUtil.formatMonth(month)),
         datasets: [
             {
                 label: 'Closing Balance',
-                data: months.map((week) => dataMap[week]),
+                data: months.map((month) => dataMap[month]),
                 fill: true,
                 tension: 0.4,
                 borderWidth: 1,
-                borderColor: documentStyle.getPropertyValue('--p-primary-500'),
-                backgroundColor: documentStyle.getPropertyValue('--p-primary-100'),
-                pointRadius: 2.5,
+                borderColor: primary,
+                backgroundColor: bg,
+                pointRadius: 2,
                 pointHoverRadius: 4,
                 pointBorderColor: '#ffffff',
-                pointBackgroundColor: documentStyle.getPropertyValue('--p-primary-500')
+                pointBackgroundColor: primary
             }
         ]
     };
@@ -92,13 +98,6 @@ function getChartOptions() {
             },
             tooltip: {
                 callbacks: {
-                    // title: function (context) {
-                    //     const weekStart = context[0].label;
-                    //     const startDate = new Date(weekStart);
-                    //     const endDate = new Date(startDate);
-                    //     endDate.setDate(endDate.getDate() + 6);
-                    //     return [`${formatUtil.formatDate(startDate)} - ${formatUtil.formatDate(endDate)}`];
-                    // },
                     label: (context) => 'Closing Balance: ' + formatUtil.formatCurrency(context.parsed.y)
                 }
             }
@@ -133,7 +132,7 @@ function getChartOptions() {
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => {
-        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 9.23);
+        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 8);
     });
 
     if (widgetContainer.value) {
@@ -158,7 +157,7 @@ onBeforeUnmount(() => {
     <div class="col-span-12" ref="widgetContainer">
         <div class="card">
             <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">Closing Balances (Books)</div>
+                <div class="font-semibold text-xl">Balance Trend</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
                         {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}

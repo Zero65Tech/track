@@ -34,6 +34,8 @@ function refreshChartData() {
 const bookId = computed(() => route.params.bookId);
 const bookName = computed(() => bookStore.booksMap[bookId.value]?.name || 'Book');
 
+const bookColor = computed(() => bookStore.booksMap[bookId.value]?.color || null);
+
 const selectedFY = ref(null);
 
 function getFinancialYear(monthStr) {
@@ -489,7 +491,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         </div>
 
         <!-- Balance Trend Line Chart -->
-        <BalancesByMonthWidget :aggregationState="chartAggregationState" />
+        <BalancesByMonthWidget :aggregationState="chartAggregationState" :accentColor="bookColor" />
 
         <!-- Balance Summary -->
         <div class="col-span-12">
