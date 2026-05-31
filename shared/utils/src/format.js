@@ -30,7 +30,7 @@ function formatCurrencyNoDecimals(value) {
 
 function formatMonth(month) {
     const [yyyy, mm] = month.split('-');
-    return yyyy + ' ' + (MONTH_NAMES[mm - 1] || `Month ${mm}`);
+    return (MONTH_NAMES[mm - 1] || `Month ${mm}`) + ' ' + yyyy;
 };
 
 function formatDate(date) {
