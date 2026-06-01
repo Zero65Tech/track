@@ -1,7 +1,14 @@
 import mongoose from "mongoose";
+import { DataSource } from "@shared/enums";
 
 const groupSchema = new mongoose.Schema(
   {
+    _src: {
+      type: String,
+      enum: Object.values(DataSource),
+      required: true,
+    },
+
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",

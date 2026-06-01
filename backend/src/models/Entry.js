@@ -1,8 +1,14 @@
 import mongoose from "mongoose";
-import { EntryType, EntryState } from "@shared/enums";
+import { EntryType, EntryState, DataSource } from "@shared/enums";
 
 const entrySchema = new mongoose.Schema(
   {
+    _src: {
+      type: String,
+      enum: Object.values(DataSource),
+      required: true,
+    },
+
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",
@@ -86,6 +92,7 @@ const bookEntrySchema = new mongoose.Schema({
     ref: "Source",
     default: null,
   },
+
   breakdown: {
     type: [
       {
@@ -132,15 +139,29 @@ const transferEntrySchema = new mongoose.Schema({
   },
 });
 
-entrySchema.discriminator(EntryType.CREDIT.id, bookEntrySchema);
-entrySchema.discriminator(EntryType.DEBIT.id, bookEntrySchema);
 entrySchema.discriminator(EntryType.INCOME.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.INCOME_TAX.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.INCOME_TAX_REFUND.id, bookEntrySchema);
 entrySchema.discriminator(EntryType.EXPENSE.id, bookEntrySchema);
-entrySchema.discriminator(EntryType.REFUND.id, bookEntrySchema);
-entrySchema.discriminator(EntryType.TAX.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.EXPENSE_REFUND.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.LOAN_GIVEN.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.LOAN_TAKEN.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.INVESTMENT_DEPOSIT.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.INVESTMENT_WITHDRAWAL.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.POSITION_ONBOARD.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.POSITION_OFFBOARD.id, bookEntrySchema);
+
+entrySchema.discriminator(EntryType.RELOCATE.id, relocateEntrySchema);
+
 entrySchema.discriminator(EntryType.PAYMENT.id, sourceEntrySchema);
 entrySchema.discriminator(EntryType.RECEIPT.id, sourceEntrySchema);
-entrySchema.discriminator(EntryType.RELOCATE.id, relocateEntrySchema);
+
 entrySchema.discriminator(EntryType.TRANSFER.id, transferEntrySchema);
+
+// TODO: Deprecate
+entrySchema.discriminator(EntryType.CREDIT.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.DEBIT.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.REFUND.id, bookEntrySchema);
+entrySchema.discriminator(EntryType.TAX.id, bookEntrySchema);
 
 export default mongoose.model("Entry", entrySchema);

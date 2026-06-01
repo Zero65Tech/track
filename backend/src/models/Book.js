@@ -1,8 +1,14 @@
 import mongoose from "mongoose";
-import { EntryFieldState } from "@shared/enums";
+import { EntryFieldState, EntrySource } from "@shared/enums";
 
 const bookSchema = new mongoose.Schema(
   {
+    _src: {
+      type: String,
+      enum: Object.values(EntrySource),
+      required: true,
+    },
+
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",

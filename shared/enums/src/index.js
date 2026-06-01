@@ -60,6 +60,11 @@ const ProfileState = Object.freeze({
   }),
 });
 
+const DataSource = Object.freeze({
+  BACKEND_SERVICE_V5_5: "Backend Service v5.5",
+  MIGRATION_SCRIPT_V1_0: "Migration Script v1.0",
+});
+
 const EntryType = Object.freeze({
 
   INCOME: Object.freeze({ id: "income", name: "Income", sign: "positive" }),
@@ -200,4 +205,5 @@ export {
   AggregationName,
   CoinLedgerRef,
   CoinLedgerType,
+  DataSource,
 };
