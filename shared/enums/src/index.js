@@ -197,6 +197,7 @@ const CoinLedgerType = Object.freeze({
 export {
   ProfileAccess,
   ProfileState,
+  DataSource,
   EntryType,
   EntryState,
   EntryFieldState,
@@ -205,5 +206,4 @@ export {
   AggregationName,
   CoinLedgerRef,
   CoinLedgerType,
-  DataSource,
 };
