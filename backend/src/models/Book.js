@@ -8,6 +8,10 @@ const bookSchema = new mongoose.Schema(
       enum: Object.values(DataSource),
       required: true,
     },
+    _ref: {
+      type: String,
+      required: false,
+    },
 
     profileId: {
       type: mongoose.Schema.Types.ObjectId,
