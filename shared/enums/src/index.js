@@ -61,16 +61,32 @@ const ProfileState = Object.freeze({
 });
 
 const EntryType = Object.freeze({
-  CREDIT: Object.freeze({ id: "credit", name: "Credit" }),
-  DEBIT: Object.freeze({ id: "debit", name: "Debit" }),
+
   INCOME: Object.freeze({ id: "income", name: "Income" }),
+  INCOME_TAX: Object.freeze({ id: "income_tax", name: "Income Tax" }),
+  INCOME_TAX_REFUND: Object.freeze({ id: "income_tax_refund", name: "Income Tax:Refund" }),
   EXPENSE: Object.freeze({ id: "expense", name: "Expense" }),
-  REFUND: Object.freeze({ id: "refund", name: "Refund" }),
-  TAX: Object.freeze({ id: "tax", name: "Tax" }),
+  EXPENSE_REFUND: Object.freeze({ id: "expense_refund", name: "Expense:Refund" }),
+  LOAN_GIVEN: Object.freeze({ id: "loan_given", name: "Loan:Given" }),
+  LOAN_TAKEN: Object.freeze({ id: "loan_taken", name: "Loan:Taken" }),
+  INVESTMENT_DEPOSIT: Object.freeze({ id: "investment_deposit", name: "Investment:Deposit" }),
+  INVESTMENT_WITHDRAWAL: Object.freeze({ id: "investment_withdrawal", name: "Investment:Withdrawal" }),
+  POSITION_ONBOARD: Object.freeze({ id: "position_onboard", name: "Position:Onboard" }),
+  POSITION_OFFBOARD: Object.freeze({ id: "position_offboard", name: "Position:Offboard" }),
+
+  RELOCATE: Object.freeze({ id: "relocate", name: "Relocate" }),
+  
   PAYMENT: Object.freeze({ id: "payment", name: "Payment" }),
   RECEIPT: Object.freeze({ id: "receipt", name: "Receipt" }),
-  RELOCATE: Object.freeze({ id: "relocate", name: "Relocate" }),
+
   TRANSFER: Object.freeze({ id: "transfer", name: "Transfer" }),
+
+  // TODO: Deprecate
+  CREDIT: Object.freeze({ id: "credit", name: "Credit" }),
+  DEBIT: Object.freeze({ id: "debit", name: "Debit" }),
+  TAX: Object.freeze({ id: "tax", name: "Tax" }),
+  REFUND: Object.freeze({ id: "refund", name: "Refund" }),
+
 });
 
 const EntryState = Object.freeze({
