@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { EntryFieldState, EntrySource } from "@shared/enums";
+import { EntryFieldState, DataSource } from "@shared/enums";
 
 const bookSchema = new mongoose.Schema(
   {
     _src: {
       type: String,
-      enum: Object.values(EntrySource),
+      enum: Object.values(DataSource),
       required: true,
     },
 
