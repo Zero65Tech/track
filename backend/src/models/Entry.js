@@ -36,9 +36,19 @@ const entrySchema = new mongoose.Schema(
       required: true,
     },
 
+    breakdown: {
+      type: [
+        {
+          _id: false,
+          amount: { type: Number, required: true },
+          note: { type: String, required: true },
+        },
+      ],
+      required: false,
+    },
     note: {
       type: String,
-      default: null,
+      required: false,
     },
 
     groupId: {
@@ -91,17 +101,6 @@ const bookEntrySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Source",
     default: null,
-  },
-
-  breakdown: {
-    type: [
-      {
-        _id: false,
-        amount: { type: Number, required: true },
-        note: { type: String, required: true },
-      },
-    ],
-    required: false,
   },
 });
 

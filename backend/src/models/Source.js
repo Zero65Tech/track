@@ -26,11 +26,11 @@ const sourceSchema = new mongoose.Schema(
 
     icon: {
       type: String,
-      required: true,
+      default: null,
     },
     color: {
       type: String,
-      required: true,
+      default: null,
     },
 
     group: {

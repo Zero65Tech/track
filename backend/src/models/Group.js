@@ -23,9 +23,14 @@ const groupSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    pinned: {
+      type: Boolean,
+      required: false,
+    },
     starred: {
       type: Boolean,
-      default: false,
+      required: false,
     },
 
     folderIds: {
