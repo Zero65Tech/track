@@ -46,6 +46,7 @@
   "extensions": {
     "recommendations": [
       "google.geminicodeassist",
+      "github.vscode-pull-request-github",
       "gruntfuggly.todo-tree",
       "mermaidchart.vscode-mermaid-chart",
     ],

@@ -5,12 +5,14 @@
     "vscode": {
       "extensions": [
         "google.geminicodeassist",
+        "github.vscode-pull-request-github",
         "gruntfuggly.todo-tree",
         "mermaidchart.vscode-mermaid-chart",
         "vue.volar",
         "EditorConfig.EditorConfig",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
+        "ms-vscode.live-server",
         "hashicorp.terraform"
       ]
     }
