@@ -125,25 +125,66 @@ npm test  # Jest, covers test/ folder
 
 | File | Purpose |
 |------|---------|
-| `backend/src/app.js` | Route definitions, middleware order |
-| `backend/src/services/profileService.js` | Profile CRUD, caching, transaction pattern |
-| `backend/src/services/auditLogService.js` | Audit log pattern |
-| `backend/src/utils/transaction.js` | MongoDB transaction wrapper |
-| `shared/src/index.js` | All shared enums (ProfileState, TriggerType, etc.) |
-| `frontend/src/stores/profile.store.js` | Pinia state example |
-| `Dockerfile` | Backend deployment artifact |
+| `backend/src/app.js` | Route definitions, middleware order, error handler |
+| `backend/src/services/profileService.js` | Profile CRUD, caching, transaction pattern example |
+| `backend/src/services/auditLogService.js` | Audit log pattern (create, update, delete events) |
+| `backend/src/utils/transaction.js` | Mongoose transaction wrapper for atomicity |
+| `backend/src/utils/response.js` | Response helpers (`sendData`, `sendBadRequestError`, etc.) |
+| `shared/schemas/src/` | Zod validation schemas (profile, entry, device, etc.) |
+| `shared/enums/src/index.js` | All shared enums (ProfileState, TriggerType, etc.) |
+| `frontend/src/stores/auth.store.js` | Pinia store with AbortController pattern |
+| `frontend/src/stores/profile.store.js` | Profile store state management example |
+| `frontend/src/service/apiClient.js` | Axios HTTP client with auth interceptors |
+| `Dockerfile` | Backend deployment artifact (2-stage build) |
 | `firebase.json` | Hosting config, rewrites, service mappings |
-| `README.md` | Architecture diagrams, checklist of incomplete features |
+| `README.md` | Architecture diagrams, feature checklist |
+
+## Validation & Error Handling
+
+### Input Validation (Backend)
+- **Location**: Controllers only, never in services
+- **Tool**: Zod schemas (shared in `shared/schemas/src/`)
+- **Pattern**: Use `safeParse()` or `parse()`, return `sendBadRequestError()` immediately on failure
+- **Schema Features**: `.strict()` rejects extra fields, `.refine()` for cross-field validation
+- **Services**: Assume parameters pre-validated; throw generic errors if resource not found
+
+### Error Handling (Backend)
+- **Controllers**: Catch validation errors, return 400; call services in try-catch
+- **Services**: Throw errors (no HTTP handling); error middleware will catch
+- **Middleware**: Express error handler at [app.js](backend/src/app.js#L107) catches all throws
+- **Auth**: Auth middleware specifically catches `auth/id-token-expired` for 401 handling
+- **Frontend**: Service layer catches errors; stores handle in try-catch and show Toast
+
+## Frontend State Management
+
+### Pinia Store Structure
+- **Syntax**: Setup function with `ref()` for state, `computed()` for getters, async functions for actions
+- **State Organization**: Group related fields (e.g., `{ isLoading, data, error }` per domain)
+- **Cleanup**: Use `AbortController` in actions for in-flight request cancellation on context switch
+- **Error Handling**: try-catch in actions; store error in `ref`; use `useToast()` for user feedback
+- **Example**: [auth.store.js](frontend/src/stores/auth.store.js), [profile.store.js](frontend/src/stores/profile.store.js)
+
+### Service Layer
+- Never call `apiClient` directly from components; use service functions
+- Services may throw; let stores handle in try-catch
+- [apiClient.js](frontend/src/service/apiClient.js): request interceptor adds auth token, response interceptor handles 401
+
+## API Response Transform
+
+- **MongoDB `_id`**: Always convert to string `id` field in API responses
+- **Method**: Use helper like `{ id: String(doc._id), ...doc }` or DTO pattern
+- **Never expose**: `_id`, `profileId` (internal reference), or other internal fields
+- **Example**: Profile responses use `id`, not `_id`
 
 ## Common Patterns
 
 1. **Create with Audit**: Always wrap in transaction, call `_logCreate()` with newData
 2. **Update with Audit**: Pass oldData + newData to transaction → `_logUpdate()`
-3. **API Response**: Transform Mongoose `lean()` documents to DTOs (strip `_id`, add `id` string)
-4. **Error Handling**: Express error middleware logs full stack, returns 500 + message
-5. **Frontend API Calls**: Use service layer (not raw axios), handle errors with Toast
-6. **State Persistence**: No Redux/Vuex, Pinia stores are runtime-only; reload on refresh
-7. **Validation Rule**: Avoid adding validation rules at the service level—parameters are already validated at the controller level. For private methods (prefixed with `_`), assume code is well-tested and well-written; validation is not needed.
+3. **Database Transaction**: Use [transaction.js](backend/src/utils/transaction.js) wrapper, pass `session` to all nested service calls
+4. **Private Methods**: Prefix with `_` (e.g., `_logCreate()`, `_getCachedProfile()`); assume pre-validated inputs
+5. **Caching**: Profile service uses LRU cache (3-hour TTL); check cache before DB lookup
+6. **State Persistence**: Pinia stores are runtime-only (no localStorage auto-sync); reload on page refresh
+7. **Monorepo Workspace**: All npm commands use `--workspace=<name>` flag (e.g., `npm run lint --workspace=backend`)
 
 ## Notes
 
@@ -151,4 +192,13 @@ npm test  # Jest, covers test/ folder
 - **Coin Ledger** uses optimistic concurrency control; see `README.md` sequence diagrams for trigger flows
 - **Profile State Machine**: inactive → active (one-way); can disable/delete but not auto-recover deleted profiles after 30 days
 - **Template Sharing**: Only template profiles created by system users are shared. No plans yet to make other users' templates sharable.
-- Avoid direct `_id` in API responses; always provide string `id` field instead
+
+## Anti-patterns to Avoid
+
+1. **Don't validate in services**—always validate in controllers using Zod; services assume pre-validated input
+2. **Don't expose `_id` in API responses**—always convert to string `id` field
+3. **Don't throw validation errors from middleware**—catch specific errors only (e.g., expired token)
+4. **Don't skip session parameter for transactional operations**—always pass `session` to all nested service calls
+5. **Don't call services directly from frontend components**—use service layer as intermediary (e.g., `profileService.getProfile()`)
+6. **Don't modify frozen enums after definition**—freeze at creation time in `shared/enums/src/index.js`
+7. **Don't skip `AbortController` in frontend stores**—cancellation prevents memory leaks on context switch
