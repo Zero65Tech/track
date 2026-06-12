@@ -1,6 +1,6 @@
 import AuditLogModel from "../models/AuditLog.js";
 
-async function getAuditLogs(profileId, lastTimestamp, pageSize = 10) {
+async function getAuditLogs(profileId, lastTimestamp, pageSize) {
   const query = { profileId };
   if (lastTimestamp) {
     query.timestamp = { $lt: new Date(lastTimestamp) };
