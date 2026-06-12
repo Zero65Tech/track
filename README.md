@@ -1,21 +1,25 @@
 ## Environments (Stages)
 
-- Development (**alpha**) - https://localhost:8080/
+- Development (**alpha**)
   - Local Machine / GitHub Codespaces, .env.aplha.local
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
+  - Commands: **npm run backend** & **npm run frontend**
 - Testing (**beta**) - https://zero65-test.web.app/
   - GCP `zero65-test` → Google Cloud Build, Firebase Hosting, Cloud Run, Secret Manager
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
-- Staging (**gamma**) - https://localhost:8080/
+  - Commands: **STAGE=beta npm run frontend**
+- Staging (**gamma**)
   - Local Machine / GitHub Codespaces, .env.gamma.local
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
+  - Commands: **STAGE=gamma npm run backend** & **STAGE=gamma npm run frontend**
 - Production (**prod**) - https://track-v5.web.app/
   - GCP `zero65-track` → Google Cloud Build, Firebase Hosting, Cloud Run, Secret Manager
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
+  - Commands: **STAGE=prod npm run frontend**
 
 ## MongoDB
 
