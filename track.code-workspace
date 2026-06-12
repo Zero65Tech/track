@@ -32,6 +32,8 @@
     "diffEditor.ignoreTrimWhitespace": false,
     "git.autofetch": true,
     "git.confirmSync": false,
+    "github.copilot.chat.localIndex.enabled": true,
+    "github.copilot.chat.sessionSync.enabled": true,
     "todo-tree.filtering.excludeGlobs": ["**/node_modules/*/**", "**/*.md"],
     "todo-tree.general.tags": [
       "DEPRECATE",
