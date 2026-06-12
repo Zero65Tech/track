@@ -44,13 +44,14 @@ app.get(`${API_PREFIX}/devices/:id/claim`, deviceController.claimDevice);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
 app.post(`${API_PREFIX}/profiles`, profileController.createProfile);
-app.patch(`${API_PREFIX}/profiles/:id`, profileController.updateProfile);
 
 // NOTE: Loggedin User must have access to the Profile for following routes
 
 API_PREFIX = "/api/profiles/:profileId";
 
 app.use(API_PREFIX, accessMiddleware);
+
+app.patch(API_PREFIX, profileController.updateProfile);
 
 app.get(`${API_PREFIX}/books`, bookController.getAll);
 app.post(`${API_PREFIX}/books`, bookController.create);
@@ -99,7 +100,7 @@ app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAuditLogs);
 app.get(`${API_PREFIX}/triggers`, triggerController.getTriggers);
 app.post(`${API_PREFIX}/triggers/data-aggregation`, triggerController.createDataAggregationTrigger); // prettier-ignore
 
-app.get(`${API_PREFIX}/aggregations/:name/result`, aggregationController.getNamedAggregationResult); // prettier-ignore
+app.get(`${API_PREFIX}/aggregations/:name/result`, aggregationController.getAggregationResult); // prettier-ignore
 
 app.use((err, req, res, next) => {
   console.log(err);

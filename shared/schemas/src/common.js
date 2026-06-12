@@ -1,5 +1,6 @@
 import { z } from "zod";
 import mongoose from "mongoose";
+import { EntryType } from "@shared/enums";
 
 export const mongoIdSchema = z
   .string()

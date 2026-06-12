@@ -1,6 +1,6 @@
 import AggregationModel from "../models/Aggregation.js";
 
-async function getNamedAggregation(
+async function getAggregation(
   profileId,
   aggregationName,
   aggregationParams,
@@ -41,4 +41,4 @@ async function _setAggregationResult(
 
 export { _setAggregationResult };
 
-export default { getNamedAggregation };
+export default { getAggregation };

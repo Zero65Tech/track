@@ -28,20 +28,9 @@ const aggregationSchema = new mongoose.Schema(
   },
   {
     collection: "aggregations",
-    discriminatorKey: "name",
     versionKey: false,
     timestamps: true,
   },
-);
-
-aggregationSchema.discriminator(
-  AggregationName.CUSTOM.id,
-  new mongoose.Schema({
-    pipeline: {
-      type: mongoose.Schema.Types.Mixed,
-      required: true,
-    },
-  }),
 );
 
 export default mongoose.model("Aggregation", aggregationSchema);

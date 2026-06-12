@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { mongoIdSchema, timeStampSchema, pageSizeSchema } from "./common.js";
+import {
+  mongoIdSchema,
+  entryTypeSchema,
+  timeStampSchema,
+  pageSizeSchema,
+} from "./common.js";
 
 export const getTriggersSchema = z
   .object({
