@@ -1,13 +1,3 @@
-## MongoDB
-
-- Naming Convension
-  - Database - snake_case
-  - Collection - snake_case, plural nouns
-  - Field - camelCase
-- Treat **profileId** as sub-collection name
-- Attributes == Book, Head, Tag, Source
-- Attribute Items = Book Collection, Head Collection, Tag Collection, Source Collection
-
 ## Environments (Stages)
 
 - Development (**alpha**)
@@ -27,20 +17,30 @@
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
 
-# Development
+## MongoDB
 
-There is no difference between development and production in Node.js, i.e., there are no specific settings you need to apply to make Node.js work in a production configuration. However, a few libraries in the npm registry recognize using the `NODE_ENV` variable and default it to a `development` setting. Always run your Node.js with the `NODE_ENV=production` set.
+- Naming Convension
+  - Database - snake_case
+  - Collection - snake_case, plural nouns
+  - Field - camelCase
+- Treat **profileId** as sub-collection name
+- Attributes == Book, Head, Tag, Source
+- Attribute Items = Book Collection, Head Collection, Tag Collection, Source Collection
 
-function names starting with '\_' are meant to be used internally, i.e. not called by any controller, to be called only by other services. private functions typically have session as one of the argument
-
-### NodeJs Version (24)
+## NodeJs Version (24)
 
 - Devcontainer
 - GitHub Workflows
 - Dockerfile
 - Terraform
 
-### Checklist
+## Backend Development
+
+- There is no difference between development and production in Node.js, i.e., there are no specific settings you need to apply to make Node.js work in a production configuration. However, a few libraries in the npm registry recognize using the `NODE_ENV` variable and default it to a `development` setting. Always run your Node.js with the `NODE_ENV=production` set.
+
+- function names starting with '\_' are meant to be used internally, i.e. not called by any controller, to be called only by other services. private functions typically have session as one of the argument
+
+## Checklist
 
 - `devices`
   - [x] Logged-in User always claims the device
