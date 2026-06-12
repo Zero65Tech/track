@@ -1,25 +1,44 @@
 import assert from "assert";
-
 import {
   TriggerType,
   TriggerState,
   CoinLedgerRef,
   CoinLedgerType,
 } from "@shared/enums";
-
 import transaction from "../utils/transaction.js";
 import TriggerModel from "../models/Trigger.js";
 import { calculateAggregationCoins } from "../config/coin.js";
-
 import { _sendFirebaseMessage } from "./userService.js";
 import { _getCachedProfile } from "./profileService.js";
 import { _aggregateEntries } from "./entryService.js";
-import { _setNamedAggregationResult } from "./aggregationService.js";
+import { _setAggregationResult } from "./aggregationService.js";
 import {
   _getCoinLedgerBalance,
   _initialiseCoinLedger,
   _deductCoinsFromLedger,
 } from "./coinService.js";
+
+async function getTriggers(profileId, lastCreatedAt, pageSize) {
+  let query = {
+    state: { $ne: TriggerState.COMPLETED.id },
+  };
+
+  const allButCompletedDataArr = lastCreatedAt
+    ? []
+    : await TriggerModel.find(query).sort({ createdAt: -1 }).lean();
+
+  query.state = TriggerState.COMPLETED.id;
+  if (lastCreatedAt) {
+    query.createdAt = { $lt: lastCreatedAt };
+  }
+
+  const completedDataArr = await TriggerModel.find(query)
+    .sort({ createdAt: -1 })
+    .limit(pageSize)
+    .lean();
+
+  return [...allButCompletedDataArr, ...completedDataArr];
+}
 
 async function _createProfileCreatedTrigger({ profileId }, session) {
   await TriggerModel.create(
@@ -61,9 +80,6 @@ async function createDataAggregationTrigger(
     data = doc.toObject();
   }
 
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
   return data;
 }
 
@@ -148,7 +164,8 @@ async function _processTrigger(triggerData) {
           },
         },
       );
-      assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+
+      assert.equal(updateResult.modifiedCount, 1); // 💪🏻
 
       await _sendFirebaseMessage(
         [profile.owner, ...profile.editors],
@@ -167,11 +184,7 @@ async function _processTrigger(triggerData) {
       return;
     }
 
-    if (triggerData.aggregationName === "custom") {
-      // TODO: TriggerType.DATA_AGGREGATION, custom
-    } else {
-      await _processNamedDataAggregationTrigger(triggerData, profile);
-    }
+    await _processDataAggregationTrigger(triggerData, profile);
 
     await _sendFirebaseMessage(
       [profile.owner, ...profile.editors],
@@ -207,12 +220,12 @@ async function _processProfileCreatedTrigger(triggerData) {
       { $set: { state: TriggerState.COMPLETED.id } },
     ).session(session);
 
-    // If modifiedCount is 0, throw error to rollback the entire transaction.
-    assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+    // If modifiedCount is not 1, throw error to rollback the entire transaction.
+    assert.equal(updateResult.modifiedCount, 1);
   });
 }
 
-async function _processNamedDataAggregationTrigger(triggerData) {
+async function _processDataAggregationTrigger(triggerData) {
   const aggregationResult = await _aggregateEntries(
     triggerData.profileId,
     triggerData.aggregationName,
@@ -227,7 +240,7 @@ async function _processNamedDataAggregationTrigger(triggerData) {
   const coinsToDeduct = calculateAggregationCoins(entriesProcessed);
 
   await transaction(async (session) => {
-    await _setNamedAggregationResult(
+    await _setAggregationResult(
       {
         profileId: triggerData.profileId,
         aggregationName: triggerData.aggregationName,
@@ -250,7 +263,7 @@ async function _processNamedDataAggregationTrigger(triggerData) {
     const updateResult = await TriggerModel.updateOne(
       {
         _id: triggerData._id,
-        type: TriggerType.DATA_AGGREGATION.id, // without this Mongoose won't $set 'result'
+        type: TriggerType.DATA_AGGREGATION.id, // without this Mongoose won't $set 'aggregationResult'
         state: TriggerState.RUNNING.id,
       },
       {
@@ -261,11 +274,11 @@ async function _processNamedDataAggregationTrigger(triggerData) {
       },
     ).session(session);
 
-    // If modifiedCount is 0, throw error to rollback the entire transaction.
-    assert.notEqual(updateResult.modifiedCount, 0); // 💪🏻
+    // If modifiedCount is not 1, throw error to rollback the entire transaction.
+    assert.equal(updateResult.modifiedCount, 1);
   });
 }
 
 export { _createProfileCreatedTrigger, _processTriggers };
 
-export default { createDataAggregationTrigger };
+export default { getTriggers, createDataAggregationTrigger };

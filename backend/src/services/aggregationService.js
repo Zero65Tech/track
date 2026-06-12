@@ -1,8 +1,4 @@
-import { AggregationName } from "@shared/enums";
-
 import AggregationModel from "../models/Aggregation.js";
-
-// Named
 
 async function getNamedAggregation(
   profileId,
@@ -32,7 +28,7 @@ async function getNamedAggregation(
   return data;
 }
 
-async function _setNamedAggregationResult(
+async function _setAggregationResult(
   { profileId, aggregationName, aggregationParams, aggregationResult },
   session,
 ) {
@@ -43,50 +39,6 @@ async function _setNamedAggregationResult(
   ).session(session);
 }
 
-// Custom
+export { _setAggregationResult };
 
-async function createCustomAggregation(profileId, aggregationPipeline) {
-  const doc = await AggregationModel.create({
-    profileId,
-    name: AggregationName.CUSTOM.id,
-    pipeline: aggregationPipeline,
-  });
-
-  const data = doc.toObject();
-  data.id = doc._id.toString();
-  delete data["_id"];
-
-  return data;
-}
-
-async function getCustomAggregation(profileId, aggregationId) {
-  const data = await AggregationModel.findOne({
-    profileId,
-    name: AggregationName.CUSTOM.id,
-    _id: aggregationId,
-  }).lean();
-
-  data.id = data._id.toString();
-  delete data["_id"];
-
-  return data;
-}
-
-async function _setCustomAggregationResult(
-  { profileId, aggregationId, aggregationResult },
-  session,
-) {
-  await AggregationModel.updateOne(
-    { profileId, name: AggregationName.CUSTOM.id, _id: aggregationId },
-    { $set: { result: aggregationResult } },
-    { upsert: true },
-  ).session(session);
-}
-
-export { _setNamedAggregationResult, _setCustomAggregationResult };
-
-export default {
-  getNamedAggregation,
-  createCustomAggregation,
-  getCustomAggregation,
-};
+export default { getNamedAggregation };

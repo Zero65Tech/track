@@ -1,10 +1,20 @@
 import { z } from "zod";
+import { mongoIdSchema, timeStampSchema, pageSizeSchema } from "./common.js";
 
-export const createDataAggregationTriggerSchema = z.object({
-  aggregationName: z.string().trim().min(1, "'aggregationName' is required"),
-  type: z.string().trim().optional(),
-  bookId: z.string().trim().optional(),
-  headId: z.string().trim().optional(),
-  tagId: z.string().trim().optional(),
-  sourceId: z.string().trim().optional(),
-}).strict();
+export const getTriggersSchema = z
+  .object({
+    lastCreatedAt: timeStampSchema.optional(),
+    pageSize: pageSizeSchema.optional(),
+  })
+  .strict();
+
+export const createDataAggregationTriggerSchema = z
+  .object({
+    aggregationName: z.string().trim().min(1, "'aggregationName' is required"),
+    entryType: entryTypeSchema.optional(),
+    bookId: mongoIdSchema.optional(),
+    headId: mongoIdSchema.optional(),
+    tagId: mongoIdSchema.optional(),
+    sourceId: mongoIdSchema.optional(),
+  })
+  .strict();
