@@ -868,6 +868,47 @@
 			"name": "triggers",
 			"item": [
 				{
+					"name": "list",
+					"id": "2ece4c3c-2404-4dc4-bc47-fc219c11465b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"aggregationName\": \"balances_by_source_week\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{track}}/api/profiles/:profileId/triggers/data-aggregation",
+							"host": [
+								"{{track}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profileId",
+								"triggers",
+								"data-aggregation"
+							],
+							"variable": [
+								{
+									"id": "aca5c92f-4267-4164-a97d-2eabbdac63b4",
+									"key": "profileId",
+									"value": "6939b520ad27169f5c7cd75e"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "data-aggregation",
 					"id": "db766ab9-304a-4dd1-8711-0ada5b09042f",
 					"protocolProfileBehavior": {
