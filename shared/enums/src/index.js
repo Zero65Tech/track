@@ -91,7 +91,6 @@ const EntryType = Object.freeze({
   DEBIT: Object.freeze({ id: "debit", name: "Debit", sign: "negative" }),
   TAX: Object.freeze({ id: "tax", name: "Tax", sign: "negative" }),
   REFUND: Object.freeze({ id: "refund", name: "Refund", sign: "positive" }),
-
 });
 
 const EntryState = Object.freeze({

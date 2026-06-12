@@ -100,7 +100,7 @@ app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAuditLogs);
 app.get(`${API_PREFIX}/triggers`, triggerController.getTriggers);
 app.post(`${API_PREFIX}/triggers/data-aggregation`, triggerController.createDataAggregationTrigger); // prettier-ignore
 
-app.get(`${API_PREFIX}/aggregations/:name/result`, aggregationController.getAggregationResult); // prettier-ignore
+app.get(`${API_PREFIX}/aggregations/:aggregationName/result`, aggregationController.getAggregationResult); // prettier-ignore
 
 app.use((err, req, res, next) => {
   console.log(err);

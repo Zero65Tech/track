@@ -18,3 +18,4 @@ export {
   getTriggersSchema,
   createDataAggregationTriggerSchema,
 } from "./trigger.js";
+export { getAggregationResultSchema } from "./aggregation.js";

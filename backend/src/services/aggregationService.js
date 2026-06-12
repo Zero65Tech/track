@@ -1,31 +1,8 @@
 import AggregationModel from "../models/Aggregation.js";
 
-async function getAggregation(
-  profileId,
-  aggregationName,
-  aggregationParams,
-) {
-  const query = { profileId, name: aggregationName };
-
-  if (Object.keys(aggregationParams).length === 0) {
-    query.params = {};
-  } else {
-    // Dot-notation is required because Mongoose only auto-casts field values
-    // (e.g. string → ObjectId) when querying by individual path ("params.bookId"),
-    // not when matching the whole subdocument ({ params: { bookId: "..." } }).
-    for (const key in aggregationParams)
-      query[`params.${key}`] = aggregationParams[key];
-  }
-
-  const data = await AggregationModel.findOne(query).lean();
-
-  if (!data) {
-    return null;
-  }
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  return data;
+async function getAggregation(profileId, aggregationName, aggregationParams) {
+  const query = { profileId, name: aggregationName, params: aggregationParams };
+  return await AggregationModel.findOne(query).lean();
 }
 
 async function _setAggregationResult(
