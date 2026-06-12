@@ -1,18 +1,18 @@
 ## Environments (Stages)
 
-- Development (**alpha**)
+- Development (**alpha**) - https://localhost:8080/
   - Local Machine / GitHub Codespaces, .env.aplha.local
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
-- Testing (**beta**)
+- Testing (**beta**) - https://zero65-test.web.app/
   - GCP `zero65-test` → Google Cloud Build, Firebase Hosting, Cloud Run, Secret Manager
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
-- Staging (**gamma**)
+- Staging (**gamma**) - https://localhost:8080/
   - Local Machine / GitHub Codespaces, .env.gamma.local
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
-- Production (**prod**)
+- Production (**prod**) - https://track-v5.web.app/
   - GCP `zero65-track` → Google Cloud Build, Firebase Hosting, Cloud Run, Secret Manager
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
@@ -25,6 +25,7 @@
   - Field - camelCase
 - Treat **profileId** as sub-collection name
 - Attributes == Book, Head, Tag, Source
+- Organizers == Group, Folder
 - Attribute Items = Book Collection, Head Collection, Tag Collection, Source Collection
 
 ## NodeJs Version (24)
@@ -40,21 +41,27 @@
 
 - function names starting with '\_' are meant to be used internally, i.e. not called by any controller, to be called only by other services. private functions typically have session as one of the argument
 
-## Checklist
+## Project Guidelines (Checklist)
 
+### User Management
+
+- Users
+  - [x] Managed by Firebase Authentication
 - `devices`
   - [x] Logged-in User always claims the device
-- Users
+
+### Core System
+
 - `profiles`
   - [x] CRU APIs
   - [ ] Disallow un-deleting after grace period
   - [ ] Clean-up **deleted** Profiles after grace period
-- Core Components
+- Attributes & Organizers
   - `boooks`, `heads`, `tags`, `sources`
     - [x] CRUD APIs
-  - `folders`
-    - [x] CRUD APIs
   - `groups`
+    - [x] CRUD APIs
+  - `folders`
     - [x] CRUD APIs
   - [ ] Do not allow deleting if in use
   - [ ] Disallow un-deleting after grace period
@@ -70,16 +77,17 @@
   - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
   - [ ] Disallow all APIs for **deleted** Profiles
   - [ ] Allow Read APIs for SYSTEM_USER_ID **template** Profiles
-- `audit_logs` (Profiles, Core Components)
+- `audit_logs`
   - [ ] Read APIs
-- Purchase
-- Promotions
+
+### Aggregations & Cleanups
+
 - Offline Processing
-  - Automations
-    - [ ] Clean-up **deleted** Profiles after wating period
   - `triggers`
     - [x] Create & Process APIs
     - [x] FCM Integration
+  - Automations
+    - [ ] Clean-up **deleted** Profiles after wating period
   - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
   - [ ] Disallow all APIs for **deleted** Profiles
   - [ ] Allow all APIs for SYSTEM_USER_ID **template** Profiles
@@ -91,6 +99,13 @@
   - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
   - [ ] Disallow all APIs for **deleted** Profiles
   - [ ] Allow all APIs for SYSTEM_USER_ID **template** Profiles
+
+### Monetisation
+
+- Purchase
+- Promotions
+
+<br/><br/><br/>
 
 # Sequence Diagrams
 
