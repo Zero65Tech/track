@@ -1,18 +1,17 @@
-# Nomenclature
+## MongoDB
 
-### MongoDB
-
-- Database - snake_case
-- Collection - snake_case, plural nouns
-- Field - camelCase
-- Treak *profileId* as sub-collection name
-- Attributes == Entry Fields == Book, Head, Tag, Source
+- Naming Convension
+  - Database - snake_case
+  - Collection - snake_case, plural nouns
+  - Field - camelCase
+- Treat **profileId** as sub-collection name
+- Attributes == Book, Head, Tag, Source
 - Attribute Items = Book Collection, Head Collection, Tag Collection, Source Collection
 
-### Environments (Stages)
+## Environments (Stages)
 
 - Development (**alpha**)
-  - Local Machine / GitHub Codespaces
+  - Local Machine / GitHub Codespaces, .env.aplha.local
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
 - Testing (**beta**)
@@ -20,7 +19,7 @@
   - GCP `zero65-test` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Test` → DB `track`
 - Staging (**gamma**)
-  - Local Machine / GitHub Codespaces
+  - Local Machine / GitHub Codespaces, .env.gamma.local
   - GCP `zero65-track` → Firebase Authentication
   - MongoDB Atlas → Project `Zero65 Prod` → DB `track`
 - Production (**prod**)
