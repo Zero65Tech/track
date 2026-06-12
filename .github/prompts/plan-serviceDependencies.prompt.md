@@ -89,3 +89,30 @@ Provide 4 Mermaid code blocks with these titles:
 4. **Show relationships** - Include any service-to-service calls even if not directly called by controllers
 5. **Circular dependencies are OK** - profileService ↔ triggerService is acceptable for event-driven design
 
+## Output Instructions
+
+Save the generated diagrams to: `docs/service-dependencies.md`
+
+Format the output file as follows:
+```markdown
+# Track Backend Service Dependency Diagrams
+
+## Part 1: Device & User Management Controllers
+
+[Mermaid diagram code here]
+
+## Part 2: Entry Attributes & Supporting CRUD
+
+[Mermaid diagram code here]
+
+## Part 3: Core Entry CRUD & Trigger Management
+
+[Mermaid diagram code here]
+
+## Part 4: Offline Trigger Processing
+
+[Mermaid diagram code here]
+```
+
+Each diagram should be a complete, standalone Mermaid code block (wrapped in triple backticks with `mermaid` language identifier).
+
