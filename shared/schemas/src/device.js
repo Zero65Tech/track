@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { fcmTokenSchema } from "@shared/schemas";
+import { fcmTokenSchema } from "./common.js";
 
 export const createDeviceSchema = z
   .object({

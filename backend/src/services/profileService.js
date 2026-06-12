@@ -29,19 +29,8 @@ async function getAccessibleProfiles(userId) {
     $or: [{ owner: userId }, { editors: userId }, { viewers: userId }],
   }).lean();
 
-  for (let i = 0; i < dataArr.length; i++) {
-    profileDataCache.set(dataArr[i]._id.toString(), dataArr[i]);
-    dataArr[i] = {
-      id: dataArr[i]._id.toString(),
-      name: dataArr[i].name,
-      access:
-        dataArr[i].owner == userId
-          ? ProfileAccess.OWNER.id
-          : dataArr[i].editors && dataArr[i].editors.includes(userId)
-            ? ProfileAccess.EDITOR.id
-            : ProfileAccess.VIEWER.id,
-      state: dataArr[i].state,
-    };
+  for (const data of dataArr) {
+    profileDataCache.set(data._id.toString(), data);
   }
 
   return dataArr;
@@ -53,14 +42,8 @@ async function getTemplateProfiles() {
     state: ProfileState.TEMPLATE.id,
   }).lean();
 
-  for (let i = 0; i < dataArr.length; i++) {
-    profileDataCache.set(dataArr[i]._id.toString(), dataArr[i]);
-    dataArr[i] = {
-      id: dataArr[i]._id.toString(),
-      name: dataArr[i].name,
-      access: ProfileAccess.VIEWER.id,
-      state: ProfileState.TEMPLATE.id,
-    };
+  for (const data of dataArr) {
+    profileDataCache.set(data._id.toString(), data);
   }
 
   return dataArr;
@@ -86,12 +69,7 @@ async function createProfile(userId, name) {
 
   profileDataCache.set(data._id.toString(), data);
 
-  return {
-    id: data._id.toString(),
-    name: data.name,
-    access: ProfileAccess.OWNER.id,
-    state: data.state,
-  };
+  return data;
 }
 
 async function _updateProfile({ profileId, updates }, session) {
@@ -128,12 +106,7 @@ async function updateProfile(userId, profileId, updates) {
 
   profileDataCache.set(data._id.toString(), data);
 
-  return {
-    id: data._id.toString(),
-    name: data.name,
-    access: ProfileAccess.OWNER.id,
-    state: data.state,
-  };
+  return data;
 }
 
 export { _getCachedProfile, _updateProfile };

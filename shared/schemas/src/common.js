@@ -1,6 +1,6 @@
 import { z } from "zod";
 import mongoose from "mongoose";
-import { EntryType } from "@shared/enums";
+import { ProfileState, EntryType } from "@shared/enums";
 
 export const mongoIdSchema = z
   .string()
@@ -8,9 +8,18 @@ export const mongoIdSchema = z
 
 export const fcmTokenSchema = z.string().trim().min(1, "Required");
 
+export const nameSchema = z
+  .string()
+  .trim()
+  .min(1, "Required")
+  .max(255, "Cannot exceed 255 characters");
+
 export const dateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be in YYYY-MM-DD format");
+
+const profileStateEnum = Object.values(ProfileState).map((state) => state.id);
+export const profileStateSchema = z.string().pipe(z.enum(profileStateEnum));
 
 const entryTypeEnum = Object.values(EntryType).map((state) => state.id);
 export const entryTypeSchema = z.string().pipe(z.enum(entryTypeEnum));

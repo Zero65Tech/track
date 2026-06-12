@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { timeStampSchema, pageSizeSchema } from "./common.js";
 
 export const getAuditLogsSchema = z
   .object({
