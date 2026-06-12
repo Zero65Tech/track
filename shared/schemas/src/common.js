@@ -6,6 +6,8 @@ export const mongoIdSchema = z
   .string()
   .regex(/^[0-9a-f]{24}$/, "Invalid ObjectId");
 
+export const fcmTokenSchema = z.string().trim().min(1, "Required");
+
 export const dateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Must be in YYYY-MM-DD format");
