@@ -34,6 +34,8 @@ export const useTriggerStore = defineStore('trigger', () => {
     watch(
         () => profileStore.activeProfile,
         async () => {
+            // NOTE: This may not work as expected if the user switches profiles quickly,
+            // but it should be good enough for now. We can improve this later if needed.
             if (inFlightRequest) {
                 await inFlightRequest;
             }

@@ -20,6 +20,7 @@ async function getTriggers(req, res) {
   for (const trigger of triggers) {
     trigger.id = trigger._id.toString();
     delete trigger._id;
+    delete trigger.profileId;
   }
 
   const lastCreatedAt = triggers.length

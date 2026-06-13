@@ -20,6 +20,7 @@ import {
 
 async function getTriggers(profileId, lastCreatedAt, pageSize) {
   let query = {
+    profileId: profileId,
     state: { $ne: TriggerState.COMPLETED.id },
   };
 
