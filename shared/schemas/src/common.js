@@ -1,4 +1,4 @@
-import { EntryType, ProfileState } from "@shared/enums";
+import { EntryType, EntryState,ProfileState } from "@shared/enums";
 import { z } from "zod";
 
 export const mongoIdSchema = z
@@ -22,8 +22,11 @@ export const dateSchema = z
 const profileStateEnum = Object.values(ProfileState).map((state) => state.id);
 export const profileStateSchema = z.string().pipe(z.enum(profileStateEnum));
 
-const entryTypeEnum = Object.values(EntryType).map((state) => state.id);
+const entryTypeEnum = Object.values(EntryType).map((type) => type.id);
 export const entryTypeSchema = z.string().pipe(z.enum(entryTypeEnum));
+
+const entryStateEnum = Object.values(EntryState).map((state) => state.id);
+export const entryStateSchema = z.string().pipe(z.enum(entryStateEnum));
 
 export const amountSchema = z.number().finite("Must be a finite number");
 

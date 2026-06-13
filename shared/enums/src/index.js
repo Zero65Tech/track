@@ -65,6 +65,7 @@ const DataSource = Object.freeze({
   MIGRATION_SCRIPT_V1_0: "Migration Script v1.0",
 });
 
+// prettier-ignore
 const EntryType = Object.freeze({
 
   INCOME: Object.freeze({ id: "income", name: "Income", sign: "positive" }),
@@ -205,15 +206,15 @@ const CoinLedgerType = Object.freeze({
 });
 
 export {
-  ProfileAccess,
-  ProfileState,
-  DataSource,
-  EntryType,
-  EntryState,
-  EntryFieldState,
-  TriggerType,
-  TriggerState,
   AggregationName,
   CoinLedgerRef,
   CoinLedgerType,
+  DataSource,
+  EntryFieldState,
+  EntryState,
+  EntryType,
+  ProfileAccess,
+  ProfileState,
+  TriggerState,
+  TriggerType,
 };
