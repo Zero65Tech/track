@@ -107,7 +107,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         state.error.value = null;
 
         try {
-            const { result, timestamp } = await aggregationService.getNamedAggregationResult({ profileId, aggregationName: state._name, aggregationParams: state._params }, abortController.signal);
+            const { result, timestamp } = await aggregationService.getAggregationResult({ profileId, aggregationName: state._name, aggregationParams: state._params }, abortController.signal);
             if (timestamp === null || _isStale(timestamp)) {
                 triggerAggregationUpdate(stateKey);
             }
