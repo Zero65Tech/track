@@ -39,6 +39,11 @@ const router = createRouter({
                     component: () => import('@/views/SourceEntries.ai.vue')
                 },
                 {
+                    path: '/triggers',
+                    name: 'triggers',
+                    component: () => import('@/views/Triggers.vue')
+                },
+                {
                     path: '/dashboard',
                     name: 'dashboard',
                     component: () => import('@/views-demo/Dashboard.vue')

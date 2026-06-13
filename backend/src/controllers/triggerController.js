@@ -23,11 +23,7 @@ async function getTriggers(req, res) {
     delete trigger.profileId;
   }
 
-  const lastCreatedAt = triggers.length
-    ? triggers[triggers.length - 1].createdAt.toISOString()
-    : null;
-
-  sendData(res, { triggers: triggers, lastCreatedAt: lastCreatedAt });
+  sendData(res, { triggers });
 }
 
 async function createDataAggregationTrigger(req, res) {
