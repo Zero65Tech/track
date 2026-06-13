@@ -12,6 +12,12 @@ async function getFolders(req, res) {
     new mongoose.Types.ObjectId(req.params.profileId),
   );
 
+  for (let folder of folders) {
+    folder.id = folder._id.toString();
+    delete folder["_id"];
+    delete folder["profileId"];
+  }
+
   sendData(res, { folders });
 }
 
@@ -29,6 +35,10 @@ async function createFolder(req, res) {
     new mongoose.Types.ObjectId(req.params.profileId),
     data,
   );
+
+  folder.id = folder._id.toString();
+  delete folder["_id"];
+  delete folder["profileId"];
 
   sendData(res, { folder }, "Folder created successfully.");
 }
@@ -48,6 +58,10 @@ async function updateFolder(req, res) {
     new mongoose.Types.ObjectId(req.params.folderId),
     data,
   );
+
+  folder.id = folder._id.toString();
+  delete folder["_id"];
+  delete folder["profileId"];
 
   sendData(res, { folder }, "Folder updated successfully.");
 }

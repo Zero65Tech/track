@@ -9,15 +9,7 @@ import {
 } from "./auditLogService.js";
 
 async function getGroups(profileId) {
-  const dataArr = await GroupModel.find({ profileId }).lean();
-
-  for (let data of dataArr) {
-    data.id = data._id.toString();
-    delete data["_id"];
-    delete data["profileId"];
-  }
-
-  return dataArr;
+  return await GroupModel.find({ profileId }).lean();
 }
 
 async function createGroup(userId, profileId, data) {
@@ -33,10 +25,6 @@ async function createGroup(userId, profileId, data) {
 
     return data;
   });
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
 
   return data;
 }
@@ -64,10 +52,6 @@ async function updateGroup(userId, profileId, groupId, updates) {
 
     return newData;
   });
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
 
   return data;
 }

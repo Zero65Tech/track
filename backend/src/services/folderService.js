@@ -9,17 +9,7 @@ import {
 } from "./auditLogService.js";
 
 async function getFolders(profileId) {
-  const dataArr = await FolderModel.find({ profileId })
-    .sort({ sortOrder: 1 })
-    .lean();
-
-  for (let data of dataArr) {
-    data.id = data._id.toString();
-    delete data["_id"];
-    delete data["profileId"];
-  }
-
-  return dataArr;
+  return await FolderModel.find({ profileId }).sort({ sortOrder: 1 }).lean();
 }
 
 async function createFolder(userId, profileId, data) {
@@ -35,10 +25,6 @@ async function createFolder(userId, profileId, data) {
 
     return data;
   });
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
 
   return data;
 }
@@ -66,10 +52,6 @@ async function updateFolder(userId, profileId, folderId, updates) {
 
     return newData;
   });
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
 
   return data;
 }

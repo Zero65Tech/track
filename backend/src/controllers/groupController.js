@@ -12,6 +12,12 @@ async function getGroups(req, res) {
     new mongoose.Types.ObjectId(req.params.profileId),
   );
 
+  for (let group of groups) {
+    group.id = group._id.toString();
+    delete group["_id"];
+    delete group["profileId"];
+  }
+
   sendData(res, { groups });
 }
 
@@ -31,6 +37,10 @@ async function createGroup(req, res) {
     new mongoose.Types.ObjectId(req.params.profileId),
     data,
   );
+
+  group.id = group._id.toString();
+  delete group["_id"];
+  delete group["profileId"];
 
   sendData(res, { group }, "Group created successfully.");
 }
@@ -52,6 +62,10 @@ async function updateGroup(req, res) {
     new mongoose.Types.ObjectId(req.params.groupId),
     data,
   );
+
+  group.id = group._id.toString();
+  delete group["_id"];
+  delete group["profileId"];
 
   sendData(res, { group }, "Group updated successfully.");
 }
