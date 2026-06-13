@@ -1,22 +1,20 @@
 import express from "express";
 
-import authMiddleware from "./middlewares/auth.js";
 import accessMiddleware from "./middlewares/access.js";
+import authMiddleware from "./middlewares/auth.js";
 
+import aggregationController from "./controllers/aggregationController.js";
+import auditLogController from "./controllers/auditLogController.js";
+import bookController from "./controllers/bookController.js";
 import deviceController from "./controllers/deviceController.js";
-import profileController from "./controllers/profileController.js";
-import {
-  bookController,
-  headController,
-  tagController,
-  sourceController,
-} from "./controllers/EntryFields.js";
+import entryController from "./controllers/entryController.js";
 import folderController from "./controllers/folderController.js";
 import groupController from "./controllers/groupController.js";
-import entryController from "./controllers/entryController.js";
-import auditLogController from "./controllers/auditLogController.js";
+import headController from "./controllers/headController.js";
+import profileController from "./controllers/profileController.js";
+import sourceController from "./controllers/sourceController.js";
+import tagController from "./controllers/tagController.js";
 import triggerController from "./controllers/triggerController.js";
-import aggregationController from "./controllers/aggregationController.js";
 
 const app = express();
 app.use(express.json());
@@ -53,25 +51,25 @@ app.use(API_PREFIX, accessMiddleware);
 
 app.patch(API_PREFIX, profileController.updateProfile);
 
-app.get(`${API_PREFIX}/books`, bookController.getAll);
-app.post(`${API_PREFIX}/books`, bookController.create);
-app.patch(`${API_PREFIX}/books/:id`, bookController.update);
-app.delete(`${API_PREFIX}/books/:id`, bookController.remove);
+app.get(`${API_PREFIX}/books`, bookController.getBooks);
+app.post(`${API_PREFIX}/books`, bookController.createBook);
+app.patch(`${API_PREFIX}/books/:bookId`, bookController.updateBook);
+app.delete(`${API_PREFIX}/books/:bookId`, bookController.deleteBook);
 
-app.get(`${API_PREFIX}/heads`, headController.getAll);
-app.post(`${API_PREFIX}/heads`, headController.create);
-app.patch(`${API_PREFIX}/heads/:id`, headController.update);
-app.delete(`${API_PREFIX}/heads/:id`, headController.remove);
+app.get(`${API_PREFIX}/heads`, headController.getHeads);
+app.post(`${API_PREFIX}/heads`, headController.createHead);
+app.patch(`${API_PREFIX}/heads/:headId`, headController.updateHead);
+app.delete(`${API_PREFIX}/heads/:headId`, headController.deleteHead);
 
-app.get(`${API_PREFIX}/tags`, tagController.getAll);
-app.post(`${API_PREFIX}/tags`, tagController.create);
-app.patch(`${API_PREFIX}/tags/:id`, tagController.update);
-app.delete(`${API_PREFIX}/tags/:id`, tagController.remove);
+app.get(`${API_PREFIX}/tags`, tagController.getTags);
+app.post(`${API_PREFIX}/tags`, tagController.createTag);
+app.patch(`${API_PREFIX}/tags/:tagId`, tagController.updateTag);
+app.delete(`${API_PREFIX}/tags/:tagId`, tagController.deleteTag);
 
-app.get(`${API_PREFIX}/sources`, sourceController.getAll);
-app.post(`${API_PREFIX}/sources`, sourceController.create);
-app.patch(`${API_PREFIX}/sources/:id`, sourceController.update);
-app.delete(`${API_PREFIX}/sources/:id`, sourceController.remove);
+app.get(`${API_PREFIX}/sources`, sourceController.getSources);
+app.post(`${API_PREFIX}/sources`, sourceController.createSource);
+app.patch(`${API_PREFIX}/sources/:sourceId`, sourceController.updateSource);
+app.delete(`${API_PREFIX}/sources/:sourceId`, sourceController.deleteSource);
 
 app.get(`${API_PREFIX}/folders`, folderController.getFolders);
 app.post(`${API_PREFIX}/folders`, folderController.createFolder);
