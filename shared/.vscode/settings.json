@@ -1,8 +1,9 @@
 {
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
+    "index.js": "common.js",
     "profile.js": "auditLog.js",
-    "entry.js": "entryFields.js, folder.js, group.js",
+    "entry.js": "book.js, head.js, tag.js, source.js, group.js, folder.js",
     "trigger.js": "aggregation.js"
   },
   "editor.codeActionsOnSave": {

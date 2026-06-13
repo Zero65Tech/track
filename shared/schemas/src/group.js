@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { booleanSchema, mongoIdSchema, nameSchema } from "./common.js";
+import { mongoIdSchema, nameSchema } from "./common.js";
 
 export const createGroupSchema = z
   .object({
@@ -11,7 +11,7 @@ export const createGroupSchema = z
 export const updateGroupSchema = z
   .object({
     name: nameSchema.optional(),
-    starred: booleanSchema.optional(),
+    starred: z.boolean().optional(),
     folderIds: z.array(mongoIdSchema).optional(),
   })
   .strict()
