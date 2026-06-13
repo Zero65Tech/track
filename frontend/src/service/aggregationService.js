@@ -6,10 +6,12 @@ export const aggregationService = {
             params: aggregationParams,
             signal: abortControllerSignal
         });
-        const apiResponseData = apiResponse.data.data;
-        if (apiResponseData.timestamp) {
-            apiResponseData.timestamp = new Date(apiResponseData.timestamp);
+
+        let { result, timestamp } = apiResponse.data.data;
+        if (timestamp) {
+            timestamp = new Date(timestamp);
         }
-        return apiResponseData;
+
+        return { result, timestamp };
     }
 };
