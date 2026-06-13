@@ -1,4 +1,4 @@
-import { EntryFieldState } from "@shared/enums";
+import { AttributeState } from "@shared/enums";
 import BookModel from "../models/Book.js";
 import transaction from "../utils/transaction.js";
 import {
@@ -13,7 +13,7 @@ async function getBooks(profileId) {
 
 async function createBook(userId, profileId, data) {
   data["profileId"] = profileId;
-  data["state"] = EntryFieldState.ACTIVE.id;
+  data["state"] = AttributeState.ACTIVE.id;
   data = await transaction(async (session) => {
     const [doc] = await BookModel.create([data], { session });
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { EntryFieldState, DataSource } from "@shared/enums";
+import { AttributeState, DataSource } from "@shared/enums";
 
 const bookSchema = new mongoose.Schema(
   {
@@ -44,7 +44,7 @@ const bookSchema = new mongoose.Schema(
 
     state: {
       type: String,
-      enum: Object.values(EntryFieldState).map((s) => s.id),
+      enum: Object.values(AttributeState).map((s) => s.id),
       required: true,
     },
   },

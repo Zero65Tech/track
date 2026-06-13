@@ -1,4 +1,4 @@
-import { EntryFieldState } from "@shared/enums";
+import { AttributeState } from "@shared/enums";
 import HeadModel from "../models/Head.js";
 import transaction from "../utils/transaction.js";
 import {
@@ -13,7 +13,7 @@ async function getHeads(profileId) {
 
 async function createHead(userId, profileId, data) {
   data["profileId"] = profileId;
-  data["state"] = EntryFieldState.ACTIVE.id;
+  data["state"] = AttributeState.ACTIVE.id;
   data = await transaction(async (session) => {
     const [doc] = await HeadModel.create([data], { session });
 
@@ -65,7 +65,7 @@ async function deleteHead(profileId, headId, userId) {
       throw new Error(`${HeadModel.modelName} not found !`);
     }
 
-    if (doc.state !== EntryFieldState.DISABLED.id) {
+    if (doc.state !== AttributeState.DISABLED.id) {
       throw new Error(
         `${HeadModel.modelName} in "${doc.state}" state can not be deleted !`,
       );

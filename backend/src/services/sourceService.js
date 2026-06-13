@@ -1,4 +1,4 @@
-import { EntryFieldState } from "@shared/enums";
+import { AttributeState } from "@shared/enums";
 import SourceModel from "../models/Source.js";
 import transaction from "../utils/transaction.js";
 import {
@@ -13,7 +13,7 @@ async function getSources(profileId) {
 
 async function createSource(userId, profileId, data) {
   data["profileId"] = profileId;
-  data["state"] = EntryFieldState.ACTIVE.id;
+  data["state"] = AttributeState.ACTIVE.id;
   data = await transaction(async (session) => {
     const [doc] = await SourceModel.create([data], { session });
 
@@ -65,7 +65,7 @@ async function deleteSource(profileId, sourceId, userId) {
       throw new Error(`${SourceModel.modelName} not found !`);
     }
 
-    if (doc.state !== EntryFieldState.DISABLED.id) {
+    if (doc.state !== AttributeState.DISABLED.id) {
       throw new Error(
         `${SourceModel.modelName} in "${doc.state}" state can not be deleted !`,
       );

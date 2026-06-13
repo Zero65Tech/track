@@ -1,4 +1,4 @@
-import { EntryFieldState } from "@shared/enums";
+import { AttributeState } from "@shared/enums";
 import TagModel from "../models/Tag.js";
 import transaction from "../utils/transaction.js";
 import {
@@ -13,7 +13,7 @@ async function getTags(profileId) {
 
 async function createTag(userId, profileId, data) {
   data["profileId"] = profileId;
-  data["state"] = EntryFieldState.ACTIVE.id;
+  data["state"] = AttributeState.ACTIVE.id;
   data = await transaction(async (session) => {
     const [doc] = await TagModel.create([data], { session });
 
@@ -65,7 +65,7 @@ async function deleteTag(profileId, tagId, userId) {
       throw new Error(`${TagModel.modelName} not found !`);
     }
 
-    if (doc.state !== EntryFieldState.DISABLED.id) {
+    if (doc.state !== AttributeState.DISABLED.id) {
       throw new Error(
         `${TagModel.modelName} in "${doc.state}" state can not be deleted !`,
       );
