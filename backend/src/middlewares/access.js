@@ -1,5 +1,5 @@
-import { sendForbiddenError } from "../utils/response.js";
 import { _getCachedProfile } from "../services/profileService.js";
+import { sendForbiddenError } from "../utils/response.js";
 
 export default async function (req, res, next) {
   const profile = await _getCachedProfile(req.params.profileId);
@@ -7,13 +7,13 @@ export default async function (req, res, next) {
   if (req.user.uid === profile.owner)
     return next(); // prettier-ignore
 
-  if (profile.editors && profile.editors.includes(req.user.uid))
+  if (profile.editors.includes(req.user.uid))
     return next(); // prettier-ignore
 
   if (req.method !== "GET")
-    return sendForbiddenError(res, "You read-only access to this Profile."); // prettier-ignore
+    return sendForbiddenError(res, "You have read-only access to this Profile."); // prettier-ignore
 
-  if (profile.viewers && profile.viewers.includes(req.user.uid))
+  if (profile.viewers.includes(req.user.uid))
     return next(); // prettier-ignore
 
   return sendForbiddenError(res, "You don't have access to this Profile.");

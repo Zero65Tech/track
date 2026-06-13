@@ -1,10 +1,10 @@
 import { createDeviceSchema, updateDeviceSchema } from "@shared/schemas";
+import deviceService from "../services/deviceService.js";
 import {
+  sendBadRequestError,
   sendData,
   sendSuccess,
-  sendBadRequestError,
 } from "../utils/response.js";
-import deviceService from "../services/deviceService.js";
 
 async function createDevice(req, res) {
   const { success, error, data } = createDeviceSchema.safeParse(req.body);
@@ -24,13 +24,13 @@ async function updateDevice(req, res) {
 
   if (!success) return sendBadRequestError(res, error);
 
-  await deviceService.updateDevice(req.params.id, data.fcmToken);
+  await deviceService.updateDevice(req.params.deviceId, data.fcmToken);
 
   return sendSuccess(res);
 }
 
 async function claimDevice(req, res) {
-  await deviceService.claimDevice(req.params.id, req.user.uid);
+  await deviceService.claimDevice(req.params.deviceId, req.user.uid);
   return sendSuccess(res);
 }
 

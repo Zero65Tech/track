@@ -19,31 +19,23 @@ import triggerController from "./controllers/triggerController.js";
 const app = express();
 app.use(express.json());
 
-app.use((req, res, next) => {
-  if (req.body) {
-    if ("_id" in req.body) delete req.body._id;
-    if ("profileId" in req.body) delete req.body.profileId;
-  }
-  next();
-});
-
 let API_PREFIX = "/api";
 
 app.post(`${API_PREFIX}/devices`, deviceController.createDevice);
-app.patch(`${API_PREFIX}/devices/:id`, deviceController.updateDevice);
+app.patch(`${API_PREFIX}/devices/:deviceId`, deviceController.updateDevice);
 
 app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplateProfiles); // prettier-ignore
 
-// NOTE: User must be loggedin for following routes
+// NOTE: USER MUST BE LOGGED IN FOR FOLLOWING ROUTES
 
 app.use(authMiddleware);
 
-app.get(`${API_PREFIX}/devices/:id/claim`, deviceController.claimDevice);
+app.get(`${API_PREFIX}/devices/:deviceId/claim`, deviceController.claimDevice);
 
 app.get(`${API_PREFIX}/profiles`, profileController.getAccessibleProfiles);
 app.post(`${API_PREFIX}/profiles`, profileController.createProfile);
 
-// NOTE: Loggedin User must have access to the Profile for following routes
+// NOTE: LOGGED-IN USER MUST HAVE ACCESS TO THE PROFILE FOR FOLLOWING ROUTES
 
 API_PREFIX = "/api/profiles/:profileId";
 

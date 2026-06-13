@@ -1,8 +1,8 @@
-import { createProfileSchema, updateProfileSchema } from "@shared/schemas";
-import { sendData, sendBadRequestError } from "../utils/response.js";
-import profileService from "../services/profileService.js";
-import mongoose from "mongoose";
 import { ProfileAccess, ProfileState } from "@shared/enums";
+import { createProfileSchema, updateProfileSchema } from "@shared/schemas";
+import mongoose from "mongoose";
+import profileService from "../services/profileService.js";
+import { sendBadRequestError, sendData } from "../utils/response.js";
 
 async function getAccessibleProfiles(req, res) {
   const profiles = await profileService.getAccessibleProfiles(req.user.uid);
@@ -14,7 +14,7 @@ async function getAccessibleProfiles(req, res) {
       access:
         profiles[i].owner == req.user.uid
           ? ProfileAccess.OWNER.id
-          : profiles[i].editors && profiles[i].editors.includes(req.user.uid)
+          : profiles[i].editors.includes(req.user.uid)
             ? ProfileAccess.EDITOR.id
             : ProfileAccess.VIEWER.id,
       state: profiles[i].state,
