@@ -19,6 +19,7 @@ import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';
 import { useTagStore } from '@/stores/tag.store';
+import { useTriggerStore } from '@/stores/trigger.store';
 
 const app = createApp(App);
 app.use(router);
@@ -66,3 +67,7 @@ const tagStore = useTagStore();
 // Initialize source store
 const sourceStore = useSourceStore();
 /* await */ sourceStore.initialize();
+
+// Initialize trigger store
+const triggerStore = useTriggerStore();
+/* await */ triggerStore.initialize();

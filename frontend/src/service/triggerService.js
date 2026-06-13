@@ -1,23 +1,21 @@
 import apiClient from '@/service/apiClient';
 
 export const triggerService = {
-    async getTriggers({ profileId, lastCreatedAt }, abortControllerSignal) {
+    async getTriggers(profileId, lastCreatedAt) {
+        const params = {};
         if (lastCreatedAt) {
-            lastCreatedAt = lastCreatedAt.toISOString();
+            params.lastCreatedAt = lastCreatedAt.toISOString();
         }
 
-        const apiResponse = await apiClient.get(`/profiles/${profileId}/triggers`, {
-            params: { lastCreatedAt },
-            signal: abortControllerSignal
-        });
+        const apiResponse = await apiClient.get(`/profiles/${profileId}/triggers`, { params });
 
-        const { triggers } = apiResponse.data.data;
-        for (const trigger of triggers) {
+        const apiResponseData = apiResponse.data.data;
+        for (const trigger of apiResponseData.triggers) {
             trigger.createdAt = new Date(trigger.createdAt);
             trigger.updatedAt = new Date(trigger.updatedAt);
         }
 
-        return triggers;
+        return apiResponseData;
     },
 
     async createDataAggregationTrigger(profileId, aggregationName, aggregationParams) {
@@ -26,10 +24,10 @@ export const triggerService = {
             ...aggregationParams
         });
 
-        const { trigger } = apiResponse.data.data;
-        trigger.createdAt = new Date(trigger.createdAt);
-        trigger.updatedAt = new Date(trigger.updatedAt);
+        const apiResponseData = apiResponse.data.data;
+        apiResponseData.trigger.createdAt = new Date(apiResponseData.trigger.createdAt);
+        apiResponseData.trigger.updatedAt = new Date(apiResponseData.trigger.updatedAt);
 
-        return trigger;
+        return apiResponseData;
     }
 };
