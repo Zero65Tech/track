@@ -71,27 +71,24 @@ app.post(`${API_PREFIX}/sources`, sourceController.createSource);
 app.patch(`${API_PREFIX}/sources/:sourceId`, sourceController.updateSource);
 app.delete(`${API_PREFIX}/sources/:sourceId`, sourceController.deleteSource);
 
-app.get(`${API_PREFIX}/folders`, folderController.getFolders);
-app.post(`${API_PREFIX}/folders`, folderController.createFolder);
-app.patch(`${API_PREFIX}/folders/:folderId`, folderController.updateFolder);
-app.delete(`${API_PREFIX}/folders/:folderId`, folderController.deleteFolder);
+app.get(`${API_PREFIX}/entries`, entryController.getEntries);
+app.get(`${API_PREFIX}/books/:bookId/entries`, entryController.getBookEntries);
+app.get(`${API_PREFIX}/heads/:headId/entries`, entryController.getHeadEntries);
+app.get(`${API_PREFIX}/tags/:tagId/entries`, entryController.getTagEntries);
+app.get(`${API_PREFIX}/sources/:sourceId/entries`, entryController.getSourceEntries); // prettier-ignore
+app.post(`${API_PREFIX}/entries`, entryController.createEntry);
+app.patch(`${API_PREFIX}/entries/:entryId`, entryController.updateEntry);
+app.delete(`${API_PREFIX}/entries/:entryId`, entryController.deleteEntry);
 
 app.get(`${API_PREFIX}/groups`, groupController.getGroups);
 app.post(`${API_PREFIX}/groups`, groupController.createGroup);
 app.patch(`${API_PREFIX}/groups/:groupId`, groupController.updateGroup);
 app.delete(`${API_PREFIX}/groups/:groupId`, groupController.deleteGroup);
 
-app.get(`${API_PREFIX}/entries`, entryController.getEntries);
-app.get(`${API_PREFIX}/books/:bookId/entries`, entryController.getBookEntries);
-app.get(`${API_PREFIX}/heads/:headId/entries`, entryController.getHeadEntries);
-app.get(`${API_PREFIX}/tags/:tagId/entries`, entryController.getTagEntries);
-app.get(
-  `${API_PREFIX}/sources/:sourceId/entries`,
-  entryController.getSourceEntries,
-);
-app.post(`${API_PREFIX}/entries`, entryController.createEntry);
-app.patch(`${API_PREFIX}/entries/:id`, entryController.updateEntry);
-app.delete(`${API_PREFIX}/entries/:id`, entryController.deleteEntry);
+app.get(`${API_PREFIX}/folders`, folderController.getFolders);
+app.post(`${API_PREFIX}/folders`, folderController.createFolder);
+app.patch(`${API_PREFIX}/folders/:folderId`, folderController.updateFolder);
+app.delete(`${API_PREFIX}/folders/:folderId`, folderController.deleteFolder);
 
 app.get(`${API_PREFIX}/audit-logs`, auditLogController.getAuditLogs);
 

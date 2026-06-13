@@ -1,6 +1,6 @@
 import { createSourceSchema, updateSourceSchema } from "@shared/schemas";
 import mongoose from "mongoose";
-import { sourceService } from "../services/EntryFields.js";
+import sourceService from "../services/sourceService.js";
 import {
   sendBadRequestError,
   sendData,

@@ -1,6 +1,6 @@
 import { createTagSchema, updateTagSchema } from "@shared/schemas";
 import mongoose from "mongoose";
-import { tagService } from "../services/EntryFields.js";
+import tagService from "../services/tagService.js";
 import {
   sendBadRequestError,
   sendData,

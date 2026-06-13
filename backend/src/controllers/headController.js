@@ -1,6 +1,6 @@
 import { createHeadSchema, updateHeadSchema } from "@shared/schemas";
 import mongoose from "mongoose";
-import { headService } from "../services/EntryFields.js";
+import headService from "../services/headService.js";
 import {
   sendBadRequestError,
   sendData,

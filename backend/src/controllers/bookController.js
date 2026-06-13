@@ -1,6 +1,6 @@
 import { createBookSchema, updateBookSchema } from "@shared/schemas";
 import mongoose from "mongoose";
-import { bookService } from "../services/EntryFields.js";
+import bookService from "../services/bookService.js";
 import {
   sendBadRequestError,
   sendData,
