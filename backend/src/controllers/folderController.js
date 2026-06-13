@@ -1,52 +1,65 @@
 import { createFolderSchema, updateFolderSchema } from "@shared/schemas";
-import { sendData, sendBadRequestError } from "../utils/response.js";
+import {
+  sendData,
+  sendSuccess,
+  sendBadRequestError,
+} from "../utils/response.js";
 import folderService from "../services/folderService.js";
+import mongoose from "mongoose";
 
 async function getFolders(req, res) {
-  const folders = await folderService.getFolders(req.params.profileId);
+  const folders = await folderService.getFolders(
+    new mongoose.Types.ObjectId(req.params.profileId),
+  );
+
   sendData(res, { folders });
 }
 
 async function createFolder(req, res) {
   const { success, error, data } = createFolderSchema.safeParse(req.body);
-  if (!success) {
-    return sendBadRequestError(res, error);
+
+  if (!success) return sendBadRequestError(res, error);
+
+  if (data.parentId) {
+    data.parentId = new mongoose.Types.ObjectId(data.parentId);
   }
 
   const folder = await folderService.createFolder(
     req.user.uid,
-    req.params.profileId,
+    new mongoose.Types.ObjectId(req.params.profileId),
     data,
   );
+
   sendData(res, { folder }, "Folder created successfully.");
 }
 
 async function updateFolder(req, res) {
-  const {
-    success,
-    error,
-    data: updates,
-  } = updateFolderSchema.safeParse(req.body);
-  if (!success) {
-    return sendBadRequestError(res, error);
+  const { success, error, data } = updateFolderSchema.safeParse(req.body);
+
+  if (!success) return sendBadRequestError(res, error);
+
+  if (data.parentId) {
+    data.parentId = new mongoose.Types.ObjectId(data.parentId);
   }
 
   const folder = await folderService.updateFolder(
     req.user.uid,
-    req.params.profileId,
-    req.params.id,
-    updates,
+    new mongoose.Types.ObjectId(req.params.profileId),
+    new mongoose.Types.ObjectId(req.params.folderId),
+    data,
   );
+
   sendData(res, { folder }, "Folder updated successfully.");
 }
 
 async function deleteFolder(req, res) {
   await folderService.deleteFolder(
     req.user.uid,
-    req.params.profileId,
-    req.params.id,
+    new mongoose.Types.ObjectId(req.params.profileId),
+    new mongoose.Types.ObjectId(req.params.folderId),
   );
-  sendData(res, null, "Folder deleted successfully");
+
+  sendSuccess(res, "Folder deleted successfully");
 }
 
 export default { getFolders, createFolder, updateFolder, deleteFolder };

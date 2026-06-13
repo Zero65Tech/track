@@ -5,6 +5,10 @@
     "entry.js": "entryFields.js, folder.js, group.js",
     "trigger.js": "aggregation.js"
   },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
   "editor.formatOnType": true,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode"

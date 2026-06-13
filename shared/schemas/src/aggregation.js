@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  mongoIdSchema,
-  entryTypeSchema,
-  timeStampSchema,
-  pageSizeSchema,
-} from "./common.js";
+import { entryTypeSchema, mongoIdSchema } from "./common.js";
 
 export const getAggregationResultSchema = z
   .object({

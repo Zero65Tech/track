@@ -1,31 +1,26 @@
 import { z } from "zod";
+import { booleanSchema, mongoIdSchema, nameSchema } from "./common.js";
 
-const groupNameSchema = z
-  .string()
-  .trim()
-  .min(1, "'name' is required")
-  .max(255, "'name' cannot exceed 255 characters");
+export const createGroupSchema = z
+  .object({
+    name: nameSchema.optional(),
+    folderId: mongoIdSchema.optional(),
+  })
+  .strict();
 
-const groupStarredSchema = z.boolean().optional();
-
-const groupFolderIdsSchema = z
-  .array(z.string().trim().min(1, "Folder IDs must be valid strings"))
-  .optional();
-
-export const createGroupSchema = z.object({
-  name: groupNameSchema.optional(),
-  starred: groupStarredSchema.optional(),
-  folderIds: groupFolderIdsSchema.optional(),
-}).strict();
-
-export const updateGroupSchema = z.object({
-  name: groupNameSchema.optional(),
-  starred: groupStarredSchema.optional(),
-  folderIds: groupFolderIdsSchema.optional(),
-}).strict().refine(
-  (data) => Object.keys(data).length > 0 && Object.values(data).some(val => val !== undefined),
-  {
-    message: "At least one field must be provided for update",
-    path: [],
-  }
-);
+export const updateGroupSchema = z
+  .object({
+    name: nameSchema.optional(),
+    starred: booleanSchema.optional(),
+    folderIds: z.array(mongoIdSchema).optional(),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      Object.keys(data).length > 0 &&
+      Object.values(data).some((val) => val !== undefined),
+    {
+      message: "At least one field must be provided for update",
+      path: [],
+    },
+  );

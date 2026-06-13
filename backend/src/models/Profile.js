@@ -9,14 +9,12 @@ const profileSchema = new mongoose.Schema(
       match: /^(system|[a-zA-Z0-9]{28})$/,
     },
     editors: {
-      type: [String],
+      type: [{ type: String, match: /^([a-zA-Z0-9]{28})$/ }],
       default: [],
-      match: /^([a-zA-Z0-9]{28})$/,
     },
     viewers: {
-      type: [String],
+      type: [{ type: String, match: /^([a-zA-Z0-9]{28})$/ }],
       default: [],
-      match: /^([a-zA-Z0-9]{28})$/,
     },
 
     name: {

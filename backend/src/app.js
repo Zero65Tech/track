@@ -75,13 +75,13 @@ app.delete(`${API_PREFIX}/sources/:id`, sourceController.remove);
 
 app.get(`${API_PREFIX}/folders`, folderController.getFolders);
 app.post(`${API_PREFIX}/folders`, folderController.createFolder);
-app.patch(`${API_PREFIX}/folders/:id`, folderController.updateFolder);
-app.delete(`${API_PREFIX}/folders/:id`, folderController.deleteFolder);
+app.patch(`${API_PREFIX}/folders/:folderId`, folderController.updateFolder);
+app.delete(`${API_PREFIX}/folders/:folderId`, folderController.deleteFolder);
 
 app.get(`${API_PREFIX}/groups`, groupController.getGroups);
 app.post(`${API_PREFIX}/groups`, groupController.createGroup);
-app.patch(`${API_PREFIX}/groups/:id`, groupController.updateGroup);
-app.delete(`${API_PREFIX}/groups/:id`, groupController.deleteGroup);
+app.patch(`${API_PREFIX}/groups/:groupId`, groupController.updateGroup);
+app.delete(`${API_PREFIX}/groups/:groupId`, groupController.deleteGroup);
 
 app.get(`${API_PREFIX}/entries`, entryController.getEntries);
 app.get(`${API_PREFIX}/books/:bookId/entries`, entryController.getBookEntries);

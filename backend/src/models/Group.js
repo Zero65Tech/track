@@ -34,7 +34,7 @@ const groupSchema = new mongoose.Schema(
     },
 
     folderIds: {
-      type: [String],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Folder" }],
       default: [],
     },
   },

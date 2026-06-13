@@ -1,12 +1,13 @@
+import { EntryType, ProfileState } from "@shared/enums";
 import { z } from "zod";
-import mongoose from "mongoose";
-import { ProfileState, EntryType } from "@shared/enums";
 
 export const mongoIdSchema = z
   .string()
   .regex(/^[0-9a-f]{24}$/, "Invalid ObjectId");
 
 export const fcmTokenSchema = z.string().trim().min(1, "Required");
+
+export const booleanSchema = z.boolean().optional();
 
 export const nameSchema = z
   .string()

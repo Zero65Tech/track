@@ -1,9 +1,10 @@
 import { z } from "zod";
 import {
-  mongoIdSchema,
   entryTypeSchema,
-  timeStampSchema,
+  mongoIdSchema,
+  nameSchema,
   pageSizeSchema,
+  timeStampSchema,
 } from "./common.js";
 
 export const getTriggersSchema = z
@@ -15,7 +16,7 @@ export const getTriggersSchema = z
 
 export const createDataAggregationTriggerSchema = z
   .object({
-    aggregationName: z.string().trim().min(1, "'aggregationName' is required"),
+    aggregationName: nameSchema,
     entryType: entryTypeSchema.optional(),
     bookId: mongoIdSchema.optional(),
     headId: mongoIdSchema.optional(),
