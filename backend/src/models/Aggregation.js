@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { AggregationName } from "@shared/enums";
 import aggregationParamsSchema from "./schemas/aggregationParams.js";
 
 const aggregationSchema = new mongoose.Schema(
@@ -12,7 +11,6 @@ const aggregationSchema = new mongoose.Schema(
 
     name: {
       type: String,
-      enum: Object.values(AggregationName).map((n) => n.id),
       required: true,
     },
 
