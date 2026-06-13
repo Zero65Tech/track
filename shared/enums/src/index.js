@@ -1,116 +1,10 @@
-const ProfileAccess = Object.freeze({
-  OWNER: Object.freeze({
-    id: "owner",
-    name: "Owner",
-    icon: "pi-crown",
-    description:
-      "Full control over the profile: can edit settings, manage access, and delete the profile.",
-  }),
-  EDITOR: Object.freeze({
-    id: "editor",
-    name: "Editor",
-    icon: "pi-pencil",
-    description:
-      "Can modify profile content and settings but cannot manage access or delete the profile.",
-  }),
-  VIEWER: Object.freeze({
-    id: "viewer",
-    name: "Viewer",
-    icon: "pi-eye",
-    description:
-      "Read-only access to view profile content and settings without making changes.",
-  }),
-});
+export { ProfileAccess, ProfileState } from "./profile.js";
 
-const ProfileState = Object.freeze({
-  INACTIVE: Object.freeze({
-    id: "inactive",
-    name: "Inactive",
-    icon: "pi-spinner",
-    description:
-      "This profile is still being set up. The system needs to finish a few setup steps before you can start using it. Once everything’s ready, it will automatically become active.",
-  }),
-  ACTIVE: Object.freeze({
-    id: "active",
-    name: "Active",
-    icon: "pi-check-circle",
-    description:
-      "This profile is fully ready to use. You can access all features and manage it like normal.",
-  }),
-  TEMPLATE: Object.freeze({
-    id: "template",
-    name: "Template",
-    icon: "pi-star",
-    description:
-      "Think of this as a reusable starter profile. You can copy it to quickly create a new profile with your preferred settings already in place.",
-  }),
-  DISABLED: Object.freeze({
-    id: "disabled",
-    name: "Disabled",
-    icon: "pi-lock",
-    description:
-      "This profile has been turned off for now. You can view it in read‑only mode, but it can’t be used until it’s re‑enabled.",
-  }),
-  DELETED: Object.freeze({
-    id: "deleted",
-    name: "Deleted",
-    icon: "pi-trash",
-    description:
-      "This profile is scheduled for deletion. It will be permanently removed after 30 days, but you can still restore it anytime before that if you change your mind.",
-  }),
-});
+export { EntryType, EntryState } from "./entry.js";
 
 const DataSource = Object.freeze({
   BACKEND_SERVICE_V5_5: "Backend Service v5.5",
   MIGRATION_SCRIPT_V1_0: "Migration Script v1.0",
-});
-
-// prettier-ignore
-const EntryType = Object.freeze({
-
-  INCOME: Object.freeze({ id: "income", name: "Income", sign: "positive" }),
-  INCOME_TAX: Object.freeze({ id: "income_tax", name: "Income Tax", sign: "negative" }),
-  INCOME_TAX_REFUND: Object.freeze({ id: "income_tax_refund", name: "Income Tax:Refund", sign: "positive" }),
-  EXPENSE: Object.freeze({ id: "expense", name: "Expense", sign: "negative" }),
-  EXPENSE_REFUND: Object.freeze({ id: "expense_refund", name: "Expense:Refund", sign: "positive" }),
-  LOAN_GIVEN: Object.freeze({ id: "loan_given", name: "Loan:Given", sign: "negative" }),
-  LOAN_TAKEN: Object.freeze({ id: "loan_taken", name: "Loan:Taken", sign: "positive" }),
-  INVESTMENT_DEPOSIT: Object.freeze({ id: "investment_deposit", name: "Investment:Deposit", sign: "negative" }),
-  INVESTMENT_WITHDRAWAL: Object.freeze({ id: "investment_withdrawal", name: "Investment:Withdrawal", sign: "positive" }),
-  POSITION_ONBOARD: Object.freeze({ id: "position_onboard", name: "Position:Onboard", sign: "positive" }),
-  POSITION_OFFBOARD: Object.freeze({ id: "position_offboard", name: "Position:Offboard", sign: "negative" }),
-
-  RELOCATE: Object.freeze({ id: "relocate", name: "Relocate", sign: "neutral" }),
-  
-  PAYMENT: Object.freeze({ id: "payment", name: "Payment", sign: "negative" }),
-  RECEIPT: Object.freeze({ id: "receipt", name: "Receipt", sign: "positive" }),
-
-  TRANSFER: Object.freeze({ id: "transfer", name: "Transfer", sign: "neutral" }),
-
-  // TODO: Deprecate
-  CREDIT: Object.freeze({ id: "credit", name: "Credit", sign: "positive" }),
-  DEBIT: Object.freeze({ id: "debit", name: "Debit", sign: "negative" }),
-  TAX: Object.freeze({ id: "tax", name: "Tax", sign: "negative" }),
-  REFUND: Object.freeze({ id: "refund", name: "Refund", sign: "positive" }),
-});
-
-const EntryState = Object.freeze({
-  DRAFT: Object.freeze({
-    id: "draft",
-    name: "Draft",
-  }),
-  FORECAST: Object.freeze({
-    id: "forecast",
-    name: "Forecast",
-  }),
-  PLANNED: Object.freeze({
-    id: "planned",
-    name: "Planned",
-  }),
-  SETTLED: Object.freeze({
-    id: "settled",
-    name: "Settled",
-  }),
 });
 
 const EntryFieldState = Object.freeze({
@@ -211,10 +105,6 @@ export {
   CoinLedgerType,
   DataSource,
   EntryFieldState,
-  EntryState,
-  EntryType,
-  ProfileAccess,
-  ProfileState,
   TriggerState,
   TriggerType,
 };
