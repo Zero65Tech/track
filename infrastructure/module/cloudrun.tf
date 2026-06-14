@@ -13,6 +13,12 @@ resource "google_service_account_iam_member" "cloudrun_user_cloudbuild" {
   member             = "serviceAccount:${google_service_account.cloudbuild.email}"
 }
 
+resource "google_service_account_iam_member" "cloudrun_user_cloudscheduler" {
+  service_account_id = "projects/${var.project_id}/serviceAccounts/${google_service_account.cloudrun.email}"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.cloudscheduler.email}"
+}
+
 resource "google_project_iam_member" "cloudrun_cloudmessaging" {
   project = var.project_id
   role    = "roles/firebase.admin"
