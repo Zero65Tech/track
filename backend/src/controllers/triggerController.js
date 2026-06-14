@@ -23,7 +23,7 @@ async function getTriggers(req, res) {
     delete trigger.profileId;
   }
 
-  sendData(res, triggers);
+  sendData(res, { triggers });
 }
 
 async function createDataAggregationTrigger(req, res) {
@@ -50,7 +50,7 @@ async function createDataAggregationTrigger(req, res) {
   delete trigger._id;
   delete trigger.profileId;
 
-  sendData(res, trigger, "Trigger created successfully");
+  sendData(res, { trigger }, "Trigger created successfully");
 }
 
 export default { getTriggers, createDataAggregationTrigger };
