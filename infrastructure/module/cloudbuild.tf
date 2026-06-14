@@ -133,6 +133,14 @@ resource "google_cloudbuild_trigger" "backend" {
         "--region", var.region,
       ]
     }
+    step {
+      name = "gcr.io/cloud-builders/gcloud"
+      args = [
+        "run", "deploy", "${var.name}-worker",
+        "--image", "${google_artifact_registry_repository.artifact_registry.registry_uri}/backend:$COMMIT_SHA",
+        "--region", var.region,
+      ]
+    }
     options {
       logging = "CLOUD_LOGGING_ONLY"
     }
