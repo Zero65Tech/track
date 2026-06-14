@@ -1,13 +1,17 @@
 <script setup>
 import { useBookStore } from '@/stores/book.store';
+import { useHeadStore } from '@/stores/head.store';
+import { useSourceStore } from '@/stores/source.store';
+import { useTagStore } from '@/stores/tag.store';
 import { useTriggerStore } from '@/stores/trigger.store';
 import { TriggerState, TriggerType } from '@shared/enums';
-import { useToast } from 'primevue/usetoast';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const triggerStore = useTriggerStore();
 const bookStore = useBookStore();
-const toast = useToast();
+const headStore = useHeadStore();
+const tagStore = useTagStore();
+const sourceStore = useSourceStore();
 
 const loadMoreElementRef = ref(null);
 const intersectionObserver = ref(null);
@@ -18,8 +22,6 @@ const error = computed(() => triggerStore.error);
 
 // Setup intersection observer for infinite scroll
 onMounted(async () => {
-    await triggerStore.initialize();
-
     if (loadMoreElementRef.value) {
         intersectionObserver.value = new IntersectionObserver(
             (entries) => {
@@ -82,7 +84,8 @@ function getTriggerStatusColor(trigger) {
 
 function formatDate(date) {
     if (!date) return '';
-    return new Date(date).toLocaleString();
+    const dateObj = new Date(date);
+    return `${dateObj.toLocaleString()}.${String(dateObj.getMilliseconds()).padStart(3, '0')}`;
 }
 
 function calculateDuration(createdAt, updatedAt) {
@@ -90,6 +93,8 @@ function calculateDuration(createdAt, updatedAt) {
     const start = new Date(createdAt);
     const end = new Date(updatedAt);
     const durationMs = end - start;
+
+    if (durationMs < 1000) return `${durationMs}ms`;
 
     const seconds = Math.floor(durationMs / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -109,6 +114,21 @@ function getReadableAggregationParams(params) {
         const book = bookStore.booksMap[readable.bookId];
         readable.Book = book?.name || readable.bookId;
         delete readable.bookId;
+    }
+    if (readable.headId) {
+        const head = headStore.headsMap[readable.headId];
+        readable.Head = head?.name || readable.headId;
+        delete readable.headId;
+    }
+    if (readable.tagId) {
+        const tag = tagStore.tagsMap[readable.tagId];
+        readable.Tag = tag?.name || readable.tagId;
+        delete readable.tagId;
+    }
+    if (readable.sourceId) {
+        const source = sourceStore.sourcesMap[readable.sourceId];
+        readable.Source = source?.name || readable.sourceId;
+        delete readable.sourceId;
     }
     return readable;
 }

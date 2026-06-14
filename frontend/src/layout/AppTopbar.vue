@@ -1,7 +1,7 @@
 <script setup>
-import { computed } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/auth.store';
+import { computed } from 'vue';
 import AppConfigurator from './AppConfigurator.vue';
 
 const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLayout();
