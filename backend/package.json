@@ -17,7 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "firebase-admin": "^13.6.1",
+    "firebase-admin": "^14.0.0",
     "lodash": "^4.17.23",
     "lru-cache": "^11.2.6",
     "mongoose": "^8.23.0",
