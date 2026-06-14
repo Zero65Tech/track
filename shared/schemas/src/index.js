@@ -12,4 +12,5 @@ export { createTagSchema, updateTagSchema } from "./tag.js";
 export {
   createDataAggregationTriggerSchema,
   getTriggersSchema,
+  processTriggersSchema,
 } from "./trigger.js";

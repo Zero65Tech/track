@@ -107,7 +107,7 @@ async function processTriggers(onTriggerStateChanged, instanceId, limit) {
     .limit(limit)
     .lean();
 
-  if (triggerDataArr.length === 0) return;
+  if (triggerDataArr.length === 0) return 0;
 
   let processedCount = 0;
   const skippedProfileIds = new Set(); // Track profiles where we failed to claim a trigger

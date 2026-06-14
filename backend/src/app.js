@@ -26,7 +26,7 @@ app.patch(`${API_PREFIX}/devices/:deviceId`, deviceController.updateDevice);
 
 app.get(`${API_PREFIX}/profiles/templates/system`, profileController.getTemplateProfiles); // prettier-ignore
 
-app.post(`${API_PREFIX}/triggers/process`, triggerController.processTriggers);
+app.get(`${API_PREFIX}/triggers/process`, triggerController.processTriggers);
 
 // NOTE: USER MUST BE LOGGED IN FOR FOLLOWING ROUTES
 
