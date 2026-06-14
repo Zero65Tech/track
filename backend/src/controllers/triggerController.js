@@ -93,7 +93,7 @@ async function processTriggers(req, res) {
       await _sendFirebaseMessage(userIds, {}, messageData);
     },
     process.env.INSTANCE_ID,
-    data.limit || 100,
+    data.limit || 60, // Assuming each trigger takes <1s to process. Scheuled to run every 1 minute.
   );
 
   sendSuccess(res, `Triggers processed successfully (${processedCount})`);

@@ -136,8 +136,8 @@ resource "google_cloud_run_v2_service" "worker" {
         }
       }
     }
-    timeout = "300s"
-    max_instance_request_concurrency = 10
+    timeout = "60s"
+    max_instance_request_concurrency = 1
     scaling {
       min_instance_count = 0
       max_instance_count = 1
