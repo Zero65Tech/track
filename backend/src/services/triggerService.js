@@ -18,7 +18,6 @@ import {
 import { _aggregateEntries } from "./entryService.js";
 import { _getCachedProfile } from "./profileService.js";
 import { _sendFirebaseMessage } from "./userService.js";
-import { _notifyTriggerUpdate } from "./notificationService.js";
 
 import TriggerModel from "../models/Trigger.js";
 
@@ -88,7 +87,11 @@ async function createDataAggregationTrigger(
   return data;
 }
 
-async function _processTriggers(instanceId, limit = 1000) {
+async function processTriggers(
+  onTriggerStateChanged,
+  instanceId,
+  limit = 1000,
+) {
   // Concurrent execution safety: This function may be invoked repeatedly (e.g., via cron) while
   // a previous invocation is still processing triggers. Overlapping invocations may fetch the same
   // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on state
@@ -137,12 +140,8 @@ async function _processTriggers(instanceId, limit = 1000) {
       continue;
     }
 
-    triggerData.state = TriggerState.RUNNING.id;
-    triggerData.updatedAt = new Date();
-    await _notifyTriggerUpdate(triggerData);
-
     console.log(`[${instanceId}] ⏰ Processing trigger ${triggerData._id}`);
-    await _processTrigger(triggerData);
+    await _processTrigger(triggerData, onTriggerStateChanged);
     processedCount++;
   }
 
@@ -151,7 +150,9 @@ async function _processTriggers(instanceId, limit = 1000) {
   );
 }
 
-async function _processTrigger(triggerData) {
+async function _processTrigger(triggerData, onTriggerStateChanged) {
+  await onTriggerStateChanged({ ...triggerData, state: TriggerState.RUNNING.id, updatedAt: new Date() }); // prettier-ignore
+
   if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
     await _processProfileCreatedTrigger(triggerData);
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
@@ -164,18 +165,19 @@ async function _processTrigger(triggerData) {
       triggerData.profileId.toString() !== process.env.MASTER_PROFILE_ID &&
       balance.total < 1
     ) {
+      const aggregationResult = "Insufficient Coins.";
       const updateResult = await TriggerModel.updateOne(
         { _id: triggerData._id, state: TriggerState.RUNNING.id },
         {
-          $set: {
-            state: TriggerState.FAILED.id,
-            aggregationResult: "Insufficient Coins.",
-          },
+          $set: { state: TriggerState.FAILED.id, aggregationResult },
         },
       );
 
       assert.equal(updateResult.modifiedCount, 1); // 💪🏻
 
+      await onTriggerStateChanged({ ...triggerData, state: TriggerState.FAILED.id, aggregationResult, updatedAt: new Date() }); // prettier-ignore
+
+      // TODO: Remove this
       await _sendFirebaseMessage(
         [profile.owner, ...profile.editors],
         {},
@@ -193,8 +195,12 @@ async function _processTrigger(triggerData) {
       return;
     }
 
-    await _processDataAggregationTrigger(triggerData, profile);
+    const triggerAggregationResult =
+      await _processDataAggregationTrigger(triggerData);
 
+    await onTriggerStateChanged({ ...triggerData, state: TriggerState.COMPLETED.id, aggregationResult: triggerAggregationResult, updatedAt: new Date() }); // prettier-ignore
+
+    // TODO: Remove this
     await _sendFirebaseMessage(
       [profile.owner, ...profile.editors],
       {},
@@ -248,6 +254,8 @@ async function _processDataAggregationTrigger(triggerData) {
 
   const coinsToDeduct = calculateAggregationCoins(entriesProcessed);
 
+  const triggerAggregationResult = `Aggregated ${entriesProcessed} entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed.`;
+
   await transaction(async (session) => {
     await _setAggregationResult(
       {
@@ -278,7 +286,7 @@ async function _processDataAggregationTrigger(triggerData) {
       {
         $set: {
           state: TriggerState.COMPLETED.id,
-          aggregationResult: `Aggregated ${entriesProcessed} entries. ${coinsToDeduct} ${coinsToDeduct <= 1 ? "coin" : "coins"} consumed.`,
+          aggregationResult: triggerAggregationResult,
         },
       },
     ).session(session);
@@ -286,8 +294,10 @@ async function _processDataAggregationTrigger(triggerData) {
     // If modifiedCount is not 1, throw error to rollback the entire transaction.
     assert.equal(updateResult.modifiedCount, 1);
   });
+
+  return triggerAggregationResult;
 }
 
-export { _createProfileCreatedTrigger, _processTriggers };
+export { _createProfileCreatedTrigger };
 
-export default { getTriggers, createDataAggregationTrigger };
+export default { getTriggers, createDataAggregationTrigger, processTriggers };
