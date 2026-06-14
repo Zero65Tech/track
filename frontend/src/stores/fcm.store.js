@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 
 import { deviceService } from '@/service/deviceService';
 import { fcmService } from '@/service/fcmService';
-import { TriggerState } from '@shared/enums';
+import { TriggerState, TriggerType } from '@shared/enums';
 
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useAuthStore } from '@/stores/auth.store';
@@ -44,23 +44,19 @@ export const useFcmStore = defineStore('fcm', () => {
             if (data?.type === 'FCM_TOKEN_REFRESH') {
                 const fcmToken = await fcmService.getFcmToken();
                 await deviceService.updateDevice(deviceId.value, fcmToken);
-            } else if (data) {
-                if (data.trigger) {
-                    data.trigger = JSON.parse(data.trigger);
-                    data.trigger.createdAt = new Date(data.trigger.createdAt);
-                    data.trigger.updatedAt = new Date(data.trigger.updatedAt);
-                    await triggerStore.asyncPush(data.trigger);
-                }
+            } else if (data.profileId === profileStore.activeProfile?.id && data.trigger) {
+                const trigger = JSON.parse(data.trigger);
 
-                if (data.profileId === profileStore.activeProfile?.id) {
-                    if (data.triggerState === TriggerState.COMPLETED.id) {
-                        if (data.triggerType === 'data_aggregation') {
-                            await aggregationStore.notifyTriggerCompleted(data.aggregationName, JSON.parse(data.aggregationParams));
-                        }
-                    } else if (data.triggerState === TriggerState.FAILED.id) {
-                        if (data.triggerType === 'data_aggregation') {
-                            aggregationStore.notifyTriggerFailed(data.aggregationName, JSON.parse(data.aggregationParams), data.message);
-                        }
+                trigger.createdAt = new Date(trigger.createdAt);
+                trigger.updatedAt = new Date(trigger.updatedAt);
+
+                await triggerStore.asyncPush(trigger);
+
+                if (trigger.type === TriggerType.DATA_AGGREGATION.id) {
+                    if (trigger.state === TriggerState.COMPLETED.id) {
+                        await aggregationStore.notifyTriggerCompleted(trigger.aggregationName, trigger.aggregationParams);
+                    } else if (trigger.state === TriggerState.FAILED.id) {
+                        aggregationStore.notifyTriggerFailed(trigger.aggregationName, trigger.aggregationParams, trigger.message);
                     }
                 }
             }

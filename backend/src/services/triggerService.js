@@ -16,8 +16,6 @@ import {
   _initialiseCoinLedger,
 } from "./coinService.js";
 import { _aggregateEntries } from "./entryService.js";
-import { _getCachedProfile } from "./profileService.js";
-import { _sendFirebaseMessage } from "./userService.js";
 
 import TriggerModel from "../models/Trigger.js";
 
@@ -156,7 +154,6 @@ async function _processTrigger(triggerData, onTriggerStateChanged) {
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
-    const profile = await _getCachedProfile(triggerData.profileId);
     const balance = await _getCoinLedgerBalance(triggerData.profileId);
     if (
       !["alpha", "beta"].includes(process.env.STAGE) &&
@@ -175,21 +172,6 @@ async function _processTrigger(triggerData, onTriggerStateChanged) {
 
       await onTriggerStateChanged({ ...triggerData, state: TriggerState.FAILED.id, aggregationResult, updatedAt: new Date() }); // prettier-ignore
 
-      // TODO: Remove this
-      await _sendFirebaseMessage(
-        [profile.owner, ...profile.editors],
-        {},
-        {
-          profileId: triggerData.profileId.toString(),
-          triggerId: triggerData._id.toString(),
-          triggerType: triggerData.type,
-          triggerState: TriggerState.FAILED.id,
-          aggregationName: triggerData.aggregationName,
-          aggregationParams: JSON.stringify(triggerData.aggregationParams),
-          message: "Insufficient Coins.",
-        },
-      );
-
       return;
     }
 
@@ -197,20 +179,6 @@ async function _processTrigger(triggerData, onTriggerStateChanged) {
       await _processDataAggregationTrigger(triggerData);
 
     await onTriggerStateChanged({ ...triggerData, state: TriggerState.COMPLETED.id, aggregationResult: triggerAggregationResult, updatedAt: new Date() }); // prettier-ignore
-
-    // TODO: Remove this
-    await _sendFirebaseMessage(
-      [profile.owner, ...profile.editors],
-      {},
-      {
-        profileId: triggerData.profileId.toString(),
-        triggerId: triggerData._id.toString(),
-        triggerType: triggerData.type,
-        triggerState: TriggerState.COMPLETED.id,
-        aggregationName: triggerData.aggregationName,
-        aggregationParams: JSON.stringify(triggerData.aggregationParams),
-      },
-    );
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
     // TODO: TriggerType.DATA_EXPORT
   } else {
