@@ -19,15 +19,9 @@ export const triggerService = {
     },
 
     async createDataAggregationTrigger(profileId, aggregationName, aggregationParams) {
-        const apiResponse = await apiClient.post(`/profiles/${profileId}/triggers/data-aggregation`, {
+        await apiClient.post(`/profiles/${profileId}/triggers/data-aggregation`, {
             aggregationName,
             ...aggregationParams
         });
-
-        const apiResponseData = apiResponse.data.data;
-        apiResponseData.trigger.createdAt = new Date(apiResponseData.trigger.createdAt);
-        apiResponseData.trigger.updatedAt = new Date(apiResponseData.trigger.updatedAt);
-
-        return apiResponseData;
     }
 };
