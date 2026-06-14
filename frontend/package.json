@@ -41,7 +41,7 @@
         "sass": "^1.55.0",
         "tailwindcss": "^4.1.17",
         "unplugin-vue-components": "^0.27.3",
-        "vite": "^7.2.4",
+        "vite": "^8.0.16",
         "vite-plugin-vue-devtools": "^8.0.5"
     }
 }
