@@ -156,12 +156,18 @@ function getReadableAggregationParams(params) {
                     <th class="border border-gray-300 px-4 py-2 text-center font-semibold">State</th>
                     <th class="border border-gray-300 px-4 py-2 text-center font-semibold">Created</th>
                     <th class="border border-gray-300 px-4 py-2 text-center font-semibold">Duration</th>
+                    <th class="border border-gray-300 px-4 py-2 text-center font-semibold">User ID</th>
                 </tr>
             </thead>
             <tbody>
                 <template v-for="trigger in displayTriggers" :key="trigger.id">
                     <tr class="hover:bg-gray-50 border border-gray-300">
-                        <td class="border border-gray-300 px-4 py-2">{{ getTriggerDisplay(trigger) }}</td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            <div>{{ getTriggerDisplay(trigger) }}</div>
+                            <div v-if="trigger.aggregationResult" class="mt-2 text-sm text-gray-600">
+                                <pre class="overflow-auto max-h-32">{{ trigger.aggregationResult }}</pre>
+                            </div>
+                        </td>
                         <td class="border border-gray-300 px-4 py-2 text-center">
                             <span :class="['text-sm font-medium', getTriggerStatusColor(trigger)]">
                                 {{ Object.values(TriggerState).find((s) => s.id === trigger.state)?.name || trigger.state }}
@@ -169,10 +175,11 @@ function getReadableAggregationParams(params) {
                         </td>
                         <td class="border border-gray-300 px-4 py-2 text-sm text-center">{{ formatDate(trigger.createdAt) }}</td>
                         <td class="border border-gray-300 px-4 py-2 text-sm text-center">{{ calculateDuration(trigger.createdAt, trigger.updatedAt) }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-sm text-center">{{ trigger.userId }}</td>
                     </tr>
 
                     <tr v-if="trigger.result" class="bg-gray-50">
-                        <td colspan="4" class="border border-gray-300 px-4 py-2">
+                        <td colspan="5" class="border border-gray-300 px-4 py-2">
                             <span class="font-semibold">Result:</span>
                             <pre class="mt-2 overflow-auto max-h-32">{{ JSON.stringify(trigger.result, null, 2) }}</pre>
                         </td>
