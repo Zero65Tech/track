@@ -41,7 +41,7 @@ const router = createRouter({
                 {
                     path: '/triggers',
                     name: 'triggers',
-                    component: () => import('@/views/Triggers.vue')
+                    component: () => import('@/views/Triggers.ai.vue')
                 },
                 {
                     path: '/dashboard',
