@@ -1,15 +1,19 @@
+import { defineStore } from 'pinia';
+import { ref, watch } from 'vue';
+
 import { deviceService } from '@/service/deviceService';
 import { fcmService } from '@/service/fcmService';
+import { TriggerState } from '@shared/enums';
+
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useProfileStore } from '@/stores/profile.store';
-import { TriggerState } from '@shared/enums';
-import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { useTriggerStore } from '@/stores/trigger.store';
 
 export const useFcmStore = defineStore('fcm', () => {
     const authStore = useAuthStore();
     const profileStore = useProfileStore();
+    const triggerStore = useTriggerStore();
     const aggregationStore = useAggregationStore();
 
     const prefix = import.meta.env.MODE !== 'prod' && import.meta.env.MODE !== 'gamma' ? 'test.' : '';
@@ -41,6 +45,13 @@ export const useFcmStore = defineStore('fcm', () => {
                 const fcmToken = await fcmService.getFcmToken();
                 await deviceService.updateDevice(deviceId.value, fcmToken);
             } else if (data) {
+                if (data.trigger) {
+                    data.trigger = JSON.parse(data.trigger);
+                    data.trigger.createdAt = new Date(data.trigger.createdAt);
+                    data.trigger.updatedAt = new Date(data.trigger.updatedAt);
+                    await triggerStore.asyncPush(data.trigger);
+                }
+                
                 if (data.profileId === profileStore.activeProfile?.id) {
                     if (data.triggerState === TriggerState.COMPLETED.id) {
                         if (data.triggerType === 'data_aggregation') {

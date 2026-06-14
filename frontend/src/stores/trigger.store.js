@@ -87,6 +87,16 @@ export const useTriggerStore = defineStore('trigger', () => {
         }
     }
 
+    async function asyncPush(trigger) {
+        for (let i = 0; i < triggers.value.length; i++) {
+            if (triggers.value[i].id === trigger.id) {
+                triggers.value[i] = trigger;
+                return;
+            }
+        }
+        triggers.value.unshift(trigger);
+    }
+
     return {
         // States
         isLoading,
@@ -96,6 +106,7 @@ export const useTriggerStore = defineStore('trigger', () => {
         // Actions
         initialize,
         refresh,
-        loadMore
+        loadMore,
+        asyncPush
     };
 });

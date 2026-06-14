@@ -1,10 +1,17 @@
-import {
-  getTriggersSchema,
-  createDataAggregationTriggerSchema,
-} from "@shared/schemas";
-import { sendData, sendBadRequestError } from "../utils/response.js";
-import triggerService from "../services/triggerService.js";
 import mongoose from "mongoose";
+
+import {
+  createDataAggregationTriggerSchema,
+  getTriggersSchema,
+} from "@shared/schemas";
+import { _getCachedProfile } from "../services/profileService.js";
+import triggerService from "../services/triggerService.js";
+import { _sendFirebaseMessage } from "../services/userService.js";
+import {
+  sendBadRequestError,
+  sendData,
+  sendSuccess,
+} from "../utils/response.js";
 
 async function getTriggers(req, res) {
   const { success, error, data } = getTriggersSchema.safeParse(req.query);
@@ -50,7 +57,15 @@ async function createDataAggregationTrigger(req, res) {
   delete trigger._id;
   delete trigger.profileId;
 
-  sendData(res, { trigger }, "Trigger created successfully");
+  const profile = await _getCachedProfile(req.params.profileId);
+  const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
+  const messageData = {
+    profileId: req.params.profileId,
+    trigger: JSON.stringify(trigger),
+  };
+  await _sendFirebaseMessage(userIds, {}, messageData);
+  
+  sendSuccess(res, "Trigger created successfully");
 }
 
 export default { getTriggers, createDataAggregationTrigger };

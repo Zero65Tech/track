@@ -1,22 +1,25 @@
 import assert from "assert";
+
 import {
-  TriggerType,
-  TriggerState,
   CoinLedgerRef,
   CoinLedgerType,
+  TriggerState,
+  TriggerType,
 } from "@shared/enums";
-import transaction from "../utils/transaction.js";
-import TriggerModel from "../models/Trigger.js";
 import { calculateAggregationCoins } from "../config/coin.js";
-import { _sendFirebaseMessage } from "./userService.js";
-import { _getCachedProfile } from "./profileService.js";
-import { _aggregateEntries } from "./entryService.js";
+import transaction from "../utils/transaction.js";
+
 import { _setAggregationResult } from "./aggregationService.js";
 import {
+  _deductCoinsFromLedger,
   _getCoinLedgerBalance,
   _initialiseCoinLedger,
-  _deductCoinsFromLedger,
 } from "./coinService.js";
+import { _aggregateEntries } from "./entryService.js";
+import { _getCachedProfile } from "./profileService.js";
+import { _sendFirebaseMessage } from "./userService.js";
+
+import TriggerModel from "../models/Trigger.js";
 
 async function getTriggers(profileId, lastCreatedAt, pageSize) {
   let query = {
