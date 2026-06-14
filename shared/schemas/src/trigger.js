@@ -24,3 +24,9 @@ export const createDataAggregationTriggerSchema = z
     sourceId: mongoIdSchema.optional(),
   })
   .strict();
+
+export const processTriggersSchema = z
+  .object({
+    limit: pageSizeSchema.optional(),
+  })
+  .strict();

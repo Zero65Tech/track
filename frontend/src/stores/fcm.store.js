@@ -51,7 +51,7 @@ export const useFcmStore = defineStore('fcm', () => {
                     data.trigger.updatedAt = new Date(data.trigger.updatedAt);
                     await triggerStore.asyncPush(data.trigger);
                 }
-                
+
                 if (data.profileId === profileStore.activeProfile?.id) {
                     if (data.triggerState === TriggerState.COMPLETED.id) {
                         if (data.triggerType === 'data_aggregation') {

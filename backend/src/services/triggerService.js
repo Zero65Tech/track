@@ -87,11 +87,7 @@ async function createDataAggregationTrigger(
   return data;
 }
 
-async function processTriggers(
-  onTriggerStateChanged,
-  instanceId,
-  limit = 1000,
-) {
+async function processTriggers(onTriggerStateChanged, instanceId, limit) {
   // Concurrent execution safety: This function may be invoked repeatedly (e.g., via cron) while
   // a previous invocation is still processing triggers. Overlapping invocations may fetch the same
   // trigger. The updateOne() query below uses optimistic concurrency control (OCC) on state
@@ -148,6 +144,8 @@ async function processTriggers(
   console.log(
     `[${instanceId}] ⏰ Fetched ${triggerDataArr.length} and processed ${processedCount} trigger(s) in ${Date.now() - timestamp}ms`,
   );
+
+  return processedCount;
 }
 
 async function _processTrigger(triggerData, onTriggerStateChanged) {

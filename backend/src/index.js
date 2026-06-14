@@ -1,9 +1,12 @@
-import dotenv from "dotenv";
 import { randomBytes } from "crypto";
-import { initialiseFirebase } from "./config/firebase.js";
+import dotenv from "dotenv";
+
 import { connectToDatabase } from "./config/db.js";
-import cron from "./cron.js";
+import { initialiseFirebase } from "./config/firebase.js";
+
 import app from "./app.js";
+
+process.env.INSTANCE_ID = randomBytes(4).toString("hex");
 
 dotenv.config({
   path: [
@@ -16,11 +19,8 @@ dotenv.config({
 initialiseFirebase();
 await connectToDatabase();
 
-const instanceId = randomBytes(4).toString("hex");
-cron.start(instanceId);
-
 app.listen(process.env.PORT, () =>
   console.log(
-    `🎉 Server (${process.env.STAGE}) is listening on port ${process.env.PORT} [instance: ${instanceId}]`,
+    `🎉 Server (${process.env.STAGE}) is listening on port ${process.env.PORT} [instance: ${process.env.INSTANCE_ID}]`,
   ),
 );
