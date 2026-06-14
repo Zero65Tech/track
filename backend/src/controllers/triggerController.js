@@ -87,7 +87,7 @@ async function processTriggers(req, res) {
       const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
 
       const messageData = {
-        profileId: req.params.profileId,
+        profileId: profileId,
         trigger: JSON.stringify(trigger),
       };
       await _sendFirebaseMessage(userIds, {}, messageData);
