@@ -17,7 +17,7 @@ initialiseFirebase();
 await connectToDatabase();
 
 const instanceId = randomBytes(4).toString("hex");
-cron.start(instanceId);
+// cron.start(instanceId);
 
 app.listen(process.env.PORT, () =>
   console.log(
