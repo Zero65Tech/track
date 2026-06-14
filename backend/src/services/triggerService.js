@@ -18,6 +18,7 @@ import {
 import { _aggregateEntries } from "./entryService.js";
 import { _getCachedProfile } from "./profileService.js";
 import { _sendFirebaseMessage } from "./userService.js";
+import { _notifyTriggerUpdate } from "./notificationService.js";
 
 import TriggerModel from "../models/Trigger.js";
 
@@ -135,6 +136,10 @@ async function _processTriggers(instanceId, limit = 1000) {
       skippedProfileIds.add(profileIdStr);
       continue;
     }
+
+    triggerData.state = TriggerState.RUNNING.id;
+    triggerData.updatedAt = new Date();
+    await _notifyTriggerUpdate(triggerData);
 
     console.log(`[${instanceId}] ⏰ Processing trigger ${triggerData._id}`);
     await _processTrigger(triggerData);
