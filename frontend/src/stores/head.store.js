@@ -1,19 +1,55 @@
 import { headService } from '@/service/headService';
 import { useProfileStore } from '@/stores/profile.store';
 import { defineStore } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { computed, ref, watch } from 'vue';
 
 export const useHeadStore = defineStore('head', () => {
-    const toast = useToast();
     const profileStore = useProfileStore();
-    let abortController = new AbortController();
+
+    let inFlightRequest = null;
 
     // States
 
     const isLoading = ref(false);
     const heads = ref([]);
     const error = ref(null);
+
+    // Internal Functions
+
+    watch(
+        () => profileStore.activeProfile,
+        async () => {
+            // NOTE: This may not work as expected if the user switches profiles quickly,
+            // but it should be good enough for now. We can improve this later if needed.
+            if (inFlightRequest) {
+                await inFlightRequest;
+            }
+
+            heads.value = [];
+
+            const profileId = profileStore.activeProfile?.id;
+            if (profileId) {
+                await _fetchHeads(profileId);
+            } else {
+                error.value = null;
+            }
+        }
+    );
+
+    async function _fetchHeads(profileId) {
+        isLoading.value = true;
+        error.value = null;
+
+        try {
+            const apiResponseData = await headService.getHeads(profileId);
+            heads.value = apiResponseData.heads;
+        } catch (err) {
+            error.value = err.message;
+            console.log(err);
+        } finally {
+            isLoading.value = false;
+        }
+    }
 
     // Getters
 
@@ -28,48 +64,9 @@ export const useHeadStore = defineStore('head', () => {
     // Actions
 
     async function initialize() {
-        if (profileStore.activeProfile) {
-            await fetchHeads();
-        }
-    }
-
-    watch(
-        () => profileStore.activeProfile,
-        () => {
-            // Abort all in-flight requests
-            abortController.abort();
-            abortController = new AbortController();
-            if (profileStore.activeProfile) {
-                fetchHeads();
-            } else {
-                heads.value = [];
-                error.value = null;
-            }
-        }
-    );
-
-    async function fetchHeads() {
         const profileId = profileStore.activeProfile?.id;
-        if (!profileId) {
-            toast.add({
-                severity: 'error',
-                summary: 'Refresh failed',
-                detail: 'Kindly select a profile to fetch heads',
-                life: 3000
-            });
-            return;
-        }
-
-        isLoading.value = true;
-        error.value = null;
-
-        try {
-            heads.value = await headService.getHeads({ profileId }, abortController.signal);
-        } catch (err) {
-            error.value = err.message;
-            console.log(err);
-        } finally {
-            isLoading.value = false;
+        if (profileId) {
+            await _fetchHeads(profileId);
         }
     }
 
@@ -83,7 +80,6 @@ export const useHeadStore = defineStore('head', () => {
         headsMap,
 
         // Actions
-        initialize,
-        fetchHeads
+        initialize
     };
 });
