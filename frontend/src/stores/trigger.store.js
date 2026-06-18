@@ -1,5 +1,6 @@
 import { triggerService } from '@/service/triggerService';
 import { useProfileStore } from '@/stores/profile.store';
+import { TriggerState } from '@shared/enums';
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
@@ -15,21 +16,6 @@ export const useTriggerStore = defineStore('trigger', () => {
     const error = ref(null);
 
     // Internal Functions
-
-    async function _fetchTriggers(profileId, lastCreatedAt) {
-        isLoading.value = true;
-        error.value = null;
-
-        try {
-            const apiResponseData = await triggerService.getTriggers(profileId, lastCreatedAt);
-            triggers.value.push(...apiResponseData.triggers);
-        } catch (err) {
-            error.value = err.message;
-            console.log(err);
-        } finally {
-            isLoading.value = false;
-        }
-    }
 
     watch(
         () => profileStore.activeProfile,
@@ -50,6 +36,38 @@ export const useTriggerStore = defineStore('trigger', () => {
             }
         }
     );
+
+    async function _fetchTriggers(profileId, lastCreatedAt) {
+        isLoading.value = true;
+        error.value = null;
+
+        try {
+            const apiResponseData = await triggerService.getTriggers(profileId, lastCreatedAt);
+            triggers.value.push(...apiResponseData.triggers);
+        } catch (err) {
+            error.value = err.message;
+            console.log(err);
+        } finally {
+            isLoading.value = false;
+        }
+    }
+
+    function _sortTriggers() {
+        triggers.value.sort((a, b) => {
+            const aCompleted = a.state === TriggerState.COMPLETED.id;
+            const bCompleted = b.state === TriggerState.COMPLETED.id;
+
+            if (aCompleted && !bCompleted) {
+                return 1;
+            }
+
+            if (!aCompleted && bCompleted) {
+                return -1;
+            }
+
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+    }
 
     // Actions
 
@@ -91,10 +109,12 @@ export const useTriggerStore = defineStore('trigger', () => {
         for (let i = 0; i < triggers.value.length; i++) {
             if (triggers.value[i].id === trigger.id) {
                 triggers.value[i] = trigger;
+                _sortTriggers();
                 return;
             }
         }
         triggers.value.unshift(trigger);
+        _sortTriggers();
     }
 
     return {
