@@ -1,19 +1,55 @@
 import { tagService } from '@/service/tagService';
 import { useProfileStore } from '@/stores/profile.store';
 import { defineStore } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { computed, ref, watch } from 'vue';
 
 export const useTagStore = defineStore('tag', () => {
-    const toast = useToast();
     const profileStore = useProfileStore();
-    let abortController = new AbortController();
+
+    let inFlightRequest = null;
 
     // States
 
     const isLoading = ref(false);
     const tags = ref([]);
     const error = ref(null);
+
+    // Internal Functions
+
+    watch(
+        () => profileStore.activeProfile,
+        async () => {
+            // NOTE: This may not work as expected if the user switches profiles quickly,
+            // but it should be good enough for now. We can improve this later if needed.
+            if (inFlightRequest) {
+                await inFlightRequest;
+            }
+
+            tags.value = [];
+
+            const profileId = profileStore.activeProfile?.id;
+            if (profileId) {
+                await _fetchTags(profileId);
+            } else {
+                error.value = null;
+            }
+        }
+    );
+
+    async function _fetchTags(profileId) {
+        isLoading.value = true;
+        error.value = null;
+
+        try {
+            const apiResponseData = await tagService.getTags(profileId);
+            tags.value = apiResponseData.tags;
+        } catch (err) {
+            error.value = err.message;
+            console.log(err);
+        } finally {
+            isLoading.value = false;
+        }
+    }
 
     // Getters
 
@@ -28,48 +64,9 @@ export const useTagStore = defineStore('tag', () => {
     // Actions
 
     async function initialize() {
-        if (profileStore.activeProfile) {
-            await fetchTags();
-        }
-    }
-
-    watch(
-        () => profileStore.activeProfile,
-        () => {
-            // Abort all in-flight requests
-            abortController.abort();
-            abortController = new AbortController();
-            if (profileStore.activeProfile) {
-                fetchTags();
-            } else {
-                tags.value = [];
-                error.value = null;
-            }
-        }
-    );
-
-    async function fetchTags() {
         const profileId = profileStore.activeProfile?.id;
-        if (!profileId) {
-            toast.add({
-                severity: 'error',
-                summary: 'Refresh failed',
-                detail: 'Kindly select a profile to fetch tags',
-                life: 3000
-            });
-            return;
-        }
-
-        isLoading.value = true;
-        error.value = null;
-
-        try {
-            tags.value = await tagService.getTags({ profileId }, abortController.signal);
-        } catch (err) {
-            error.value = err.message;
-            console.log(err);
-        } finally {
-            isLoading.value = false;
+        if (profileId) {
+            await _fetchTags(profileId);
         }
     }
 
@@ -83,7 +80,6 @@ export const useTagStore = defineStore('tag', () => {
         tagsMap,
 
         // Actions
-        initialize,
-        fetchTags
+        initialize
     };
 });

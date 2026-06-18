@@ -1,19 +1,55 @@
 import { sourceService } from '@/service/sourceService';
 import { useProfileStore } from '@/stores/profile.store';
 import { defineStore } from 'pinia';
-import { useToast } from 'primevue/usetoast';
 import { computed, ref, watch } from 'vue';
 
 export const useSourceStore = defineStore('source', () => {
-    const toast = useToast();
     const profileStore = useProfileStore();
-    let abortController = new AbortController();
+
+    let inFlightRequest = null;
 
     // States
 
     const isLoading = ref(false);
     const sources = ref([]);
     const error = ref(null);
+
+    // Internal Functions
+
+    watch(
+        () => profileStore.activeProfile,
+        async () => {
+            // NOTE: This may not work as expected if the user switches profiles quickly,
+            // but it should be good enough for now. We can improve this later if needed.
+            if (inFlightRequest) {
+                await inFlightRequest;
+            }
+
+            sources.value = [];
+
+            const profileId = profileStore.activeProfile?.id;
+            if (profileId) {
+                await _fetchSources(profileId);
+            } else {
+                error.value = null;
+            }
+        }
+    );
+
+    async function _fetchSources(profileId) {
+        isLoading.value = true;
+        error.value = null;
+
+        try {
+            const apiResponseData = await sourceService.getSources(profileId);
+            sources.value = apiResponseData.sources;
+        } catch (err) {
+            error.value = err.message;
+            console.log(err);
+        } finally {
+            isLoading.value = false;
+        }
+    }
 
     // Getters
 
@@ -28,48 +64,9 @@ export const useSourceStore = defineStore('source', () => {
     // Actions
 
     async function initialize() {
-        if (profileStore.activeProfile) {
-            await fetchSources();
-        }
-    }
-
-    watch(
-        () => profileStore.activeProfile,
-        () => {
-            // Abort all in-flight requests
-            abortController.abort();
-            abortController = new AbortController();
-            if (profileStore.activeProfile) {
-                fetchSources();
-            } else {
-                sources.value = [];
-                error.value = null;
-            }
-        }
-    );
-
-    async function fetchSources() {
         const profileId = profileStore.activeProfile?.id;
-        if (!profileId) {
-            toast.add({
-                severity: 'error',
-                summary: 'Refresh failed',
-                detail: 'Kindly select a profile to fetch sources',
-                life: 3000
-            });
-            return;
-        }
-
-        isLoading.value = true;
-        error.value = null;
-
-        try {
-            sources.value = await sourceService.getSources({ profileId }, abortController.signal);
-        } catch (err) {
-            error.value = err.message;
-            console.log(err);
-        } finally {
-            isLoading.value = false;
+        if (profileId) {
+            await _fetchSources(profileId);
         }
     }
 
@@ -83,7 +80,6 @@ export const useSourceStore = defineStore('source', () => {
         sourcesMap,
 
         // Actions
-        initialize,
-        fetchSources
+        initialize
     };
 });
