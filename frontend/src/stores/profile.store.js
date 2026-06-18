@@ -12,6 +12,8 @@ export const useProfileStore = defineStore('profile', () => {
 
     const localStorageKey = computed(() => `profile.active.${authStore.user?.uid || 'guest'}`);
 
+    let inFlightRequest = null;
+
     // States
 
     const accessible = {
@@ -28,33 +30,30 @@ export const useProfileStore = defineStore('profile', () => {
 
     const activeProfile = ref(null);
 
-    // Actions
-
-    async function initialize() {
-        activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
-        if (!authStore.isAuthenticated) {
-            await fetchTemplates();
-        } else {
-            await Promise.all([fetchTemplates(), fetchAccessibles()]);
-        }
-    }
+    // Internal Functions
 
     watch(
         () => authStore.isAuthenticated,
-        (isAuthenticated) => {
+        async (isAuthenticated) => {
+            // NOTE: This may not work as expected if the user switches profiles quickly,
+            // but it should be good enough for now. We can improve this later if needed.
+            if (inFlightRequest) {
+                await inFlightRequest;
+            }
+
+            accessible.profiles.value = [];
             activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
+
             if (isAuthenticated) {
-                fetchAccessibles();
+                inFlightRequest = _fetchAccessibles();
             } else {
-                accessible.isLoading.value = false;
-                accessible.profiles.value = [];
                 accessible.error.value = null;
                 _autoSelectActive();
             }
         }
     );
 
-    async function fetchAccessibles() {
+    async function _fetchAccessibles() {
         if (!authStore.isAuthenticated) {
             toast.add({
                 severity: 'error',
@@ -95,7 +94,7 @@ export const useProfileStore = defineStore('profile', () => {
         _autoSelectActive();
     }
 
-    async function fetchTemplates() {
+    async function _fetchTemplates() {
         template.isLoading.value = true;
         template.error.value = null;
 
@@ -128,6 +127,17 @@ export const useProfileStore = defineStore('profile', () => {
         }
     }
 
+    // Actions
+
+    async function initialize() {
+        activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
+        if (!authStore.isAuthenticated) {
+            await _fetchTemplates();
+        } else {
+            await Promise.all([_fetchTemplates(), _fetchAccessibles()]);
+        }
+    }
+
     function setActive(profile) {
         activeProfile.value = profile;
         localStorage.setItem(localStorageKey.value, JSON.stringify(profile));
@@ -141,8 +151,8 @@ export const useProfileStore = defineStore('profile', () => {
 
         // Actions
         initialize,
-        fetchAccessibles,
-        fetchTemplates,
+        _fetchAccessibles,
+        fetchTemplates: _fetchTemplates,
         setActive
     };
 });
