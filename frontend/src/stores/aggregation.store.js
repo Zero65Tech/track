@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { TriggerState, TriggerType } from '@shared/enums';
 import { formatUtil } from '@shared/utils';
@@ -9,14 +9,16 @@ import { aggregationService } from '@/service/aggregationService';
 import { triggerService } from '@/service/triggerService';
 
 import { useProfileStore } from '@/stores/profile.store';
+import { useTriggerStore } from '@/stores/trigger.store';
 
-const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
 const TIME_UPDATE_INTERVAL_MS = 60 * 1000;
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 export const useAggregationStore = defineStore('aggregation', () => {
     const toast = useToast();
     const profileStore = useProfileStore();
+    const triggerStore = useTriggerStore();
+
     let abortController = new AbortController();
     let globalIntervalId = null;
 
@@ -38,13 +40,17 @@ export const useAggregationStore = defineStore('aggregation', () => {
         const key = _stateKey(aggregationName, params);
         if (!aggregations[key]) {
             aggregations[key] = {
-                _timeoutId: null,
                 _name: aggregationName,
                 _params: params,
                 data: ref([]),
                 dataTimestamp: ref(null),
                 dataUpdatedTimeAgo: ref(null),
-                isUpdating: ref(false),
+                isUpdating: computed(
+                    () =>
+                        triggerStore.triggers.find(
+                            (trigger) => trigger.type === TriggerType.DATA_AGGREGATION.id && _stateKey(trigger.aggregationName, trigger.aggregationParams) === key && ![TriggerState.FAILED.id, TriggerState.COMPLETED.id].includes(trigger.state)
+                        ) !== undefined
+                ),
                 isLoading: ref(false),
                 error: ref(null)
             };
@@ -80,7 +86,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
             Object.entries(aggregations).forEach((entry) => {
                 const [key, state] = entry;
-                _clearPendingTrigger(key);
                 if (profileStore.activeProfile) {
                     fetchAggregation(key);
                 } else {
@@ -99,58 +104,26 @@ export const useAggregationStore = defineStore('aggregation', () => {
             return;
         }
 
-        if (trigger.type === TriggerType.DATA_AGGREGATION.id) {
-            if (trigger.state === TriggerState.COMPLETED.id) {
-                notifyTriggerCompleted(trigger.aggregationName, trigger.aggregationParams);
-            } else if (trigger.state === TriggerState.FAILED.id) {
-                notifyTriggerFailed(trigger.aggregationName, trigger.aggregationParams, trigger.message);
-            }
+        if (trigger.type !== TriggerType.DATA_AGGREGATION.id) {
+            return;
         }
-    });
 
-    function notifyTriggerFailed(aggregationName, aggregationParams, message) {
-        const stateKey = _stateKey(aggregationName, aggregationParams);
-        if (aggregations[stateKey]) {
-            _clearPendingTrigger(stateKey);
+        const stateKey = _stateKey(trigger.aggregationName, trigger.aggregationParams);
+        if (!aggregations[stateKey]) {
+            return;
+        }
+
+        if (trigger.state === TriggerState.COMPLETED.id) {
+            await fetchAggregation(stateKey);
+        } else if (trigger.state === TriggerState.FAILED.id) {
             toast.add({
                 severity: 'error',
                 summary: 'Update failed',
-                detail: message,
+                detail: trigger.message,
                 life: 3000
             });
         }
-    }
-
-    async function notifyTriggerCompleted(aggregationName, aggregationParams) {
-        const stateKey = _stateKey(aggregationName, aggregationParams);
-        if (aggregations[stateKey]) {
-            _clearPendingTrigger(stateKey);
-            await fetchAggregation(stateKey);
-        }
-    }
-
-    function _setPendingTrigger(stateKey) {
-        const state = aggregations[stateKey];
-        state.isUpdating.value = true;
-
-        if (state._timeoutId) {
-            clearTimeout(state._timeoutId);
-        }
-
-        state._timeoutId = setTimeout(() => {
-            _clearPendingTrigger(stateKey);
-        }, PENDING_TRIGGER_TIMEOUT_MS);
-    }
-
-    function _clearPendingTrigger(stateKey) {
-        const state = aggregations[stateKey];
-        state.isUpdating.value = false;
-
-        if (state._timeoutId) {
-            clearTimeout(state._timeoutId);
-            state._timeoutId = null;
-        }
-    }
+    });
 
     // Actions
 
@@ -171,7 +144,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         state.error.value = null;
 
         try {
-            const { result, timestamp } = await aggregationService.getAggregationResult({ profileId, aggregationName: state._name, aggregationParams: state._params }, abortController.signal);
+            const { result, timestamp } = await aggregationService.getAggregationResult(profileId, state._name, state._params);
             if (timestamp === null || _isStale(timestamp)) {
                 triggerAggregationUpdate(stateKey);
             }
@@ -201,10 +174,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
         const state = aggregations[stateKey];
 
         try {
-            _setPendingTrigger(stateKey);
             await triggerService.createDataAggregationTrigger(profileId, state._name, state._params);
         } catch (err) {
-            _clearPendingTrigger(stateKey);
             toast.add({
                 severity: 'error',
                 summary: 'Update failed',
@@ -221,8 +192,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         // Actions
         fetchAggregation,
-        triggerAggregationUpdate,
-        notifyTriggerCompleted,
-        notifyTriggerFailed
+        triggerAggregationUpdate
     };
 });
