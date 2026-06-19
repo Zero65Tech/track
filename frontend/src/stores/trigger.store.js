@@ -37,6 +37,25 @@ export const useTriggerStore = defineStore('trigger', () => {
         }
     );
 
+    triggerService.onAsyncResponse(async (profileId, trigger) => {
+        if (profileId !== profileStore.activeProfile?.id) {
+            return;
+        }
+
+        for (let i = 0; i < triggers.value.length; i++) {
+            if (triggers.value[i].id === trigger.id) {
+                if (triggers.value[i].updatedAt.getTime() < trigger.updatedAt.getTime()) {
+                    triggers.value[i] = trigger;
+                    _sortTriggers();
+                }
+                return;
+            }
+        }
+
+        triggers.value.unshift(trigger);
+        _sortTriggers();
+    });
+
     async function _fetchTriggers(profileId, lastCreatedAt) {
         isLoading.value = true;
         error.value = null;
@@ -105,18 +124,6 @@ export const useTriggerStore = defineStore('trigger', () => {
         }
     }
 
-    async function asyncPush(trigger) {
-        for (let i = 0; i < triggers.value.length; i++) {
-            if (triggers.value[i].id === trigger.id) {
-                triggers.value[i] = trigger;
-                _sortTriggers();
-                return;
-            }
-        }
-        triggers.value.unshift(trigger);
-        _sortTriggers();
-    }
-
     return {
         // States
         isLoading,
@@ -126,7 +133,6 @@ export const useTriggerStore = defineStore('trigger', () => {
         // Actions
         initialize,
         refresh,
-        loadMore,
-        asyncPush
+        loadMore
     };
 });

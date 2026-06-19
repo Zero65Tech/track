@@ -1,6 +1,7 @@
 import { aggregationService } from '@/service/aggregationService';
 import { triggerService } from '@/service/triggerService';
 import { useProfileStore } from '@/stores/profile.store';
+import { TriggerState, TriggerType } from '@shared/enums';
 import { formatUtil } from '@shared/utils';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
@@ -89,6 +90,20 @@ export const useAggregationStore = defineStore('aggregation', () => {
             });
         }
     );
+
+    triggerService.onAsyncResponse(async (profileId, trigger) => {
+        if (profileId !== profileStore.activeProfile?.id) {
+            return;
+        }
+
+        if (trigger.type === TriggerType.DATA_AGGREGATION.id) {
+            if (trigger.state === TriggerState.COMPLETED.id) {
+                notifyTriggerCompleted(trigger.aggregationName, trigger.aggregationParams);
+            } else if (trigger.state === TriggerState.FAILED.id) {
+                notifyTriggerFailed(trigger.aggregationName, trigger.aggregationParams, trigger.message);
+            }
+        }
+    });
 
     async function fetchAggregation(stateKey) {
         const profileId = profileStore.activeProfile?.id;

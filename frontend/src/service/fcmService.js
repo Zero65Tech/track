@@ -1,25 +1,7 @@
-import { getToken, onMessage } from 'firebase/messaging';
-import { messaging } from '@/config/firebaseClient';
-
-const swFile = import.meta.env.MODE === 'prod' || import.meta.env.MODE === 'gamma' ? '/sw.prod.js' : '/sw.test.js';
-const swRegistration = await navigator.serviceWorker.register(swFile, {
-    scope: '/'
-});
+import fcmClient from '@/service/fcmClient';
 
 export const fcmService = {
-    onMessage(callback) {
-        onMessage(messaging, callback);
-        navigator.serviceWorker.onmessage = (event) => {
-            if (event.data.data.type === 'FCM_BACKGROUND_MESSAGE') {
-                callback(event.data);
-            }
-        };
-    },
-
-    async getFcmToken() {
-        return await getToken(messaging, {
-            serviceWorkerRegistration: swRegistration,
-            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
-        });
+    onFcmTokenRefresh(callback) {
+        fcmClient.onFcmTokenRefresh(callback);
     }
 };

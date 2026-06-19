@@ -12,6 +12,8 @@ import ToastService from 'primevue/toastservice';
 import '@/assets/styles.scss';
 import '@/assets/tailwind.css';
 
+import { getFcmToken } from '@/config/firebaseClient';
+
 import { useAuthStore } from '@/stores/auth.store';
 import { useBookStore } from '@/stores/book.store';
 import { useFcmStore } from '@/stores/fcm.store';
@@ -40,13 +42,15 @@ app.use(ToastService);
 
 app.mount('#app');
 
+const fcmToken = await getFcmToken();
+
 // Initialize auth store
 const authStore = useAuthStore();
 /* await */ authStore.initialize();
 
 // Initialize fcm store
 const fcmStore = useFcmStore();
-/* await */ fcmStore.initialize();
+/* await */ fcmStore.initialize(fcmToken);
 
 // Initialize profile store
 const profileStore = useProfileStore();
