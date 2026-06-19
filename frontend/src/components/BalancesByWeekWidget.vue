@@ -171,7 +171,7 @@ onBeforeUnmount(() => {
                         {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : '' }}
                     </span>
                     <button
-                        @click="props.aggregationState.error.value ? aggregationStore.fetchAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"
+                        @click="props.aggregationState.error.value ? aggregationStore.refreshAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"
                         :disabled="props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',

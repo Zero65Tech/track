@@ -15,7 +15,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     const profileStore = useProfileStore();
     const triggerStore = useTriggerStore();
 
-    function _stateKey(aggregationName, params = {}) {
+    function _stateKey(aggregationName, params) {
         return `${aggregationName}:${JSON.stringify(params)}`;
     }
 
@@ -23,23 +23,34 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     const aggregations = {}; // State structure: { stateKey: { _name, _params, _inFlightRequest, data, dataTimestamp, isUpdateAvailable, isUpdating, isRefreshAvailable, isLoading, error } }
 
-    function _isUpdateAvailable(aggregationName, params = {}) {
-        if (Object.keys(params).length === 0) {
+    function _isUpdating(stateKey) {
+        return computed(
+            // prettier-ignore
+            () => triggerStore.triggers.find((trigger) =>
+                trigger.type === TriggerType.DATA_AGGREGATION.id
+                && _stateKey(trigger.aggregationName, trigger.aggregationParams) === stateKey
+                && [TriggerState.QUEUED.id, TriggerState.RUNNING.id].includes(trigger.state)
+            ) !== undefined
+        );
+    }
+
+    function _isUpdateAvailable(aggregationName, aggregationParams) {
+        if (Object.keys(aggregationParams).length === 0) {
             // TODO: Check if there is any book with data update after the aggregation timestamp.
             return computed(() => false);
-        } else if (params.type) {
+        } else if (aggregationParams.type) {
             // TODO: Check if the type has a data update after the aggregation timestamp.
             return computed(() => false);
-        } else if (params.bookId) {
+        } else if (aggregationParams.bookId) {
             // TODO: Check if the book with bookId has a data update after the aggregation timestamp.
             return computed(() => false);
-        } else if (params.headId) {
+        } else if (aggregationParams.headId) {
             // TODO: Check if the head with headId has a data update after the aggregation timestamp.
             return computed(() => false);
-        } else if (params.tagId) {
+        } else if (aggregationParams.tagId) {
             // TODO: Check if the tag with tagId has a data update after the aggregation timestamp.
             return computed(() => false);
-        } else if (params.sourceId) {
+        } else if (aggregationParams.sourceId) {
             // TODO: Check if the source with sourceId has a data update after the aggregation timestamp.
             return computed(() => false);
         } else {
@@ -47,32 +58,21 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
     }
 
-    function _isUpdating(key) {
-        return computed(
-            // prettier-ignore
-            () => triggerStore.triggers.find((trigger) =>
-                trigger.type === TriggerType.DATA_AGGREGATION.id
-                && _stateKey(trigger.aggregationName, trigger.aggregationParams) === key
-                && [TriggerState.QUEUED.id, TriggerState.RUNNING.id].includes(trigger.state)
-            ) !== undefined
-        );
-    }
-
     // Getters
 
-    function getAggregationState(aggregationName, params = {}) {
-        const key = _stateKey(aggregationName, params);
+    function getAggregationState(aggregationName, aggregationParams = {}) {
+        const key = _stateKey(aggregationName, aggregationParams);
         if (!aggregations[key]) {
             aggregations[key] = {
                 _name: aggregationName,
-                _params: params,
+                _params: aggregationParams,
                 _inFlightRequest: null,
                 data: ref([]),
                 dataTimestamp: ref(null),
                 isLoading: ref(false),
-                isRefreshAvailable: ref(true),
+                isRefreshAvailable: ref(Boolean(profileStore.activeProfile)),
                 isUpdating: _isUpdating(key),
-                isUpdateAvailable: _isUpdateAvailable(aggregationName, params),
+                isUpdateAvailable: _isUpdateAvailable(aggregationName, aggregationParams),
                 error: ref(null)
             };
         }
@@ -84,11 +84,15 @@ export const useAggregationStore = defineStore('aggregation', () => {
     watch(
         () => profileStore.activeProfile,
         async () => {
-            for (const [key, state] of Object.entries(aggregations)) {
+            for (const state of Object.values(aggregations)) {
                 if (state._inFlightRequest) {
                     await state._inFlightRequest;
                 }
-                delete aggregations[key];
+                state._inFlightRequest = null;
+                state.data.value = [];
+                state.dataTimestamp.value = null;
+                state.isRefreshAvailable.value = Boolean(profileStore.activeProfile);
+                state.error.value = null;
             }
         }
     );
@@ -139,7 +143,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     // Actions
 
-    async function fetchAggregation(stateKey) {
+    async function refreshAggregation(stateKey) {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
             throw new Error('No profile selected');
@@ -147,10 +151,10 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         const state = aggregations[stateKey];
         if (state.isLoading.value === true) {
-            return state._inFlightRequest;
+            throw new Error('Request already in flight');
         }
 
-        state._inFlightRequest = _fetchAggregation();
+        state._inFlightRequest = _fetchAggregation(profileId, state);
     }
 
     async function triggerAggregationUpdate(stateKey) {
@@ -185,7 +189,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         getAggregationState,
 
         // Actions
-        fetchAggregation,
+        refreshAggregation,
         triggerAggregationUpdate
     };
 });

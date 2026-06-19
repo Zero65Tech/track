@@ -28,7 +28,7 @@ export function useAggregationRefresh(aggregationState) {
             }
 
             try {
-                await aggregationStore.fetchAggregation(stateKey);
+                await aggregationStore.refreshAggregation(stateKey);
             } catch (err) {
                 console.log(err);
             }

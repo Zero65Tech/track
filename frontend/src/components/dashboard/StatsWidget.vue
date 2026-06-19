@@ -51,7 +51,7 @@ const aggregations = AGGREGATIONS.map((agg) => {
     });
 
     const handleRetry = async () => {
-        await aggregationStore.fetchAggregation(aggState.key);
+        await aggregationStore.refreshAggregation(aggState.key);
     };
 
     const handleUpdate = async () => {

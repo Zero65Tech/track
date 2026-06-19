@@ -222,7 +222,7 @@ function getEntryTypeName(typeId) {
                             {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
                             :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',

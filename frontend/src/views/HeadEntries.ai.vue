@@ -514,7 +514,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -547,7 +547,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -580,7 +580,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -613,7 +613,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
@@ -647,7 +647,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
+                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
                             :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
