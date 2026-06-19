@@ -1,4 +1,5 @@
 <script setup>
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { colorUtil, dateUtil, formatUtil } from '@shared/utils';
@@ -21,6 +22,7 @@ const props = defineProps({
 });
 
 const aggregationStore = useAggregationStore();
+useAggregationRefresh(() => props.aggregationState);
 
 const numDataPoints = ref(52);
 

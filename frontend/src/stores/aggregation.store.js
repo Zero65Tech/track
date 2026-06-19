@@ -15,15 +15,48 @@ export const useAggregationStore = defineStore('aggregation', () => {
     const profileStore = useProfileStore();
     const triggerStore = useTriggerStore();
 
-    let abortController = new AbortController();
-
     function _stateKey(aggregationName, params = {}) {
         return `${aggregationName}:${JSON.stringify(params)}`;
     }
 
     // States
 
-    const aggregations = {}; // State structure: { stateKey: { _timeoutId, _name, _params, data, dataTimestamp, isUpdating, isLoading, error } }
+    const aggregations = {}; // State structure: { stateKey: { _name, _params, _inFlightRequest, data, dataTimestamp, isUpdateAvailable, isUpdating, isRefreshAvailable, isLoading, error } }
+
+    function _isUpdateAvailable(aggregationName, params = {}) {
+        if (Object.keys(params).length === 0) {
+            // TODO: Check if there is any book with data update after the aggregation timestamp.
+            return computed(() => false);
+        } else if (params.type) {
+            // TODO: Check if the type has a data update after the aggregation timestamp.
+            return computed(() => false);
+        } else if (params.bookId) {
+            // TODO: Check if the book with bookId has a data update after the aggregation timestamp.
+            return computed(() => false);
+        } else if (params.headId) {
+            // TODO: Check if the head with headId has a data update after the aggregation timestamp.
+            return computed(() => false);
+        } else if (params.tagId) {
+            // TODO: Check if the tag with tagId has a data update after the aggregation timestamp.
+            return computed(() => false);
+        } else if (params.sourceId) {
+            // TODO: Check if the source with sourceId has a data update after the aggregation timestamp.
+            return computed(() => false);
+        } else {
+            throw new Error('Unexpected Scenario');
+        }
+    }
+
+    function _isUpdating(key) {
+        return computed(
+            // prettier-ignore
+            () => triggerStore.triggers.find((trigger) =>
+                trigger.type === TriggerType.DATA_AGGREGATION.id
+                && _stateKey(trigger.aggregationName, trigger.aggregationParams) === key
+                && [TriggerState.QUEUED.id, TriggerState.RUNNING.id].includes(trigger.state)
+            ) !== undefined
+        );
+    }
 
     // Getters
 
@@ -33,47 +66,15 @@ export const useAggregationStore = defineStore('aggregation', () => {
             aggregations[key] = {
                 _name: aggregationName,
                 _params: params,
+                _inFlightRequest: null,
                 data: ref([]),
                 dataTimestamp: ref(null),
-                isUpdateAvailable: (() => {
-                    if (Object.keys(params).length === 0) {
-                        // TODO: Check if there is any book with data update after the aggregation timestamp.
-                        return computed(() => false);
-                    } else if (params.type) {
-                        // TODO: Check if the type has a data update after the aggregation timestamp.
-                        return computed(() => false);
-                    } else if (params.bookId) {
-                        // TODO: Check if the book with bookId has a data update after the aggregation timestamp.
-                        return computed(() => false);
-                    } else if (params.headId) {
-                        // TODO: Check if the head with headId has a data update after the aggregation timestamp.
-                        return computed(() => false);
-                    } else if (params.tagId) {
-                        // TODO: Check if the tag with tagId has a data update after the aggregation timestamp.
-                        return computed(() => false);
-                    } else if (params.sourceId) {
-                        // TODO: Check if the source with sourceId has a data update after the aggregation timestamp.
-                        return computed(() => false);
-                    } else {
-                        throw new Error('Unexpected Scenario');
-                    }
-                })(),
-                isUpdating: computed(
-                    // prettier-ignore
-                    () => triggerStore.triggers.find((trigger) =>
-                        trigger.type === TriggerType.DATA_AGGREGATION.id
-                            && _stateKey(trigger.aggregationName, trigger.aggregationParams) === key
-                            && [TriggerState.QUEUED.id, TriggerState.RUNNING.id].includes(trigger.state)
-                    ) !== undefined
-                ),
-                isRefreshAvailable: ref(false),
                 isLoading: ref(false),
+                isRefreshAvailable: ref(true),
+                isUpdating: _isUpdating(key),
+                isUpdateAvailable: _isUpdateAvailable(aggregationName, params),
                 error: ref(null)
             };
-
-            if (profileStore.activeProfile) {
-                fetchAggregation(key);
-            }
         }
         return { key, ...aggregations[key] };
     }
@@ -82,22 +83,13 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     watch(
         () => profileStore.activeProfile,
-        () => {
-            // Abort all in-flight requests
-            abortController.abort();
-            abortController = new AbortController();
-
-            Object.entries(aggregations).forEach((entry) => {
-                const [key, state] = entry;
-                if (profileStore.activeProfile) {
-                    fetchAggregation(key);
-                } else {
-                    state.data.value = null;
-                    state.dataTimestamp.value = null;
-                    state.isLoading.value = false;
-                    state.error.value = null;
+        async () => {
+            for (const [key, state] of Object.entries(aggregations)) {
+                if (state._inFlightRequest) {
+                    await state._inFlightRequest;
                 }
-            });
+                delete aggregations[key];
+            }
         }
     );
 
@@ -111,50 +103,54 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
 
         const stateKey = _stateKey(trigger.aggregationName, trigger.aggregationParams);
-        if (!aggregations[stateKey]) {
+        const state = aggregations[stateKey];
+        if (state === undefined) {
             return;
         }
 
-        if (trigger.state === TriggerState.COMPLETED.id) {
-            await fetchAggregation(stateKey);
-        } else if (trigger.state === TriggerState.FAILED.id) {
+        if (trigger.state === TriggerState.FAILED.id) {
             toast.add({
                 severity: 'error',
                 summary: 'Update failed',
                 detail: trigger.message,
                 life: 3000
             });
+        } else if (trigger.state === TriggerState.COMPLETED.id) {
+            state.isRefreshAvailable.value = true;
         }
     });
 
-    // Actions
-
-    async function fetchAggregation(stateKey) {
-        const profileId = profileStore.activeProfile?.id;
-        if (!profileId) {
-            toast.add({
-                severity: 'error',
-                summary: 'Refresh failed',
-                detail: 'Kindly select a profile to fetch aggregation data',
-                life: 3000
-            });
-            return;
-        }
-
-        const state = aggregations[stateKey];
+    async function _fetchAggregation(profileId, state) {
         state.isLoading.value = true;
+        state.isRefreshAvailable.value = false;
         state.error.value = null;
 
         try {
-            const { result, timestamp } = await aggregationService.getAggregationResult(profileId, state._name, state._params);
-            state.data.value = result;
-            state.dataTimestamp.value = timestamp;
+            const apiResponseData = await aggregationService.getAggregationResult(profileId, state._name, state._params);
+            state.data.value = apiResponseData.result;
+            state.dataTimestamp.value = apiResponseData.timestamp;
         } catch (err) {
             state.error.value = err.message;
             console.log(err);
         } finally {
             state.isLoading.value = false;
         }
+    }
+
+    // Actions
+
+    async function fetchAggregation(stateKey) {
+        const profileId = profileStore.activeProfile?.id;
+        if (!profileId) {
+            throw new Error('No profile selected');
+        }
+
+        const state = aggregations[stateKey];
+        if (state.isLoading.value === true) {
+            return state._inFlightRequest;
+        }
+
+        state._inFlightRequest = _fetchAggregation();
     }
 
     async function triggerAggregationUpdate(stateKey) {

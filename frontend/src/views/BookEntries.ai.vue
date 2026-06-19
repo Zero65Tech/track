@@ -1,5 +1,6 @@
 <script setup>
 import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -28,6 +29,7 @@ const chartAggregationState = computed(() => aggregationStore.getAggregationStat
 const chartData = computed(() => chartAggregationState.value.data.value);
 
 const bookId = computed(() => route.params.bookId);
+useAggregationRefresh(chartAggregationState);
 const bookName = computed(() => bookStore.booksMap[bookId.value]?.name || 'Book');
 
 const bookColor = computed(() => bookStore.booksMap[bookId.value]?.color || null);

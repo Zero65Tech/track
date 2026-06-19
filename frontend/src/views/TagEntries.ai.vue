@@ -1,5 +1,6 @@
 <script setup>
 import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -25,6 +26,7 @@ const aggregationStore = useAggregationStore();
 const chartAggregationState = computed(() => aggregationStore.getAggregationState('amounts_for_a_tag', { tagId: tagId.value }));
 
 const tagId = computed(() => route.params.tagId);
+useAggregationRefresh(chartAggregationState);
 const tagName = computed(() => tagStore.tagsMap[tagId.value]?.name || 'Tag');
 const tagGroup = computed(() => tagStore.tagsMap[tagId.value]?.group || null);
 

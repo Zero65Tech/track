@@ -1,4 +1,5 @@
 <script setup>
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
@@ -31,6 +32,7 @@ const AGGREGATIONS = [
 
 const aggregations = AGGREGATIONS.map((agg) => {
     const aggState = aggregationStore.getAggregationState(agg.name);
+    useAggregationRefresh(aggState);
 
     const totalBalance = computed(() => {
         if (!aggState.data.value) {

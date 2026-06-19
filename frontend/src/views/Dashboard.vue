@@ -1,12 +1,14 @@
 <script setup>
-import AmountsByTypeBookMonthWidget from '@/components/dashboard/AmountsByTypeBookMonthWidget.vue';
-import { useAggregationStore } from '@/stores/aggregation.store';
 import BalancesByWeekWidget from '@/components/BalancesByWeekWidget.vue';
+import AmountsByTypeBookMonthWidget from '@/components/dashboard/AmountsByTypeBookMonthWidget.vue';
 import StatsWidget from '@/components/dashboard/StatsWidget.vue';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
+import { useAggregationStore } from '@/stores/aggregation.store';
 import { EntryType } from '@shared/enums';
 
 const aggregationStore = useAggregationStore();
 const aggregationState = aggregationStore.getAggregationState('amounts_by_book');
+useAggregationRefresh(aggregationState);
 </script>
 
 <template>

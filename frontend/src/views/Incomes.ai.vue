@@ -1,5 +1,6 @@
 <script setup>
 import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
@@ -18,6 +19,7 @@ const headStore = useHeadStore();
 const chartAggregationName = 'amounts_for_a_type';
 const chartAggregationParams = { type: EntryType.INCOME.id };
 const chartAggregationState = aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams);
+useAggregationRefresh(chartAggregationState);
 
 // Income data from aggregation
 const incomeData = computed(() => chartAggregationState.data.value || []);

@@ -1,5 +1,6 @@
 <script setup>
 import BalancesByWeekWidget from '@/components/BalancesByWeekWidget.vue';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
@@ -24,6 +25,7 @@ const sourceId = computed(() => route.params.sourceId);
 const sourceName = computed(() => sourceStore.sourcesMap[sourceId.value]?.name || 'Source');
 
 const aggregationState = computed(() => aggregationStore.getAggregationState('amounts_for_a_source', { sourceId: sourceId.value }));
+useAggregationRefresh(aggregationState);
 
 let abortController = new AbortController();
 const loadedWeekCount = ref(0);

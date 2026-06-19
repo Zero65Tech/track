@@ -1,4 +1,5 @@
 <script setup>
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -26,6 +27,7 @@ const chartAggregationParams = computed(() => ({ headId: headId.value }));
 const chartAggregationState = computed(() => aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams.value));
 
 const headId = computed(() => route.params.headId);
+useAggregationRefresh(chartAggregationState);
 const headName = computed(() => headStore.headsMap[headId.value]?.name || 'Head');
 
 let abortController = new AbortController();

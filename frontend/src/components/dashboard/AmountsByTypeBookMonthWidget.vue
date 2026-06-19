@@ -1,4 +1,5 @@
 <script setup>
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
@@ -26,6 +27,7 @@ const bookStore = useBookStore();
 const aggregationStore = useAggregationStore();
 
 const aggregationState = aggregationStore.getAggregationState('amounts_by_type_book_month');
+useAggregationRefresh(aggregationState);
 
 const numBars = ref(12);
 
