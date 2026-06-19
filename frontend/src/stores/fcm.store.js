@@ -31,9 +31,9 @@ export const useFcmStore = defineStore('fcm', () => {
             await deviceService.updateDevice(savedDeviceId, fcmToken);
             deviceId.value = savedDeviceId;
         } else {
-            const device = await deviceService.createDevice(fcmToken);
-            deviceId.value = device.id;
-            localStorage.setItem(localStorageKey, device.id);
+            const apiResponseData = await deviceService.createDevice(fcmToken);
+            deviceId.value = apiResponseData.device.id;
+            localStorage.setItem(localStorageKey, apiResponseData.device.id);
         }
 
         if (authStore.isAuthenticated) {

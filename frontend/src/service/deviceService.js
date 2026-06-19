@@ -2,7 +2,8 @@ import apiClient from '@/service/apiClient';
 
 export const deviceService = {
     async createDevice(fcmToken) {
-        return (await apiClient.post('/devices', { fcmToken })).data.data;
+        const apiResponse = await apiClient.post('/devices', { fcmToken });
+        return apiResponse.data.data;
     },
 
     async updateDevice(deviceId, fcmToken) {

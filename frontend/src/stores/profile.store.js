@@ -36,12 +36,12 @@ export const useProfileStore = defineStore('profile', () => {
                 await inFlightRequest;
             }
 
+            accessible.profiles.value = [];
             activeProfile.value = JSON.parse(localStorage.getItem(localStorageKey.value)) || null;
 
             if (isAuthenticated) {
                 inFlightRequest = _fetchAccessibles();
             } else {
-                accessible.profiles.value = [];
                 accessible.error.value = null;
                 _autoSelectActive();
             }

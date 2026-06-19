@@ -16,7 +16,7 @@ async function createDevice(req, res) {
   device.id = device._id.toString();
   delete device._id;
 
-  return sendData(res, device);
+  return sendData(res, { device });
 }
 
 async function updateDevice(req, res) {
