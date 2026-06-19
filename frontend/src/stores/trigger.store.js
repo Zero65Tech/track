@@ -100,9 +100,9 @@ export const useTriggerStore = defineStore('trigger', () => {
     async function refresh() {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
-            console.error('No profile selected');
+            throw new Error('No profile selected');
         } else if (isLoading.value) {
-            console.error('Request already in flight');
+            throw new Error('Request already in flight');
         } else {
             triggers.value = [];
             inFlightRequest = _fetchTriggers(profileId);
@@ -112,11 +112,11 @@ export const useTriggerStore = defineStore('trigger', () => {
     async function loadMore() {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
-            console.error('No profile selected');
+            throw new Error('No profile selected');
         } else if (isLoading.value) {
-            console.error('Request already in flight');
+            throw new Error('Request already in flight');
         } else if (triggers.value.length === 0) {
-            console.error('No triggers to load more');
+            throw new Error('No triggers to load more');
         } else {
             const lastTrigger = triggers.value[triggers.value.length - 1];
             const lastCreatedAt = lastTrigger ? lastTrigger.createdAt : null;

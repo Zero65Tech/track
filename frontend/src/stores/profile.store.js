@@ -105,9 +105,9 @@ export const useProfileStore = defineStore('profile', () => {
 
     async function refreshAccessibles() {
         if (!authStore.isAuthenticated) {
-            console.error('Not authenticated');
+            throw new Error('Not authenticated');
         } else if (accessible.isLoading.value) {
-            console.error('Request already in flight');
+            throw new Error('Request already in flight');
         } else {
             inFlightRequest = _fetchAccessibles();
         }
@@ -115,7 +115,7 @@ export const useProfileStore = defineStore('profile', () => {
 
     async function refreshTemplates() {
         if (template.isLoading.value) {
-            console.error('Request already in flight');
+            throw new Error('Request already in flight');
         } else {
             _fetchTemplates();
         }

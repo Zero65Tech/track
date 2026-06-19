@@ -1,11 +1,14 @@
-import { aggregationService } from '@/service/aggregationService';
-import { triggerService } from '@/service/triggerService';
-import { useProfileStore } from '@/stores/profile.store';
-import { TriggerState, TriggerType } from '@shared/enums';
-import { formatUtil } from '@shared/utils';
 import { defineStore } from 'pinia';
 import { useToast } from 'primevue/usetoast';
 import { ref, watch } from 'vue';
+
+import { TriggerState, TriggerType } from '@shared/enums';
+import { formatUtil } from '@shared/utils';
+
+import { aggregationService } from '@/service/aggregationService';
+import { triggerService } from '@/service/triggerService';
+
+import { useProfileStore } from '@/stores/profile.store';
 
 const PENDING_TRIGGER_TIMEOUT_MS = 60 * 1000;
 const TIME_UPDATE_INTERVAL_MS = 60 * 1000;
@@ -66,7 +69,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         return { key, ...aggregations[key] };
     }
 
-    // Actions
+    // Internal Functions
 
     watch(
         () => profileStore.activeProfile,
@@ -104,6 +107,52 @@ export const useAggregationStore = defineStore('aggregation', () => {
             }
         }
     });
+
+    function notifyTriggerFailed(aggregationName, aggregationParams, message) {
+        const stateKey = _stateKey(aggregationName, aggregationParams);
+        if (aggregations[stateKey]) {
+            _clearPendingTrigger(stateKey);
+            toast.add({
+                severity: 'error',
+                summary: 'Update failed',
+                detail: message,
+                life: 3000
+            });
+        }
+    }
+
+    async function notifyTriggerCompleted(aggregationName, aggregationParams) {
+        const stateKey = _stateKey(aggregationName, aggregationParams);
+        if (aggregations[stateKey]) {
+            _clearPendingTrigger(stateKey);
+            await fetchAggregation(stateKey);
+        }
+    }
+
+    function _setPendingTrigger(stateKey) {
+        const state = aggregations[stateKey];
+        state.isUpdating.value = true;
+
+        if (state._timeoutId) {
+            clearTimeout(state._timeoutId);
+        }
+
+        state._timeoutId = setTimeout(() => {
+            _clearPendingTrigger(stateKey);
+        }, PENDING_TRIGGER_TIMEOUT_MS);
+    }
+
+    function _clearPendingTrigger(stateKey) {
+        const state = aggregations[stateKey];
+        state.isUpdating.value = false;
+
+        if (state._timeoutId) {
+            clearTimeout(state._timeoutId);
+            state._timeoutId = null;
+        }
+    }
+
+    // Actions
 
     async function fetchAggregation(stateKey) {
         const profileId = profileStore.activeProfile?.id;
@@ -163,50 +212,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 life: 3000
             });
             console.log(err);
-        }
-    }
-
-    function notifyTriggerFailed(aggregationName, aggregationParams, message) {
-        const stateKey = _stateKey(aggregationName, aggregationParams);
-        if (aggregations[stateKey]) {
-            _clearPendingTrigger(stateKey);
-            toast.add({
-                severity: 'error',
-                summary: 'Update failed',
-                detail: message,
-                life: 3000
-            });
-        }
-    }
-
-    async function notifyTriggerCompleted(aggregationName, aggregationParams) {
-        const stateKey = _stateKey(aggregationName, aggregationParams);
-        if (aggregations[stateKey]) {
-            _clearPendingTrigger(stateKey);
-            await fetchAggregation(stateKey);
-        }
-    }
-
-    function _setPendingTrigger(stateKey) {
-        const state = aggregations[stateKey];
-        state.isUpdating.value = true;
-
-        if (state._timeoutId) {
-            clearTimeout(state._timeoutId);
-        }
-
-        state._timeoutId = setTimeout(() => {
-            _clearPendingTrigger(stateKey);
-        }, PENDING_TRIGGER_TIMEOUT_MS);
-    }
-
-    function _clearPendingTrigger(stateKey) {
-        const state = aggregations[stateKey];
-        state.isUpdating.value = false;
-
-        if (state._timeoutId) {
-            clearTimeout(state._timeoutId);
-            state._timeoutId = null;
         }
     }
 
