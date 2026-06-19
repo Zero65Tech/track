@@ -217,7 +217,7 @@ function getEntryTypeName(typeId) {
                     <div class="font-semibold text-xl">Entries</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : allWeeksAsc.length ? aggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="aggregationState.error.value ? aggregationStore.fetchAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"

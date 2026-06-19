@@ -60,7 +60,6 @@ const aggregations = AGGREGATIONS.map((agg) => {
         ...agg,
         totalBalance,
         formattedBalance,
-        formattedTimestamp: aggState.dataUpdatedTimeAgo,
         isUpdating: aggState.isUpdating,
         isLoading: aggState.isLoading,
         error: aggState.error,
@@ -100,7 +99,7 @@ onBeforeUnmount(() => {
             </div>
             <div class="flex items-center justify-between gap-2">
                 <span class="text-primary font-medium">
-                    {{ agg.isLoading.value ? 'Loading ...' : agg.isUpdating.value ? 'Updating ...' : agg.formattedTimestamp.value }}
+                    {{ agg.isLoading.value ? 'Loading ...' : agg.isUpdating.value ? 'Updating ...' : '' }}
                 </span>
                 <button
                     @click="agg.error.value ? agg.handleRetry() : agg.handleUpdate()"

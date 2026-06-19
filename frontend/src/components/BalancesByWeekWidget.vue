@@ -1,7 +1,7 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
-import { colorUtil, formatUtil, dateUtil } from '@shared/utils';
+import { colorUtil, dateUtil, formatUtil } from '@shared/utils';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl">Balance Trend</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
-                        {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? props.aggregationState.dataUpdatedTimeAgo.value : '' }}
+                        {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : '' }}
                     </span>
                     <button
                         @click="props.aggregationState.error.value ? aggregationStore.fetchAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"

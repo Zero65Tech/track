@@ -700,7 +700,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Cumulative by Head</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : cumulativeChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
@@ -734,7 +734,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Debit - Credit</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : debitCreditChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
@@ -768,7 +768,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Income</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : incomeChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
@@ -802,7 +802,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Tax</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : taxChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
@@ -836,7 +836,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Expense & Refund</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : expenseRefundChartData.labels.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
@@ -871,7 +871,7 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Entries</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : allMonthsAsc.length ? chartAggregationState.dataUpdatedTimeAgo.value : '' }}
+                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
                             @click="chartAggregationState.error.value ? aggregationStore.fetchAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"

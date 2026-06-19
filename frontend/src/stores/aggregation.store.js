@@ -3,7 +3,6 @@ import { useToast } from 'primevue/usetoast';
 import { computed, ref, watch } from 'vue';
 
 import { TriggerState, TriggerType } from '@shared/enums';
-import { formatUtil } from '@shared/utils';
 
 import { aggregationService } from '@/service/aggregationService';
 import { triggerService } from '@/service/triggerService';
@@ -11,32 +10,24 @@ import { triggerService } from '@/service/triggerService';
 import { useProfileStore } from '@/stores/profile.store';
 import { useTriggerStore } from '@/stores/trigger.store';
 
-const TIME_UPDATE_INTERVAL_MS = 60 * 1000;
-const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
-
 export const useAggregationStore = defineStore('aggregation', () => {
     const toast = useToast();
     const profileStore = useProfileStore();
     const triggerStore = useTriggerStore();
 
     let abortController = new AbortController();
-    let globalIntervalId = null;
 
     function _stateKey(aggregationName, params = {}) {
         return `${aggregationName}:${JSON.stringify(params)}`;
     }
 
-    function _isStale(timestamp) {
-        return timestamp && Date.now() - timestamp.getTime() > STALE_THRESHOLD_MS;
-    }
-
     // States
 
-    const aggregations = {}; // State structure: { stateKey: { _timeoutId, _name, _params, data, dataTimestamp, dataUpdatedTimeAgo, isUpdating, isLoading, error } }
+    const aggregations = {}; // State structure: { stateKey: { _timeoutId, _name, _params, data, dataTimestamp, isUpdating, isLoading, error } }
 
     // Getters
 
-    function getAggregationState(aggregationName, params) {
+    function getAggregationState(aggregationName, params = {}) {
         const key = _stateKey(aggregationName, params);
         if (!aggregations[key]) {
             aggregations[key] = {
@@ -44,29 +35,41 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 _params: params,
                 data: ref([]),
                 dataTimestamp: ref(null),
-                dataUpdatedTimeAgo: ref(null),
+                isUpdateAvailable: (() => {
+                    if (Object.keys(params).length === 0) {
+                        // TODO: Check if there is any book with data update after the aggregation timestamp.
+                        return computed(() => false);
+                    } else if (params.type) {
+                        // TODO: Check if the type has a data update after the aggregation timestamp.
+                        return computed(() => false);
+                    } else if (params.bookId) {
+                        // TODO: Check if the book with bookId has a data update after the aggregation timestamp.
+                        return computed(() => false);
+                    } else if (params.headId) {
+                        // TODO: Check if the head with headId has a data update after the aggregation timestamp.
+                        return computed(() => false);
+                    } else if (params.tagId) {
+                        // TODO: Check if the tag with tagId has a data update after the aggregation timestamp.
+                        return computed(() => false);
+                    } else if (params.sourceId) {
+                        // TODO: Check if the source with sourceId has a data update after the aggregation timestamp.
+                        return computed(() => false);
+                    } else {
+                        throw new Error('Unexpected Scenario');
+                    }
+                })(),
                 isUpdating: computed(
-                    () =>
-                        triggerStore.triggers.find(
-                            (trigger) => trigger.type === TriggerType.DATA_AGGREGATION.id && _stateKey(trigger.aggregationName, trigger.aggregationParams) === key && ![TriggerState.FAILED.id, TriggerState.COMPLETED.id].includes(trigger.state)
-                        ) !== undefined
+                    // prettier-ignore
+                    () => triggerStore.triggers.find((trigger) =>
+                        trigger.type === TriggerType.DATA_AGGREGATION.id
+                            && _stateKey(trigger.aggregationName, trigger.aggregationParams) === key
+                            && [TriggerState.QUEUED.id, TriggerState.RUNNING.id].includes(trigger.state)
+                    ) !== undefined
                 ),
+                isRefreshAvailable: ref(false),
                 isLoading: ref(false),
                 error: ref(null)
             };
-
-            if (!globalIntervalId) {
-                globalIntervalId = setInterval(() => {
-                    Object.entries(aggregations).forEach(([key, aggregation]) => {
-                        if (aggregation.dataTimestamp.value) {
-                            aggregation.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(aggregation.dataTimestamp.value);
-                            if (_isStale(aggregation.dataTimestamp.value) && !aggregation.isUpdating.value && !aggregation.isLoading.value) {
-                                triggerAggregationUpdate(key);
-                            }
-                        }
-                    });
-                }, TIME_UPDATE_INTERVAL_MS);
-            }
 
             if (profileStore.activeProfile) {
                 fetchAggregation(key);
@@ -91,7 +94,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 } else {
                     state.data.value = null;
                     state.dataTimestamp.value = null;
-                    state.dataUpdatedTimeAgo.value = null;
                     state.isLoading.value = false;
                     state.error.value = null;
                 }
@@ -145,12 +147,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         try {
             const { result, timestamp } = await aggregationService.getAggregationResult(profileId, state._name, state._params);
-            if (timestamp === null || _isStale(timestamp)) {
-                triggerAggregationUpdate(stateKey);
-            }
             state.data.value = result;
             state.dataTimestamp.value = timestamp;
-            state.dataUpdatedTimeAgo.value = formatUtil.formatTimeAgo(timestamp);
         } catch (err) {
             state.error.value = err.message;
             console.log(err);

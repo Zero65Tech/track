@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl">Balance Trend</div>
                 <div class="flex items-center gap-2">
                     <span class="text-primary font-medium text-sm">
-                        {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : chartData.labels.length ? props.aggregationState.dataUpdatedTimeAgo.value : '' }}
+                        {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : '' }}
                     </span>
                     <button
                         @click="props.aggregationState.error.value ? aggregationStore.fetchAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"
