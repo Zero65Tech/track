@@ -78,7 +78,7 @@ const handleProfileClick = (profile) => {
                 <div v-else-if="profileStore.accessible.error" class="profiles-error">
                     <i class="pi pi-exclamation-circle"></i>
                     <p class="error-text">{{ profileStore.accessible.error }}</p>
-                    <button class="retry-button" @click="profileStore._fetchAccessibles">
+                    <button class="retry-button" @click="profileStore.refreshAccessibles">
                         <i class="pi pi-refresh"></i>
                         <span>Retry</span>
                     </button>
@@ -123,7 +123,7 @@ const handleProfileClick = (profile) => {
                 <div v-else-if="profileStore.template.error" class="profiles-error">
                     <i class="pi pi-exclamation-circle"></i>
                     <p class="error-text">{{ profileStore.template.error }}</p>
-                    <button class="retry-button" @click="profileStore._fetchTemplates">
+                    <button class="retry-button" @click="profileStore.refreshTemplates">
                         <i class="pi pi-refresh"></i>
                         <span>Retry</span>
                     </button>
