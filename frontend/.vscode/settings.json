@@ -7,7 +7,7 @@
     "explorer.fileNesting.patterns": {
         ".env": ".env.*",
         "apiClient.js": "fcmClient.js",
-        "authService.js": "deviceService.js, fcmService.js",
+        "authService.js": "deviceService.js",
         "entryService.js": "bookService.js, headService.js, tagService.js, sourceService.js",
         "triggerService.js": "aggregationService.js",
         ".gitignore": ".gitattributes",

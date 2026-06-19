@@ -69,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
             // The onAuthStateChanged listener will handle updating the user and token states.
             toast.add({
                 severity: 'success',
-                summary: 'Signed in',
+                summary: 'Logged in',
                 detail: `Welcome, ${userName.value}!`,
                 life: 3000
             });
@@ -78,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
             error.value = err.message;
             toast.add({
                 severity: 'error',
-                summary: 'Sign in failed',
+                summary: 'Login failed',
                 detail: error.value,
                 life: 3000
             });
@@ -95,8 +95,8 @@ export const useAuthStore = defineStore('auth', () => {
             // The onAuthStateChanged listener will handle updating the user and token states.
             toast.add({
                 severity: 'success',
-                summary: 'Signed out',
-                detail: 'You have been successfully signed out.',
+                summary: 'Logged out',
+                detail: 'You have been successfully logged out.',
                 life: 3000
             });
         } catch (err) {
@@ -104,7 +104,7 @@ export const useAuthStore = defineStore('auth', () => {
             error.value = err.message;
             toast.add({
                 severity: 'error',
-                summary: 'Sign out failed',
+                summary: 'Logout failed',
                 detail: error.value,
                 life: 3000
             });

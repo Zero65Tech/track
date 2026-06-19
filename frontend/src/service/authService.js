@@ -1,11 +1,11 @@
-import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/config/firebaseClient';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 
 const googleProvider = new GoogleAuthProvider();
 
 export const authService = {
     onAuthStateChanged(callback) {
-        return onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 callback({
                     uid: user.uid,
@@ -20,43 +20,14 @@ export const authService = {
     },
 
     async getIdToken() {
-        if (!auth.currentUser) {
-            throw new Error('No user logged in');
-        }
-        return await auth.currentUser.getIdToken();
-    },
-
-    getCurrentUser() {
-        return auth.currentUser
-            ? {
-                  uid: auth.currentUser.uid,
-                  displayName: auth.currentUser.displayName,
-                  email: auth.currentUser.email,
-                  photoURL: auth.currentUser.photoURL
-              }
-            : null;
+        return auth.currentUser ? await auth.currentUser.getIdToken() : null;
     },
 
     async loginWithGoogle() {
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const user = result.user;
-            return {
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL
-            };
-        } catch (error) {
-            throw new Error(`Google sign-in failed: ${error.message}`);
-        }
+        await signInWithPopup(auth, googleProvider);
     },
 
     async logout() {
-        try {
-            await signOut(auth);
-        } catch (error) {
-            throw new Error(`Sign out failed: ${error.message}`);
-        }
+        await signOut(auth);
     }
 };
