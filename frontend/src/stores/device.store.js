@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
 import { deviceService } from '@/service/deviceService';
-import { fcmService } from '@/service/fcmService';
 
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -44,7 +43,7 @@ export const useFcmStore = defineStore('fcm', () => {
             await deviceService.claimDevice(deviceId.value);
         }
 
-        fcmService.onFcmTokenRefresh(async (fcmToken) => {
+        deviceService.onFcmTokenRefresh(async (fcmToken) => {
             await deviceService.updateDevice(deviceId.value, fcmToken);
         });
     }
