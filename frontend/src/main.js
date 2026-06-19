@@ -16,7 +16,7 @@ import { getFcmToken } from '@/config/firebaseClient';
 
 import { useAuthStore } from '@/stores/auth.store';
 import { useBookStore } from '@/stores/book.store';
-import { useFcmStore } from '@/stores/fcm.store';
+import { useFcmStore } from '@/stores/device.store.js';
 import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';

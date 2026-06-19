@@ -18,15 +18,14 @@ const auth = getAuth(app);
 const messaging = getMessaging(app);
 // const analytics = getAnalytics(app);
 
-const swFile = import.meta.env.MODE === 'prod' || import.meta.env.MODE === 'gamma' ? '/sw.prod.js' : '/sw.test.js';
-const swRegistration = await navigator.serviceWorker.register(swFile, {
-    scope: '/'
-});
+const swFile = ['prod', 'gamma'].includes(import.meta.env.MODE) ? '/sw.prod.js' : '/sw.test.js';
+const swRegistration = await navigator.serviceWorker.register(swFile, { scope: '/' });
 
-const getFcmToken = async () =>
-    await getToken(messaging, {
+const getFcmToken = async () => {
+    return await getToken(messaging, {
         serviceWorkerRegistration: swRegistration,
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
     });
+};
 
 export { auth, getFcmToken };
