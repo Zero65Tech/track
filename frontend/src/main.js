@@ -16,7 +16,7 @@ import { getFcmToken } from '@/config/firebaseClient';
 
 import { useAuthStore } from '@/stores/auth.store';
 import { useBookStore } from '@/stores/book.store';
-import { useFcmStore } from '@/stores/device.store.js';
+import { useDeviceStore } from '@/stores/device.store.js';
 import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';
@@ -48,9 +48,9 @@ const fcmToken = await getFcmToken();
 const authStore = useAuthStore();
 /* await */ authStore.initialize();
 
-// Initialize fcm store
-const fcmStore = useFcmStore();
-/* await */ fcmStore.initialize(fcmToken);
+// Initialize device store
+const deviceStore = useDeviceStore();
+/* await */ deviceStore.initialize(fcmToken);
 
 // Initialize profile store
 const profileStore = useProfileStore();

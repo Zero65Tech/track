@@ -14,6 +14,16 @@ export const useSourceStore = defineStore('source', () => {
     const sources = ref([]);
     const error = ref(null);
 
+    // Getters
+
+    const sourcesMap = computed(() => {
+        const map = {};
+        sources.value.forEach((source) => {
+            map[source.id] = source;
+        });
+        return map;
+    });
+
     // Internal Functions
 
     watch(
@@ -50,16 +60,6 @@ export const useSourceStore = defineStore('source', () => {
             isLoading.value = false;
         }
     }
-
-    // Getters
-
-    const sourcesMap = computed(() => {
-        const map = {};
-        sources.value.forEach((source) => {
-            map[source.id] = source;
-        });
-        return map;
-    });
 
     // Actions
 

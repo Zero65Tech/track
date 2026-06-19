@@ -14,6 +14,16 @@ export const useHeadStore = defineStore('head', () => {
     const heads = ref([]);
     const error = ref(null);
 
+    // Getters
+
+    const headsMap = computed(() => {
+        const map = {};
+        heads.value.forEach((head) => {
+            map[head.id] = head;
+        });
+        return map;
+    });
+
     // Internal Functions
 
     watch(
@@ -50,16 +60,6 @@ export const useHeadStore = defineStore('head', () => {
             isLoading.value = false;
         }
     }
-
-    // Getters
-
-    const headsMap = computed(() => {
-        const map = {};
-        heads.value.forEach((head) => {
-            map[head.id] = head;
-        });
-        return map;
-    });
 
     // Actions
 

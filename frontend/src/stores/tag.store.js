@@ -14,6 +14,16 @@ export const useTagStore = defineStore('tag', () => {
     const tags = ref([]);
     const error = ref(null);
 
+    // Getters
+
+    const tagsMap = computed(() => {
+        const map = {};
+        tags.value.forEach((tag) => {
+            map[tag.id] = tag;
+        });
+        return map;
+    });
+
     // Internal Functions
 
     watch(
@@ -50,16 +60,6 @@ export const useTagStore = defineStore('tag', () => {
             isLoading.value = false;
         }
     }
-
-    // Getters
-
-    const tagsMap = computed(() => {
-        const map = {};
-        tags.value.forEach((tag) => {
-            map[tag.id] = tag;
-        });
-        return map;
-    });
 
     // Actions
 

@@ -13,18 +13,20 @@ export const useAuthStore = defineStore('auth', () => {
     };
 
     // States
+
     const isLoading = ref(true);
     const user = ref(null);
     const token = ref(null);
     const error = ref(null);
 
     // Getters
+
     const userName = computed(() => user.value?.displayName || user.value?.email || 'User');
     const isAuthenticated = computed(() => token.value !== null);
 
     // Actions
+
     async function initialize() {
-        // Restore user from localStorage if available
         const savedUser = localStorage.getItem(localStorageKeys.user) || null;
         const savedToken = localStorage.getItem(localStorageKeys.token) || null;
 
@@ -33,14 +35,15 @@ export const useAuthStore = defineStore('auth', () => {
             token.value = savedToken;
         }
 
-        authService.onAuthStateChanged((currentUser) => {
+        authService.onAuthStateChanged(async (currentUser) => {
             if (currentUser) {
+                const newToken = await authService.getIdToken();
+
                 user.value = currentUser;
+                token.value = newToken;
+
                 localStorage.setItem(localStorageKeys.user, JSON.stringify(currentUser));
-                authService.getIdToken().then(async (newToken) => {
-                    token.value = newToken;
-                    localStorage.setItem(localStorageKeys.token, newToken);
-                });
+                localStorage.setItem(localStorageKeys.token, newToken);
             } else {
                 user.value = null;
                 token.value = null;
@@ -63,6 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             await authService.loginWithGoogle();
+            // The onAuthStateChanged listener will handle updating the user and token states.
             toast.add({
                 severity: 'success',
                 summary: 'Signed in',
@@ -88,6 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             await authService.logout();
+            // The onAuthStateChanged listener will handle updating the user and token states.
             toast.add({
                 severity: 'success',
                 summary: 'Signed out',

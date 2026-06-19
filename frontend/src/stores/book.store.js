@@ -14,6 +14,16 @@ export const useBookStore = defineStore('book', () => {
     const books = ref([]);
     const error = ref(null);
 
+    // Getters
+
+    const booksMap = computed(() => {
+        const map = {};
+        books.value.forEach((book) => {
+            map[book.id] = book;
+        });
+        return map;
+    });
+
     // Internal Functions
 
     watch(
@@ -50,16 +60,6 @@ export const useBookStore = defineStore('book', () => {
             isLoading.value = false;
         }
     }
-
-    // Getters
-
-    const booksMap = computed(() => {
-        const map = {};
-        books.value.forEach((book) => {
-            map[book.id] = book;
-        });
-        return map;
-    });
 
     // Actions
 

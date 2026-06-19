@@ -17,7 +17,7 @@ navigator.serviceWorker.onmessage = async (event) => {
     if (type === 'FCM_TOKEN_REFRESH') {
         if (fcmTokenRefreshCallback) {
             const fcmToken = await getFcmToken();
-            console.log(fcmToken, event.data.data);
+            console.log(fcmToken, event.data.data); // TODO: test
             fcmTokenRefreshCallback(fcmToken);
         }
     }

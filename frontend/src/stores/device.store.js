@@ -5,7 +5,7 @@ import { deviceService } from '@/service/deviceService';
 
 import { useAuthStore } from '@/stores/auth.store';
 
-export const useFcmStore = defineStore('fcm', () => {
+export const useDeviceStore = defineStore('device', () => {
     const authStore = useAuthStore();
 
     const localStorageKey = `${['prod', 'gamma'].includes(import.meta.env.MODE) ? '' : 'test.'}fcm.deviceId`;
