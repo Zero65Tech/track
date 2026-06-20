@@ -1,38 +1,42 @@
 <script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
+import { EntryType } from '@shared/enums';
+import { formatUtil } from '@shared/utils';
+
 import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
 import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
 import { useLayout } from '@/layout/composables/layout';
+
 import { entryService } from '@/service/entryService';
+
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
 import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';
 import { useTagStore } from '@/stores/tag.store';
-import { EntryType } from '@shared/enums';
-import { formatUtil } from '@shared/utils';
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
+
 const profileStore = useProfileStore();
 const bookStore = useBookStore();
 const headStore = useHeadStore();
-const sourceStore = useSourceStore();
 const tagStore = useTagStore();
+const sourceStore = useSourceStore();
 const aggregationStore = useAggregationStore();
 
-const chartAggregationName = 'amounts_for_a_book';
-const chartAggregationParams = computed(() => ({ bookId: bookId.value }));
-const chartAggregationState = computed(() => aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams.value));
-const chartData = computed(() => chartAggregationState.value.data.value);
+const book = computed(() => bookStore.booksMap[route.params.bookId]);
+const aggregationState = computed(() => aggregationStore.getAggregationState('amounts_for_a_book', { bookId: book.value.id }));
+useAggregationRefresh(aggregationState);
 
-const bookId = computed(() => route.params.bookId);
-useAggregationRefresh(chartAggregationState);
-const bookName = computed(() => bookStore.booksMap[bookId.value]?.name || 'Book');
+const bookBalance = computed(() => aggregationState.value.data.value.reduce((sum, item) => sum + item.amount, 0));
 
-const bookColor = computed(() => bookStore.booksMap[bookId.value]?.color || null);
+// TODO: Refactor ↓
+
+const chartData = computed(() => aggregationState.value.data.value);
 
 const selectedFY = ref(null);
 
@@ -159,7 +163,7 @@ async function fetchMonthEntries(month) {
 
     const { fromDate, toDate } = getMonthDateRange(month);
     try {
-        const entries = await entryService.getBookEntries({ profileId, bookId: bookId.value, fromDate, toDate }, abortController.signal);
+        const entries = await entryService.getBookEntries({ profileId, bookId: book.value.id, fromDate, toDate }, abortController.signal);
         entriesByMonth.value = { ...entriesByMonth.value, [month]: entries };
     } catch (err) {
         if (err.name !== 'CanceledError') {
@@ -201,9 +205,9 @@ async function loadInitial() {
     await loadMore();
 }
 
-// Re-load when aggregation data becomes available, bookId changes, or FY filter changes
+// Re-load when aggregation data becomes available, book changes, or FY filter changes
 watch(
-    [chartData, bookId, selectedFY],
+    [chartData, book, selectedFY],
     () => {
         loadInitial();
     },
@@ -350,25 +354,7 @@ const expenseRefundTotal = computed(() => Object.values(expenseRefundMonthMap.va
 // balance = credit - debit + income - tax - expense + refund
 const balance = computed(() => -debitCreditTotal.value + incomeTotal.value + taxTotal.value - expenseRefundTotal.value);
 
-// Debit-Credit breakdown by head and tag
-const debitCreditByHead = computed(() => {
-    if (!filteredChartData.value) return [];
-    const map = {};
-    for (const item of filteredChartData.value) {
-        if (!DEBIT_CREDIT_TYPES.has(item.type) || !item.headId) continue;
-        const sign = POSITIVE_TYPES.has(item.type) ? -1 : 1; // negate=true: debit positive, credit negative
-        map[item.headId] = (map[item.headId] || 0) + sign * item.amount;
-    }
-    return Object.entries(map)
-        .map(([headId, amount]) => ({
-            headId,
-            name: headStore.headsMap[headId]?.name || headId,
-            color: headStore.headsMap[headId]?.color || '#94a3b8',
-            amount
-        }))
-        .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
-});
-
+// Debit-Credit breakdown by tag
 const debitCreditByTag = computed(() => {
     if (!filteredChartData.value) return [];
     const tagMap = {};
@@ -479,17 +465,38 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
     <div class="grid grid-cols-12 gap-8">
         <!-- Title -->
         <div class="col-span-12">
-            <div class="flex justify-between items-center">
-                <div class="font-semibold text-2xl">Book: {{ bookName }}</div>
-                <div class="flex items-center gap-3">
-                    <Select v-model="selectedFY" :options="fyOptions" optionLabel="label" optionValue="value" placeholder="All FY" class="text-sm" />
-                    <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+            <div class="flex justify-between items-center gap-4">
+                <div class="flex items-center gap-2 font-semibold text-2xl">
+                    <i class="pi pi-book text-xl!" :style="{ color: book.color }"></i>
+                    <span>{{ book.name }}</span>
+                    <i v-if="aggregationState.isTriggering.value || aggregationState.isUpdating.value" class="pi pi-spinner animate-spin text-xl!" :style="{ color: book.color }"></i>
+                    <button
+                        v-else-if="!aggregationState.isLoading.value && aggregationState.isUpdateAvailable.value"
+                        @click="aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                        class="rounded-border transition-colors cursor-pointer hover:bg-surface-100 dark:hover:bg-surface-800"
+                        title="Update"
+                    >
+                        <i class="pi pi-refresh text-xl!" :style="{ color: book.color }"></i>
+                    </button>
+                </div>
+                <div v-if="aggregationState.isLoading.value" class="text-right whitespace-nowrap text-muted-color">
+                    <i class="pi pi-spinner animate-spin text-2xl!" :style="{ color: book.color }"></i>
+                </div>
+                <div v-else class="text-2xl font-bold text-right whitespace-nowrap" :class="bookBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    {{ bookBalance >= 0 ? '+' : '-' }}{{ formatUtil.formatCurrency(Math.abs(bookBalance)) }}
                 </div>
             </div>
         </div>
 
         <!-- Balance Trend Line Chart -->
-        <BalancesByMonthWidget :aggregationState="chartAggregationState" :accentColor="bookColor" />
+        <BalancesByMonthWidget :aggregationState="aggregationState" :accentColor="book.color" />
+
+        <!-- TODO: Refactor ↓ -->
+
+        <div class="col-span-12 flex justify-end items-center gap-3 -mt-4">
+            <Select v-model="selectedFY" :options="fyOptions" optionLabel="label" optionValue="value" placeholder="All FY" class="text-sm" />
+            <SelectButton v-model="chartMode" :options="chartModeOptions" optionLabel="label" optionValue="value" :allowEmpty="false" />
+        </div>
 
         <!-- Balance Summary -->
         <div class="col-span-12">
@@ -498,18 +505,18 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-xl">Balance</span>
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                     <div class="text-3xl font-bold" :class="balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ balance >= 0 ? '+' : '-' }}{{ formatUtil.formatCurrency(Math.abs(balance)) }}</div>
@@ -540,18 +547,18 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-xl">Debit − Credit</span>
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                     <div class="text-2xl font-bold" :class="debitCreditTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
@@ -590,18 +597,18 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-xl">Income</span>
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                     <div class="text-2xl font-bold" :class="incomeTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
@@ -637,18 +644,18 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-xl">Tax</span>
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                     <div class="text-2xl font-bold" :class="taxTotal >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
@@ -684,18 +691,18 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="flex items-center gap-2">
                         <span class="font-semibold text-xl">Expense &amp; Refund</span>
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                     <div class="text-2xl font-bold" :class="expenseRefundTotal >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'">
@@ -731,25 +738,25 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Debit - Credit</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                 </div>
 
-                <div v-if="chartAggregationState.error.value" class="mb-4">
+                <div v-if="aggregationState.error.value" class="mb-4">
                     <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
                 </div>
                 <div v-else-if="debitCreditChartData.labels.length === 0" class="mb-4">
                     <div class="text-center text-muted-color">No data available !</div>
@@ -765,25 +772,25 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Income</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                 </div>
 
-                <div v-if="chartAggregationState.error.value" class="mb-4">
+                <div v-if="aggregationState.error.value" class="mb-4">
                     <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
                 </div>
                 <div v-else-if="incomeChartData.labels.length === 0" class="mb-4">
                     <div class="text-center text-muted-color">No data available !</div>
@@ -799,25 +806,25 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Tax</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                 </div>
 
-                <div v-if="chartAggregationState.error.value" class="mb-4">
+                <div v-if="aggregationState.error.value" class="mb-4">
                     <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
                 </div>
                 <div v-else-if="taxChartData.labels.length === 0" class="mb-4">
                     <div class="text-center text-muted-color">No data available !</div>
@@ -833,25 +840,25 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Expense & Refund</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                 </div>
 
-                <div v-if="chartAggregationState.error.value" class="mb-4">
+                <div v-if="aggregationState.error.value" class="mb-4">
                     <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
                 </div>
                 <div v-else-if="expenseRefundChartData.labels.length === 0" class="mb-4">
                     <div class="text-center text-muted-color">No data available !</div>
@@ -868,30 +875,30 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <div class="font-semibold text-xl">Entries</div>
                     <div class="flex items-center gap-2">
                         <span class="text-primary font-medium text-sm">
-                            {{ chartAggregationState.isUpdating.value ? 'Updating ...' : chartAggregationState.isLoading.value ? 'Loading ...' : '' }}
+                            {{ aggregationState.isUpdating.value ? 'Updating ...' : aggregationState.isLoading.value ? 'Loading ...' : '' }}
                         </span>
                         <button
-                            @click="chartAggregationState.error.value ? aggregationStore.refreshAggregation(chartAggregationState.key) : aggregationStore.triggerAggregationUpdate(chartAggregationState.key)"
-                            :disabled="chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value"
+                            @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                            :disabled="aggregationState.isUpdating.value || aggregationState.isLoading.value"
                             :class="[
                                 'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                                chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                                aggregationState.isUpdating.value || aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                             ]"
-                            :title="chartAggregationState.error.value ? 'Retry' : 'Update'"
+                            :title="aggregationState.error.value ? 'Retry' : 'Update'"
                         >
-                            <i :class="['pi', chartAggregationState.isUpdating.value || chartAggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                            <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Error from aggregation -->
-                <div v-if="chartAggregationState.error.value" class="mb-4">
+                <div v-if="aggregationState.error.value" class="mb-4">
                     <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading aggregation data</div>
-                    <div class="text-red-500 dark:text-red-300 text-xs">{{ chartAggregationState.error.value }}</div>
+                    <div class="text-red-500 dark:text-red-300 text-xs">{{ aggregationState.error.value }}</div>
                 </div>
 
                 <!-- Loading aggregation -->
-                <div v-else-if="chartAggregationState.isLoading.value && allMonthsDesc.length === 0" class="text-center text-muted-color py-8">
+                <div v-else-if="aggregationState.isLoading.value && allMonthsDesc.length === 0" class="text-center text-muted-color py-8">
                     <i class="pi pi-spinner animate-spin text-2xl mb-2"></i>
                     <div>Loading book data...</div>
                 </div>

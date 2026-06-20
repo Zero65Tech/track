@@ -1,20 +1,18 @@
-import { isRef, watch } from 'vue';
+import { toValue, watch } from 'vue';
 
 import { useAggregationStore } from '@/stores/aggregation.store';
 
 export function useAggregationRefresh(aggregationState) {
     const aggregationStore = useAggregationStore();
 
-    // TODO: Remove this whenever possible
-    if (isRef(aggregationState)) {
-        aggregationState = aggregationState.value;
-    }
-
     watch(
-        () => aggregationState.isRefreshAvailable.value,
-        async (isRefreshAvailable) => {
+        () => {
+            const state = toValue(aggregationState);
+            return [state.key, state.isRefreshAvailable.value];
+        },
+        async ([stateKey, isRefreshAvailable]) => {
             if (isRefreshAvailable === true) {
-                await aggregationStore.refreshAggregation(aggregationState.key);
+                await aggregationStore.refreshAggregation(stateKey);
             }
         },
         { immediate: true }

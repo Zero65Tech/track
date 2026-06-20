@@ -71,6 +71,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
                 dataTimestamp: ref(null),
                 isLoading: ref(false),
                 isRefreshAvailable: ref(Boolean(profileStore.activeProfile)),
+                isTriggering: ref(false),
                 isUpdating: _isUpdating(key),
                 isUpdateAvailable: _isUpdateAvailable(aggregationName, aggregationParams),
                 error: ref(null)
@@ -141,7 +142,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
     }
 
     async function _createDataAggregationTrigger(profileId, state) {
-        state.isLoading.value = true;
+        state.isTriggering.value = true;
         state.error.value = null;
 
         try {
@@ -150,7 +151,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
             state.error.value = err.message;
             console.log(err);
         } finally {
-            state.isLoading.value = false;
+            state.isTriggering.value = false;
         }
     }
 
@@ -181,8 +182,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         const state = aggregations[stateKey];
 
-        if (state.isLoading.value === true) {
-            throw new Error('Request already in flight');
+        if (state.isTriggering.value === true) {
+            throw new Error('Trigger already in flight');
         }
 
         if (state.isUpdating.value === true) {
