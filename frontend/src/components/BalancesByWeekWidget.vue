@@ -1,6 +1,5 @@
 <script setup>
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
-import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints.ai';
+import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { colorUtil, dateUtil, formatUtil } from '@shared/utils';
@@ -21,11 +20,9 @@ const props = defineProps({
 
 const aggregationStore = useAggregationStore();
 
-useAggregationRefresh(props.aggregationState);
-
 const { widgetContainer, numDataPoints } = useResponsiveDataPoints({
     initialValue: 52,
-    pixelsPerPoint: 9.23
+    pixelsPerPoint: 9.23 // Enough to fit in 2 x 52 points
 });
 
 const sortedWeeks = computed(() => {

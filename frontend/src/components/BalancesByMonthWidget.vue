@@ -1,5 +1,4 @@
 <script setup>
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
 import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -21,11 +20,9 @@ const props = defineProps({
 
 const aggregationStore = useAggregationStore();
 
-useAggregationRefresh(props.aggregationState);
-
 const { widgetContainer, numDataPoints } = useResponsiveDataPoints({
     initialValue: 60,
-    pixelsPerPoint: 8
+    pixelsPerPoint: 8 // Enough to fit in 10 x 12 points
 });
 
 const sortedMonths = computed(() => {
