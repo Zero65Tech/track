@@ -472,9 +472,9 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                     <i v-if="aggregationState.isTriggering.value || aggregationState.isUpdating.value" class="pi pi-spinner animate-spin text-xl!" :style="{ color: book.color }"></i>
                     <button
                         v-else-if="!aggregationState.isLoading.value && aggregationState.isUpdateAvailable.value"
-                        @click="aggregationStore.triggerAggregationUpdate(aggregationState.key)"
+                        @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
                         class="rounded-border transition-colors cursor-pointer hover:bg-surface-100 dark:hover:bg-surface-800"
-                        title="Update"
+                        :title="aggregationState.error.value ? 'Refresh' : 'Update'"
                     >
                         <i class="pi pi-refresh text-xl!" :style="{ color: book.color }"></i>
                     </button>

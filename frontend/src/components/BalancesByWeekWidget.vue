@@ -152,19 +152,16 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
             <div class="flex justify-between items-center mb-6">
                 <div class="font-semibold text-xl">Balance Trend</div>
                 <div class="flex items-center gap-2">
-                    <span class="text-primary font-medium text-sm">
-                        {{ props.aggregationState.isUpdating.value ? 'Updating ...' : props.aggregationState.isLoading.value ? 'Loading ...' : '' }}
-                    </span>
                     <button
                         @click="props.aggregationState.error.value ? aggregationStore.refreshAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"
-                        :disabled="props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value"
+                        :disabled="props.aggregationState.isLoading.value || props.aggregationState.isTriggering.value || props.aggregationState.isUpdating.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                            props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            props.aggregationState.isLoading.value || props.aggregationState.isTriggering.value || props.aggregationState.isUpdating.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                         ]"
                         :title="props.aggregationState.error.value ? 'Retry' : 'Update'"
                     >
-                        <i :class="['pi', props.aggregationState.isUpdating.value || props.aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        <i :class="['pi', props.aggregationState.isLoading.value || props.aggregationState.isTriggering.value || props.aggregationState.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                     </button>
                 </div>
             </div>
