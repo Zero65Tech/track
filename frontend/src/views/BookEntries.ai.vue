@@ -32,7 +32,7 @@ const book = computed(() => bookStore.booksMap[route.params.bookId]);
 const aggregationState = computed(() => aggregationStore.getAggregationState('amounts_for_a_book', { bookId: book.value.id }));
 useAggregationRefresh(aggregationState);
 
-const bookBalance = computed(() => aggregationState.value.data.value.reduce((sum, item) => sum + item.amount, 0));
+const bookBalance = computed(() => (aggregationState.value.data.value.length === 0 ? null : aggregationState.value.data.value.reduce((sum, item) => sum + item.amount, 0)));
 
 // TODO: Refactor ↓
 
@@ -469,9 +469,9 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 <div class="flex items-center gap-2 font-semibold text-2xl">
                     <i class="pi pi-book text-xl!" :style="{ color: book.color }"></i>
                     <span>{{ book.name }}</span>
-                    <i v-if="aggregationState.isTriggering.value || aggregationState.isUpdating.value" class="pi pi-spinner animate-spin text-xl!" :style="{ color: book.color }"></i>
+                    <i v-if="aggregationState.isLoading.value || aggregationState.isTriggering.value || aggregationState.isUpdating.value" class="pi pi-spinner animate-spin text-xl!" :style="{ color: book.color }"></i>
                     <button
-                        v-else-if="!aggregationState.isLoading.value && aggregationState.isUpdateAvailable.value"
+                        v-else
                         @click="aggregationState.error.value ? aggregationStore.refreshAggregation(aggregationState.key) : aggregationStore.triggerAggregationUpdate(aggregationState.key)"
                         class="rounded-border transition-colors cursor-pointer hover:bg-surface-100 dark:hover:bg-surface-800"
                         :title="aggregationState.error.value ? 'Refresh' : 'Update'"
@@ -479,11 +479,8 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                         <i class="pi pi-refresh text-xl!" :style="{ color: book.color }"></i>
                     </button>
                 </div>
-                <div v-if="aggregationState.isLoading.value" class="text-right whitespace-nowrap text-muted-color">
-                    <i class="pi pi-spinner animate-spin text-2xl!" :style="{ color: book.color }"></i>
-                </div>
-                <div v-else class="text-2xl font-bold text-right whitespace-nowrap" :class="bookBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                    {{ bookBalance >= 0 ? '+' : '-' }}{{ formatUtil.formatCurrency(Math.abs(bookBalance)) }}
+                <div v-if="bookBalance !== null" class="text-2xl font-bold text-right whitespace-nowrap" :class="bookBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    {{ formatUtil.formatCurrency(bookBalance) }}
                 </div>
             </div>
         </div>
