@@ -1,6 +1,6 @@
 <script setup>
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
-import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints.ai';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
+import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { colorUtil, formatUtil, monthUtil } from '@shared/utils';

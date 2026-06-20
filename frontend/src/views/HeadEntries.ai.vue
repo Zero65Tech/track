@@ -1,5 +1,5 @@
 <script setup>
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
 import { useLayout } from '@/layout/composables/layout';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';

@@ -1,6 +1,6 @@
 <script setup>
 import BalancesByWeekWidget from '@/components/BalancesByWeekWidget.vue';
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';

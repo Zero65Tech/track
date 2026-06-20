@@ -1,5 +1,5 @@
 <script setup>
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 

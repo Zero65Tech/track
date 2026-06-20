@@ -2,7 +2,7 @@
 import BalancesByWeekWidget from '@/components/BalancesByWeekWidget.vue';
 import AmountsByTypeBookMonthWidget from '@/components/dashboard/AmountsByTypeBookMonthWidget.vue';
 import StatsWidget from '@/components/dashboard/StatsWidget.vue';
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { EntryType } from '@shared/enums';
 
