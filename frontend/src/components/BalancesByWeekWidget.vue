@@ -1,14 +1,12 @@
 <script setup>
 import { useAggregationRefresh } from '@/composables/useAggregationRefresh.ai';
+import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints.ai';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { colorUtil, dateUtil, formatUtil } from '@shared/utils';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
-
-const widgetContainer = ref(null);
-let resizeObserver = null;
 
 const props = defineProps({
     aggregationState: {
@@ -23,7 +21,12 @@ const props = defineProps({
 
 const aggregationStore = useAggregationStore();
 
-const numDataPoints = ref(52);
+useAggregationRefresh(props.aggregationState);
+
+const { widgetContainer, numDataPoints } = useResponsiveDataPoints({
+    initialValue: 52,
+    pixelsPerPoint: 9.23
+});
 
 const sortedWeeks = computed(() => {
     const weeksSet = new Set();
@@ -138,27 +141,11 @@ function getChartOptions() {
 }
 
 onMounted(() => {
-    useAggregationRefresh(props.aggregationState);
-
-    resizeObserver = new ResizeObserver(() => {
-        numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 9.23);
-    });
-
-    if (widgetContainer.value) {
-        resizeObserver.observe(widgetContainer.value);
-    }
-
     chartOptions.value = getChartOptions();
 });
 
 watch([getPrimary, getSurface, isDarkTheme], () => {
     chartOptions.value = getChartOptions();
-});
-
-onBeforeUnmount(() => {
-    if (resizeObserver) {
-        resizeObserver.disconnect();
-    }
 });
 </script>
 
