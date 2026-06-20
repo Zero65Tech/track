@@ -22,7 +22,6 @@ const props = defineProps({
 });
 
 const aggregationStore = useAggregationStore();
-useAggregationRefresh(() => props.aggregationState);
 
 const numDataPoints = ref(52);
 
@@ -139,6 +138,8 @@ function getChartOptions() {
 }
 
 onMounted(() => {
+    useAggregationRefresh(props.aggregationState);
+
     resizeObserver = new ResizeObserver(() => {
         numDataPoints.value = Math.round((widgetContainer.value.offsetWidth - 2 * 28 - 60) / 9.23);
     });
