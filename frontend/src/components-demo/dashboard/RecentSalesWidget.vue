@@ -1,5 +1,5 @@
 <script setup>
-import { ProductService } from '@/service/ProductService';
+import { ProductService } from '@/service-demo/ProductService';
 import { onMounted, ref } from 'vue';
 
 const products = ref(null);
