@@ -21,7 +21,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     // States
 
-    const aggregations = {}; // State structure: { stateKey: { _name, _params, _inFlightRequest, data, dataTimestamp, isUpdateAvailable, isUpdating, isRefreshAvailable, isLoading, error } }
+    const aggregations = {}; // State structure: { stateKey: { _name, _params, _inFlightRequest, data, dataTimestamp, isLoading, isRefreshAvailable, isUpdating, isUpdateAvailable, error } }
 
     function _isUpdating(stateKey) {
         return computed(
@@ -126,17 +126,32 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
     async function _fetchAggregation(profileId, state) {
         state.isLoading.value = true;
-        state.isRefreshAvailable.value = false;
         state.error.value = null;
 
         try {
             const apiResponseData = await aggregationService.getAggregationResult(profileId, state._name, state._params);
             state.data.value = apiResponseData.result;
             state.dataTimestamp.value = apiResponseData.timestamp;
+            state.isRefreshAvailable.value = false;
         } catch (err) {
             state.error.value = err.message;
             console.log(err);
         } finally {
+            state.isLoading.value = false;
+        }
+    }
+
+    async function _createDataAggregationTrigger(profileId, state) {
+        state.isLoading.value = true;
+        state.error.value = null;
+
+        try {
+            await triggerService.createDataAggregationTrigger(profileId, state._name, state._params);
+        } catch (err) {
+            state.error.value = err.message;
+            console.log(err);
+        } finally {
+            console.log(state.isUpdating.value);
             state.isLoading.value = false;
         }
     }
@@ -150,6 +165,7 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
 
         const state = aggregations[stateKey];
+
         if (state.isLoading.value === true) {
             throw new Error('Request already in flight');
         }
@@ -160,28 +176,20 @@ export const useAggregationStore = defineStore('aggregation', () => {
     async function triggerAggregationUpdate(stateKey) {
         const profileId = profileStore.activeProfile?.id;
         if (!profileId) {
-            toast.add({
-                severity: 'error',
-                summary: 'Update failed',
-                detail: 'Kindly select a profile to trigger aggregation update',
-                life: 3000
-            });
-            return;
+            throw new Error('No profile selected');
         }
 
         const state = aggregations[stateKey];
 
-        try {
-            await triggerService.createDataAggregationTrigger(profileId, state._name, state._params);
-        } catch (err) {
-            toast.add({
-                severity: 'error',
-                summary: 'Update failed',
-                detail: err.message,
-                life: 3000
-            });
-            console.log(err);
+        if (state.isLoading.value === true) {
+            throw new Error('Request already in flight');
         }
+
+        if (state.isUpdating.value === true) {
+            throw new Error('Update already in progress');
+        }
+
+        state._inFlightRequest = _createDataAggregationTrigger(profileId, state);
     }
 
     return {

@@ -39,7 +39,7 @@ export const useBookStore = defineStore('book', () => {
 
             const profileId = profileStore.activeProfile?.id;
             if (profileId) {
-                await _fetchBooks(profileId);
+                inFlightRequest = _fetchBooks(profileId);
             } else {
                 error.value = null;
             }
@@ -66,7 +66,7 @@ export const useBookStore = defineStore('book', () => {
     async function initialize() {
         const profileId = profileStore.activeProfile?.id;
         if (profileId) {
-            await _fetchBooks(profileId);
+            inFlightRequest = _fetchBooks(profileId);
         }
     }
 

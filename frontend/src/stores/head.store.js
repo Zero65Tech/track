@@ -39,7 +39,7 @@ export const useHeadStore = defineStore('head', () => {
 
             const profileId = profileStore.activeProfile?.id;
             if (profileId) {
-                await _fetchHeads(profileId);
+                inFlightRequest = _fetchHeads(profileId);
             } else {
                 error.value = null;
             }
@@ -66,7 +66,7 @@ export const useHeadStore = defineStore('head', () => {
     async function initialize() {
         const profileId = profileStore.activeProfile?.id;
         if (profileId) {
-            await _fetchHeads(profileId);
+            inFlightRequest = _fetchHeads(profileId);
         }
     }
 

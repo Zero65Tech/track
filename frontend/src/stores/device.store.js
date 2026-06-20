@@ -18,9 +18,9 @@ export const useDeviceStore = defineStore('device', () => {
 
     watch(
         () => authStore.isAuthenticated,
-        (isAuthenticated) => {
+        async (isAuthenticated) => {
             if (isAuthenticated && deviceId.value) {
-                deviceService.claimDevice(deviceId.value);
+                await deviceService.claimDevice(deviceId.value);
             }
         }
     );

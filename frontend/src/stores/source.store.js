@@ -39,7 +39,7 @@ export const useSourceStore = defineStore('source', () => {
 
             const profileId = profileStore.activeProfile?.id;
             if (profileId) {
-                await _fetchSources(profileId);
+                inFlightRequest = _fetchSources(profileId);
             } else {
                 error.value = null;
             }
@@ -66,7 +66,7 @@ export const useSourceStore = defineStore('source', () => {
     async function initialize() {
         const profileId = profileStore.activeProfile?.id;
         if (profileId) {
-            await _fetchSources(profileId);
+            inFlightRequest = _fetchSources(profileId);
         }
     }
 

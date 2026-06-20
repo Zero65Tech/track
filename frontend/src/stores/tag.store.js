@@ -39,7 +39,7 @@ export const useTagStore = defineStore('tag', () => {
 
             const profileId = profileStore.activeProfile?.id;
             if (profileId) {
-                await _fetchTags(profileId);
+                inFlightRequest = _fetchTags(profileId);
             } else {
                 error.value = null;
             }
@@ -66,7 +66,7 @@ export const useTagStore = defineStore('tag', () => {
     async function initialize() {
         const profileId = profileStore.activeProfile?.id;
         if (profileId) {
-            await _fetchTags(profileId);
+            inFlightRequest = _fetchTags(profileId);
         }
     }
 
