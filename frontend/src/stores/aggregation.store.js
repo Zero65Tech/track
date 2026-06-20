@@ -132,7 +132,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
             const apiResponseData = await aggregationService.getAggregationResult(profileId, state._name, state._params);
             state.data.value = apiResponseData.result;
             state.dataTimestamp.value = apiResponseData.timestamp;
-            state.isRefreshAvailable.value = false;
         } catch (err) {
             state.error.value = err.message;
             console.log(err);
@@ -151,7 +150,6 @@ export const useAggregationStore = defineStore('aggregation', () => {
             state.error.value = err.message;
             console.log(err);
         } finally {
-            console.log(state.isUpdating.value);
             state.isLoading.value = false;
         }
     }
@@ -166,8 +164,10 @@ export const useAggregationStore = defineStore('aggregation', () => {
 
         const state = aggregations[stateKey];
 
+        state.isRefreshAvailable.value = false;
+
         if (state.isLoading.value === true) {
-            throw new Error('Request already in flight');
+            throw new Error(`A request already in-flight for ${stateKey}`);
         }
 
         state._inFlightRequest = _fetchAggregation(profileId, state);
