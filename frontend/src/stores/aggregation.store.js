@@ -148,7 +148,12 @@ export const useAggregationStore = defineStore('aggregation', () => {
         try {
             await triggerService.createDataAggregationTrigger(profileId, state._name, state._params);
         } catch (err) {
-            state.error.value = err.message;
+            toast.add({
+                severity: 'error',
+                summary: 'Update failed',
+                detail: err.value,
+                life: 3000
+            });
             console.log(err);
         } finally {
             state.isTriggering.value = false;
@@ -181,6 +186,10 @@ export const useAggregationStore = defineStore('aggregation', () => {
         }
 
         const state = aggregations[stateKey];
+
+        if (state.isLoading.value === true) {
+            throw new Error(`A request already in-flight for ${stateKey}`);
+        }
 
         if (state.isTriggering.value === true) {
             throw new Error('Trigger already in flight');

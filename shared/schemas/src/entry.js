@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   amountSchema,
   dateSchema,
+  entryStateSchema,
   entryTypeSchema,
   mongoIdSchema,
   noteSchema,
@@ -50,6 +51,7 @@ const baseEntrySchema = z
     groupId: mongoIdSchema.optional(),
     folderId: mongoIdSchema.optional(),
     sortOrder: sortOrderSchema,
+    state: entryStateSchema,
   })
   .strict();
 

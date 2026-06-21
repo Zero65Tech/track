@@ -141,8 +141,10 @@ async function _aggregateEntries(
 }
 
 async function createEntry(userId, profileId, data) {
-  return await transaction(async (session) => {
-    const [doc] = await EntryModel.create([data], { session });
+  data = await transaction(async (session) => {
+    const [doc] = await EntryModel.create([{ profileId, ...data }], {
+      session,
+    });
 
     data = doc.toObject();
     await _logCreateAudit(
@@ -152,10 +154,16 @@ async function createEntry(userId, profileId, data) {
 
     return data;
   });
+
+  data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+
+  return data;
 }
 
 async function updateEntry(userId, profileId, entryId, updates) {
-  return await transaction(async (session) => {
+  const data = await transaction(async (session) => {
     const doc = await EntryModel.findOne({ profileId, _id: entryId }).session(
       session,
     );
@@ -176,6 +184,12 @@ async function updateEntry(userId, profileId, entryId, updates) {
 
     return newData;
   });
+
+  data.id = data._id.toString();
+  delete data["_id"];
+  delete data["profileId"];
+
+  return data;
 }
 
 async function deleteEntry(userId, profileId, entryId) {

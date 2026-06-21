@@ -1,7 +1,7 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { computed, ref, watch } from 'vue';
-import AddEntryDialog from '@/components/AddEntryDialog.vue';
+import AddEntryDialog from '@/components/AddEntryDialog.ai.vue';
 import AppFooter from './AppFooter.vue';
 import AppSidebar from './AppSidebar.vue';
 import AppAccountSidebar from './AppAccountSidebar.vue';

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import { DataSource } from "@shared/enums";
 import { createEntrySchema, updateEntrySchema } from "@shared/schemas";
 import {
   sendBadRequestError,
@@ -83,12 +84,8 @@ async function createEntry(req, res) {
   const entry = await entryService.createEntry(
     req.user.uid,
     new mongoose.Types.ObjectId(req.params.profileId),
-    data,
+    { _src: DataSource.BACKEND_SERVICE_V5_5, ...data },
   );
-
-  entry.id = entry._id.toString();
-  delete entry["_id"];
-  delete entry["profileId"];
 
   const profile = await _getCachedProfile(req.params.profileId);
   const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
@@ -103,7 +100,7 @@ async function createEntry(req, res) {
 
 async function updateEntry(req, res) {
   const { success, error, data } = updateEntrySchema.safeParse(req.body);
-  
+
   if (!success) return sendBadRequestError(res, error);
 
   const entry = await entryService.updateEntry(
@@ -112,10 +109,6 @@ async function updateEntry(req, res) {
     req.params.entryId,
     data,
   );
-
-  entry.id = entry._id.toString();
-  delete entry["_id"];
-  delete entry["profileId"];
 
   const profile = await _getCachedProfile(req.params.profileId);
   const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
