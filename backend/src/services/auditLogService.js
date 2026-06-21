@@ -3,13 +3,15 @@ import AuditLogModel from "../models/AuditLog.js";
 async function getAuditLogs(profileId, lastTimestamp, pageSize) {
   const query = { profileId };
   if (lastTimestamp) {
-    query.timestamp = { $lt: new Date(lastTimestamp) };
+    query.timestamp = { $lt: lastTimestamp };
   }
 
   const dataArr = await AuditLogModel.find(query)
     .sort({ timestamp: -1 })
     .limit(pageSize)
     .lean();
+
+  dataArr.forEach((data) => delete data["profileId"]);
 
   return dataArr;
 }
@@ -75,6 +77,6 @@ async function _logDeleteAudit({ userId, docType, data }, session) {
   );
 }
 
-export { _logCreateAudit, _logUpdateAudit, _logDeleteAudit };
+export { _logCreateAudit, _logDeleteAudit, _logUpdateAudit };
 
 export default { getAuditLogs };

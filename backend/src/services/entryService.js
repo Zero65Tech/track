@@ -1,5 +1,5 @@
-import transaction from "../utils/transaction.js";
 import { EntryType } from "@shared/enums";
+import transaction from "../utils/transaction.js";
 
 import {
   _logCreateAudit,
@@ -27,8 +27,7 @@ async function getEntries(profileId, filter, fromDate, toDate) {
     .limit(1000) // Safety limit
     .lean();
 
-  for (let data of dataArr)
-    delete data["profileId"];
+  dataArr.forEach((data) => delete data["profileId"]);
 
   return dataArr;
 }

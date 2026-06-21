@@ -11,9 +11,7 @@ import {
 async function getGroups(profileId) {
   const dataArr = await GroupModel.find({ profileId }).lean();
 
-  for (let data of dataArr) {
-    delete data["profileId"];
-  }
+  dataArr.forEach((data) => delete data["profileId"]);
 
   return dataArr;
 }

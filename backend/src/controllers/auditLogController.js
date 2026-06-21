@@ -1,7 +1,9 @@
-import { getAuditLogsSchema } from "@shared/schemas";
-import { sendData, sendBadRequestError } from "../utils/response.js";
-import auditLogService from "../services/auditLogService.js";
 import mongoose from "mongoose";
+
+import { getAuditLogsSchema } from "@shared/schemas";
+import { sendBadRequestError, sendData } from "../utils/response.js";
+
+import auditLogService from "../services/auditLogService.js";
 
 async function getAuditLogs(req, res) {
   const { success, error, data } = getAuditLogsSchema.safeParse(req.query);
@@ -19,11 +21,7 @@ async function getAuditLogs(req, res) {
     delete auditLog._id;
   }
 
-  const lastTimestamp = auditLogs.length
-    ? auditLogs[auditLogs.length - 1].timestamp
-    : null;
-
-  sendData(res, { auditLogs, lastTimestamp });
+  sendData(res, { auditLogs });
 }
 
 export default { getAuditLogs };

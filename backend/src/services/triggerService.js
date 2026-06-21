@@ -39,7 +39,10 @@ async function getTriggers(profileId, lastCreatedAt, pageSize) {
     .limit(pageSize)
     .lean();
 
-  return [...allButCompletedDataArr, ...completedDataArr];
+  const dataArr = [...allButCompletedDataArr, ...completedDataArr];
+  dataArr.forEach((data) => delete data["profileId"]);
+
+  return dataArr;
 }
 
 async function _createProfileCreatedTrigger({ profileId }, session) {
@@ -81,6 +84,8 @@ async function createDataAggregationTrigger(
     });
     data = doc.toObject();
   }
+
+  delete data.profileId;
 
   return data;
 }
@@ -135,7 +140,11 @@ async function processTriggers(onTriggerStateChanged, instanceId, limit) {
     }
 
     console.log(`[${instanceId}] ⏰ Processing trigger ${triggerData._id}`);
-    await _processTrigger(triggerData, onTriggerStateChanged);
+
+    const profileId = triggerData.profileId;
+    delete triggerData.profileId;
+    await _processTrigger(profileId, triggerData, onTriggerStateChanged);
+
     processedCount++;
   }
 
@@ -146,18 +155,18 @@ async function processTriggers(onTriggerStateChanged, instanceId, limit) {
   return processedCount;
 }
 
-async function _processTrigger(triggerData, onTriggerStateChanged) {
-  await onTriggerStateChanged({ ...triggerData, state: TriggerState.RUNNING.id, updatedAt: new Date() }); // prettier-ignore
+async function _processTrigger(profileId, triggerData, onTriggerStateChanged) {
+  await onTriggerStateChanged(profileId, { ...triggerData, state: TriggerState.RUNNING.id, updatedAt: new Date() }); // prettier-ignore
 
   if (triggerData.type === TriggerType.PROFILE_CREATED.id) {
-    await _processProfileCreatedTrigger(triggerData);
+    await _processProfileCreatedTrigger(profileId, triggerData);
   } else if (triggerData.type === TriggerType.PROFILE_OPENED.id) {
     // TODO: TriggerType.PROFILE_OPENED
   } else if (triggerData.type === TriggerType.DATA_AGGREGATION.id) {
-    const balance = await _getCoinLedgerBalance(triggerData.profileId);
+    const balance = await _getCoinLedgerBalance(profileId);
     if (
       !["alpha", "beta"].includes(process.env.STAGE) &&
-      triggerData.profileId.toString() !== process.env.MASTER_PROFILE_ID &&
+      profileId.toString() !== process.env.MASTER_PROFILE_ID &&
       balance.total < 1
     ) {
       const aggregationResult = "Insufficient Coins.";
@@ -170,7 +179,7 @@ async function _processTrigger(triggerData, onTriggerStateChanged) {
 
       assert.equal(updateResult.modifiedCount, 1); // 💪🏻
 
-      await onTriggerStateChanged({ ...triggerData, state: TriggerState.FAILED.id, aggregationResult, updatedAt: new Date() }); // prettier-ignore
+      await onTriggerStateChanged(profileId, { ...triggerData, state: TriggerState.FAILED.id, aggregationResult, updatedAt: new Date() }); // prettier-ignore
 
       return;
     }
@@ -178,7 +187,7 @@ async function _processTrigger(triggerData, onTriggerStateChanged) {
     const triggerAggregationResult =
       await _processDataAggregationTrigger(triggerData);
 
-    await onTriggerStateChanged({ ...triggerData, state: TriggerState.COMPLETED.id, aggregationResult: triggerAggregationResult, updatedAt: new Date() }); // prettier-ignore
+    await onTriggerStateChanged(profileId, { ...triggerData, state: TriggerState.COMPLETED.id, aggregationResult: triggerAggregationResult, updatedAt: new Date() }); // prettier-ignore
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
     // TODO: TriggerType.DATA_EXPORT
   } else {
@@ -186,11 +195,11 @@ async function _processTrigger(triggerData, onTriggerStateChanged) {
   }
 }
 
-async function _processProfileCreatedTrigger(triggerData) {
+async function _processProfileCreatedTrigger(profileId, triggerData) {
   await transaction(async (session) => {
     await _initialiseCoinLedger(
       {
-        profileId: triggerData.profileId,
+        profileId: profileId,
         ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
       },
       session,
@@ -206,9 +215,9 @@ async function _processProfileCreatedTrigger(triggerData) {
   });
 }
 
-async function _processDataAggregationTrigger(triggerData) {
+async function _processDataAggregationTrigger(profileId, triggerData) {
   const aggregationResult = await _aggregateEntries(
-    triggerData.profileId,
+    profileId,
     triggerData.aggregationName,
     triggerData.aggregationParams,
   );
@@ -225,7 +234,7 @@ async function _processDataAggregationTrigger(triggerData) {
   await transaction(async (session) => {
     await _setAggregationResult(
       {
-        profileId: triggerData.profileId,
+        profileId: profileId,
         aggregationName: triggerData.aggregationName,
         aggregationParams: triggerData.aggregationParams,
         aggregationResult: aggregationResult,
@@ -235,7 +244,7 @@ async function _processDataAggregationTrigger(triggerData) {
 
     await _deductCoinsFromLedger(
       {
-        profileId: triggerData.profileId,
+        profileId: profileId,
         ref: { type: CoinLedgerRef.TRIGGER.id, id: triggerData._id },
         type: CoinLedgerType.DATA_AGGREGATION.id,
         coinsToDeduct,

@@ -1,9 +1,9 @@
+import { ProfileState } from "@shared/enums";
 import { LRUCache } from "lru-cache";
-import { ProfileAccess, ProfileState } from "@shared/enums";
 
-import transaction from "../utils/transaction.js";
-import ProfileModel from "../models/Profile.js";
 import { lruCacheConfig } from "../config/cache.js";
+import ProfileModel from "../models/Profile.js";
+import transaction from "../utils/transaction.js";
 
 import { _logCreateAudit, _logUpdateAudit } from "./auditLogService.js";
 import { _createProfileCreatedTrigger } from "./triggerService.js";

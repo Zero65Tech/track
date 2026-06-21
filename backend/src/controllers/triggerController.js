@@ -29,7 +29,6 @@ async function getTriggers(req, res) {
   for (const trigger of triggers) {
     trigger.id = trigger._id.toString();
     delete trigger._id;
-    delete trigger.profileId;
   }
 
   sendData(res, { triggers });
@@ -57,7 +56,6 @@ async function createDataAggregationTrigger(req, res) {
 
   trigger.id = trigger._id.toString();
   delete trigger._id;
-  delete trigger.profileId;
 
   const profile = await _getCachedProfile(req.params.profileId);
   const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
@@ -76,12 +74,10 @@ async function processTriggers(req, res) {
   if (!success) return sendBadRequestError(res, error);
 
   const processedCount = await triggerService.processTriggers(
-    async (trigger) => {
-      const profileId = trigger.profileId.toString();
-
+    async (profileId, trigger) => {
+      profileId = profileId.toString();
       trigger.id = trigger._id.toString();
       delete trigger._id;
-      delete trigger.profileId;
 
       const profile = await _getCachedProfile(profileId);
       const userIds = [profile.owner, ...profile.editors, ...profile.viewers];

@@ -1,8 +1,15 @@
 import AggregationModel from "../models/Aggregation.js";
 
 async function getAggregation(profileId, aggregationName, aggregationParams) {
-  const query = { profileId, name: aggregationName, params: aggregationParams };
-  return await AggregationModel.findOne(query).lean();
+  const dataArr = await AggregationModel.findOne({
+    profileId,
+    name: aggregationName,
+    params: aggregationParams,
+  }).lean();
+
+  dataArr.forEach((data) => delete data["profileId"]);
+
+  return dataArr;
 }
 
 async function _setAggregationResult(

@@ -12,7 +12,7 @@ async function getBooks(profileId) {
     .sort({ sortOrder: 1 })
     .lean();
 
-  for (let data of dataArr) delete data["profileId"];
+  dataArr.forEach((data) => delete data["profileId"]);
 
   return dataArr;
 }
