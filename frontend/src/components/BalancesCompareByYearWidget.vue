@@ -1,15 +1,18 @@
 <script setup>
 import { usePeriodBalances } from '@/composables/usePeriodBalances';
-import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
-import { colorUtil, dateUtil, formatUtil } from '@shared/utils';
+import { colorUtil, formatUtil, monthUtil } from '@shared/utils';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
 
 const props = defineProps({
-    aggregationState: {
+    primaryAggregationState: {
+        type: Object,
+        required: true
+    },
+    secondaryAggregationState: {
         type: Object,
         required: true
     },
@@ -21,34 +24,44 @@ const props = defineProps({
 
 const aggregationStore = useAggregationStore();
 
-const { widgetContainer, numDataPoints } = useResponsiveDataPoints({
-    initialValue: 52,
-    pixelsPerPoint: 9.23 // Enough to fit in 2 x 52 points
-});
-
-const { sortedPeriods: sortedWeeks, balancesByPeriod: balancesByWeek } = usePeriodBalances(props.aggregationState, 'week', (w) => dateUtil.getNext(w, 7));
+const { sortedPeriods: sortedMonths, balancesByPeriodArr } = usePeriodBalances([props.primaryAggregationState, props.secondaryAggregationState], 'month', monthUtil.getNext);
 
 const chartData = computed(() => {
-    const weeks = sortedWeeks.value.slice(-numDataPoints.value);
-    const dataMap = balancesByWeek.value;
+    const years = sortedMonths.value;
+    const [primaryAmounts, secondaryAmounts] = balancesByPeriodArr.value;
     const documentStyle = getComputedStyle(document.documentElement);
-    const primary = props.accentColor || documentStyle.getPropertyValue('--p-primary-500');
-    const bg = colorUtil.hexToRgba(primary, 0.08);
+    const primaryColor = props.accentColor || documentStyle.getPropertyValue('--p-primary-500');
+    const secondaryColor = documentStyle.getPropertyValue('--p-secondary-500');
+    const primaryBg = colorUtil.hexToRgba(primaryColor, 0.08);
+    const secondaryBg = colorUtil.hexToRgba(secondaryColor, 0.08);
     return {
-        labels: weeks.map((week) => formatUtil.formatDate(week)),
+        labels: years.map((month) => formatUtil.formatMonth(month)),
         datasets: [
             {
-                label: 'Closing Balance',
-                data: weeks.map((week) => dataMap[week]),
+                label: 'Primary Balance',
+                data: years.map((month) => primaryAmounts[month]),
                 fill: true,
                 tension: 0.4,
                 borderWidth: 1,
-                borderColor: primary,
-                backgroundColor: bg,
+                borderColor: primaryColor,
+                backgroundColor: primaryBg,
                 pointRadius: 2,
                 pointHoverRadius: 4,
                 pointBorderColor: '#ffffff',
-                pointBackgroundColor: primary
+                pointBackgroundColor: primaryColor
+            },
+            {
+                label: 'Secondary Balance',
+                data: years.map((month) => -secondaryAmounts[month]),
+                fill: true,
+                tension: 0.4,
+                borderWidth: 1,
+                borderColor: secondaryColor,
+                backgroundColor: secondaryBg,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                pointBorderColor: '#ffffff',
+                pointBackgroundColor: secondaryColor
             }
         ]
     };
@@ -66,21 +79,14 @@ function getChartOptions() {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false,
+                display: true,
                 labels: {
                     fontColor: textColor
                 }
             },
             tooltip: {
                 callbacks: {
-                    title: function (context) {
-                        const weekStart = context[0].label;
-                        const startDate = new Date(weekStart);
-                        const endDate = new Date(startDate);
-                        endDate.setDate(endDate.getDate() + 6);
-                        return [`${formatUtil.formatDate(startDate)} - ${formatUtil.formatDate(endDate)}`];
-                    },
-                    label: (context) => 'Closing Balance: ' + formatUtil.formatCurrency(context.parsed.y)
+                    label: (context) => context.dataset.label + ': ' + formatUtil.formatCurrency(context.parsed.y)
                 }
             }
         },
@@ -128,22 +134,24 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                 <div class="font-semibold text-xl">Balance Trend</div>
                 <div class="flex items-center gap-2">
                     <button
-                        @click="props.aggregationState.error.value ? aggregationStore.refreshAggregation(props.aggregationState.key) : aggregationStore.triggerAggregationUpdate(props.aggregationState.key)"
-                        :disabled="props.aggregationState.isLoading.value || props.aggregationState.isTriggering.value || props.aggregationState.isUpdating.value"
+                        @click="props.primaryAggregationState.error.value ? aggregationStore.refreshAggregation(props.secondaryAggregationState.key) : aggregationStore.triggerAggregationUpdate(props.secondaryAggregationState.key)"
+                        :disabled="props.primaryAggregationState.isLoading.value || props.primaryAggregationState.isTriggering.value || props.primaryAggregationState.isUpdating.value"
                         :class="[
                             'p-1 rounded-border transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
-                            props.aggregationState.isLoading.value || props.aggregationState.isTriggering.value || props.aggregationState.isUpdating.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
+                            props.primaryAggregationState.isLoading.value || props.primaryAggregationState.isTriggering.value || props.primaryAggregationState.isUpdating.value ? '' : 'hover:bg-surface-100 dark:hover:bg-surface-800'
                         ]"
-                        :title="props.aggregationState.error.value ? 'Retry' : 'Update'"
+                        :title="props.primaryAggregationState.error.value ? 'Refresh' : 'Update'"
                     >
-                        <i :class="['pi', props.aggregationState.isLoading.value || props.aggregationState.isTriggering.value || props.aggregationState.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
+                        <i
+                            :class="['pi', props.primaryAggregationState.isLoading.value || props.primaryAggregationState.isTriggering.value || props.primaryAggregationState.isUpdating.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"
+                        ></i>
                     </button>
                 </div>
             </div>
 
-            <div v-if="props.aggregationState.error.value" class="mb-4">
+            <div v-if="props.primaryAggregationState.error.value" class="mb-4">
                 <div class="text-red-600 dark:text-red-400 text-sm font-medium mb-2">Error loading data</div>
-                <div class="text-red-500 dark:text-red-300 text-xs">{{ props.aggregationState.error.value }}</div>
+                <div class="text-red-500 dark:text-red-300 text-xs">{{ props.primaryAggregationState.error.value }}</div>
             </div>
 
             <div v-else-if="chartData.labels.length === 0" class="mb-4">

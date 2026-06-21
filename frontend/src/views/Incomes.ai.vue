@@ -1,28 +1,46 @@
 <script setup>
-import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
-import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
-import { useLayout } from '@/layout/composables/layout';
-import { useAggregationStore } from '@/stores/aggregation.store';
-import { useBookStore } from '@/stores/book.store';
-import { useHeadStore } from '@/stores/head.store';
-import { useTagStore } from '@/stores/tag.store';
-import { EntryType } from '@shared/enums';
-import { formatUtil } from '@shared/utils';
 import { computed, onMounted, ref, watch } from 'vue';
 
+import { useLayout } from '@/layout/composables/layout';
+import { EntryType } from '@shared/enums';
+import { formatUtil } from '@shared/utils';
+
+import BalancesByMonthWidget from '@/components/BalancesByMonthWidget.vue';
+import BalancesCompareByYearWidget from '@/components/BalancesCompareByYearWidget.vue';
+import { useAggregationRefresh } from '@/composables/useAggregationRefresh';
+
+import { useAggregationStore } from '@/stores/aggregation.store';
+import { useBookStore } from '@/stores/book.store';
+import { useEntryStore } from '@/stores/entry.store';
+import { useHeadStore } from '@/stores/head.store';
+import { useTagStore } from '@/stores/tag.store';
+
 const { getPrimary, getSurface, isDarkTheme } = useLayout();
-const aggregationStore = useAggregationStore();
-const tagStore = useTagStore();
+
 const bookStore = useBookStore();
 const headStore = useHeadStore();
+const tagStore = useTagStore();
+const entryStore = useEntryStore();
+const aggregationStore = useAggregationStore();
 
-const chartAggregationName = 'amounts_for_a_type';
-const chartAggregationParams = { type: EntryType.INCOME.id };
-const chartAggregationState = aggregationStore.getAggregationState(chartAggregationName, chartAggregationParams);
-useAggregationRefresh(chartAggregationState);
+const incomeAggregationState = aggregationStore.getAggregationState('amounts_for_a_type', { entryType: EntryType.INCOME.id });
+const incomeTaxAggregationState = aggregationStore.getAggregationState('amounts_for_a_type', { entryType: EntryType.TAX.id });
+
+useAggregationRefresh(incomeAggregationState);
+useAggregationRefresh(incomeTaxAggregationState);
+
+// TODO: Refactor ↓
+
+// Refresh aggregation when a new entry is created via the global dialog
+watch(
+    () => entryStore.lastCreated,
+    () => {
+        aggregationStore.refreshAggregation(incomeAggregationState.key);
+    }
+);
 
 // Income data from aggregation
-const incomeData = computed(() => chartAggregationState.data.value || []);
+const incomeData = computed(() => incomeAggregationState.data.value || []);
 
 // Financial year helper
 function getFinancialYear(monthStr) {
@@ -246,7 +264,9 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
         </div>
 
         <!-- Income Chart -->
-        <BalancesByMonthWidget :aggregationState="chartAggregationState" accentColor="#22c55e" />
+        <BalancesByMonthWidget :aggregationState="incomeAggregationState" accentColor="#22c55e" />
+
+        <BalancesCompareByYearWidget :primaryAggregationState="incomeAggregationState" :secondaryAggregationState="incomeTaxAggregationState" accentColor="#22c55e" />
 
         <!-- Income by Book (Stacked Bar Chart) -->
         <div v-if="allYears.length > 0" class="col-span-12">

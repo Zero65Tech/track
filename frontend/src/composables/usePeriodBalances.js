@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 
-export function useBalanceSeries(aggregationStateInput, periodKey, getNextPeriod) {
+export function usePeriodBalances(aggregationStateInput, periodKey, getNextPeriod) {
     const aggregationStateArr = Array.isArray(aggregationStateInput) ? aggregationStateInput : [aggregationStateInput];
 
     const sortedPeriods = computed(() => {
@@ -31,6 +31,7 @@ export function useBalanceSeries(aggregationStateInput, periodKey, getNextPeriod
                 amounts[item[periodKey]] = (amounts[item[periodKey]] || 0) + item.amount;
             });
 
+            amounts[periods[0]] = amounts[periods[0]] || 0;
             for (let i = 1; i < periods.length; i++) {
                 amounts[periods[i]] = amounts[periods[i - 1]] + (amounts[periods[i]] || 0);
             }

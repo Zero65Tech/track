@@ -1,5 +1,5 @@
 <script setup>
-import { useBalanceSeries } from '@/composables/useBalanceSeries';
+import { usePeriodBalances } from '@/composables/usePeriodBalances';
 import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -26,7 +26,7 @@ const { widgetContainer, numDataPoints } = useResponsiveDataPoints({
     pixelsPerPoint: 8 // Enough to fit in 10 x 12 points
 });
 
-const { sortedPeriods: sortedMonths, balancesByPeriod: balancesByMonth } = useBalanceSeries(props.aggregationState, 'month', (m) => monthUtil.getNext(m));
+const { sortedPeriods: sortedMonths, balancesByPeriod: balancesByMonth } = usePeriodBalances(props.aggregationState, 'month', monthUtil.getNext);
 
 const chartData = computed(() => {
     const months = sortedMonths.value.slice(-numDataPoints.value);
