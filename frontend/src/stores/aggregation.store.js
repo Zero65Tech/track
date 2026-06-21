@@ -38,8 +38,8 @@ export const useAggregationStore = defineStore('aggregation', () => {
         if (Object.keys(aggregationParams).length === 0) {
             // TODO: Check if there is any book with data update after the aggregation timestamp.
             return computed(() => false);
-        } else if (aggregationParams.type) {
-            // TODO: Check if the type has a data update after the aggregation timestamp.
+        } else if (aggregationParams.entryType) {
+            // TODO: Check if the entryType has a data update after the aggregation timestamp.
             return computed(() => false);
         } else if (aggregationParams.bookId) {
             // TODO: Check if the book with bookId has a data update after the aggregation timestamp.

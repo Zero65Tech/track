@@ -1,7 +1,9 @@
-import { getAggregationResultSchema } from "@shared/schemas";
-import { sendData, sendBadRequestError } from "../utils/response.js";
-import aggregationService from "../services/aggregationService.js";
 import mongoose from "mongoose";
+
+import { getAggregationResultSchema } from "@shared/schemas";
+import { sendBadRequestError, sendData } from "../utils/response.js";
+
+import aggregationService from "../services/aggregationService.js";
 
 async function getAggregationResult(req, res) {
   const { success, error, data } = getAggregationResultSchema.safeParse(
@@ -11,7 +13,10 @@ async function getAggregationResult(req, res) {
   if (!success) return sendBadRequestError(res, error);
 
   for (const key in data) {
-    if (key !== "entryType") {
+    if (key === "entryType") {
+      data["type"] = data["entryType"];
+      delete data["entryType"];
+    } else {
       data[key] = new mongoose.Types.ObjectId(data[key]);
     }
   }

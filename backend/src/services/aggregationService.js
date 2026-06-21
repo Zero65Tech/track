@@ -7,7 +7,9 @@ async function getAggregation(profileId, aggregationName, aggregationParams) {
     params: aggregationParams,
   }).lean();
 
-  delete data["profileId"];
+  if (data) {
+    delete data["profileId"];
+  }
 
   return data;
 }
