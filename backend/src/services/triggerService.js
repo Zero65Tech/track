@@ -184,8 +184,10 @@ async function _processTrigger(profileId, triggerData, onTriggerStateChanged) {
       return;
     }
 
-    const triggerAggregationResult =
-      await _processDataAggregationTrigger(triggerData);
+    const triggerAggregationResult = await _processDataAggregationTrigger(
+      profileId,
+      triggerData,
+    );
 
     await onTriggerStateChanged(profileId, { ...triggerData, state: TriggerState.COMPLETED.id, aggregationResult: triggerAggregationResult, updatedAt: new Date() }); // prettier-ignore
   } else if (triggerData.type === TriggerType.DATA_EXPORT.id) {
