@@ -1,11 +1,11 @@
 import { createGroupSchema, updateGroupSchema } from "@shared/schemas";
+import mongoose from "mongoose";
+import groupService from "../services/groupService.js";
 import {
+  sendBadRequestError,
   sendData,
   sendSuccess,
-  sendBadRequestError,
 } from "../utils/response.js";
-import groupService from "../services/groupService.js";
-import mongoose from "mongoose";
 
 async function getGroups(req, res) {
   const groups = await groupService.getGroups(
@@ -15,7 +15,6 @@ async function getGroups(req, res) {
   for (let group of groups) {
     group.id = group._id.toString();
     delete group["_id"];
-    delete group["profileId"];
   }
 
   sendData(res, { groups });
@@ -40,7 +39,6 @@ async function createGroup(req, res) {
 
   group.id = group._id.toString();
   delete group["_id"];
-  delete group["profileId"];
 
   sendData(res, { group }, "Group created successfully.");
 }
@@ -65,7 +63,6 @@ async function updateGroup(req, res) {
 
   group.id = group._id.toString();
   delete group["_id"];
-  delete group["profileId"];
 
   sendData(res, { group }, "Group updated successfully.");
 }

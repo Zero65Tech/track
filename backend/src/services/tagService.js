@@ -8,7 +8,15 @@ import {
 } from "./auditLogService.js";
 
 async function getTags(profileId) {
-  return await TagModel.find({ profileId }).sort({ sortOrder: 1 }).lean();
+  const dataArr = await TagModel.find({ profileId })
+    .sort({ sortOrder: 1 })
+    .lean();
+
+  for (let data of dataArr) {
+    delete data["profileId"];
+  }
+
+  return dataArr;
 }
 
 async function createTag(userId, profileId, data) {
@@ -25,6 +33,8 @@ async function createTag(userId, profileId, data) {
 
     return data;
   });
+
+  delete data["profileId"];
 
   return data;
 }
@@ -52,6 +62,8 @@ async function updateTag(userId, profileId, tagId, updates) {
 
     return newData;
   });
+
+  delete data["profileId"];
 
   return data;
 }

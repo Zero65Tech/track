@@ -15,7 +15,6 @@ async function getTags(req, res) {
   for (let tag of tags) {
     tag.id = tag._id.toString();
     delete tag["_id"];
-    delete tag["profileId"];
   }
 
   sendData(res, { tags });
@@ -34,7 +33,6 @@ async function createTag(req, res) {
 
   tag.id = tag._id.toString();
   delete tag["_id"];
-  delete tag["profileId"];
 
   sendData(res, { tag }, "Tag created successfully.");
 }
@@ -53,7 +51,6 @@ async function updateTag(req, res) {
 
   tag.id = tag._id.toString();
   delete tag["_id"];
-  delete tag["profileId"];
 
   sendData(res, { tag }, "Tag updated successfully.");
 }

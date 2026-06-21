@@ -1,13 +1,13 @@
 import transaction from "../utils/transaction.js";
-
 import { EntryType } from "@shared/enums";
-import EntryModel from "../models/Entry.js";
 
 import {
   _logCreateAudit,
   _logDeleteAudit,
   _logUpdateAudit,
 } from "./auditLogService.js";
+
+import EntryModel from "../models/Entry.js";
 
 async function getEntries(profileId, filter, fromDate, toDate) {
   const query = { profileId, ...filter };
@@ -27,11 +27,8 @@ async function getEntries(profileId, filter, fromDate, toDate) {
     .limit(1000) // Safety limit
     .lean();
 
-  for (let data of dataArr) {
-    data.id = data._id.toString();
-    delete data["_id"];
+  for (let data of dataArr)
     delete data["profileId"];
-  }
 
   return dataArr;
 }
@@ -155,8 +152,6 @@ async function createEntry(userId, profileId, data) {
     return data;
   });
 
-  data.id = data._id.toString();
-  delete data["_id"];
   delete data["profileId"];
 
   return data;
@@ -185,8 +180,6 @@ async function updateEntry(userId, profileId, entryId, updates) {
     return newData;
   });
 
-  data.id = data._id.toString();
-  delete data["_id"];
   delete data["profileId"];
 
   return data;

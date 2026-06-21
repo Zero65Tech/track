@@ -1,11 +1,11 @@
 import { createFolderSchema, updateFolderSchema } from "@shared/schemas";
+import mongoose from "mongoose";
+import folderService from "../services/folderService.js";
 import {
+  sendBadRequestError,
   sendData,
   sendSuccess,
-  sendBadRequestError,
 } from "../utils/response.js";
-import folderService from "../services/folderService.js";
-import mongoose from "mongoose";
 
 async function getFolders(req, res) {
   const folders = await folderService.getFolders(
@@ -15,7 +15,6 @@ async function getFolders(req, res) {
   for (let folder of folders) {
     folder.id = folder._id.toString();
     delete folder["_id"];
-    delete folder["profileId"];
   }
 
   sendData(res, { folders });
@@ -38,7 +37,6 @@ async function createFolder(req, res) {
 
   folder.id = folder._id.toString();
   delete folder["_id"];
-  delete folder["profileId"];
 
   sendData(res, { folder }, "Folder created successfully.");
 }
@@ -61,7 +59,6 @@ async function updateFolder(req, res) {
 
   folder.id = folder._id.toString();
   delete folder["_id"];
-  delete folder["profileId"];
 
   sendData(res, { folder }, "Folder updated successfully.");
 }

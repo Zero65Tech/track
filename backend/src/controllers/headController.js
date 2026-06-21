@@ -15,7 +15,6 @@ async function getHeads(req, res) {
   for (let head of heads) {
     head.id = head._id.toString();
     delete head["_id"];
-    delete head["profileId"];
   }
 
   sendData(res, { heads });
@@ -34,7 +33,6 @@ async function createHead(req, res) {
 
   head.id = head._id.toString();
   delete head["_id"];
-  delete head["profileId"];
 
   sendData(res, { head }, "Head created successfully.");
 }
@@ -53,7 +51,6 @@ async function updateHead(req, res) {
 
   head.id = head._id.toString();
   delete head["_id"];
-  delete head["profileId"];
 
   sendData(res, { head }, "Head updated successfully.");
 }

@@ -8,7 +8,15 @@ import {
 } from "./auditLogService.js";
 
 async function getSources(profileId) {
-  return await SourceModel.find({ profileId }).sort({ sortOrder: 1 }).lean();
+  const dataArr = await SourceModel.find({ profileId })
+    .sort({ sortOrder: 1 })
+    .lean();
+
+  for (let data of dataArr) {
+    delete data["profileId"];
+  }
+
+  return dataArr;
 }
 
 async function createSource(userId, profileId, data) {
@@ -25,6 +33,8 @@ async function createSource(userId, profileId, data) {
 
     return data;
   });
+
+  delete data["profileId"];
 
   return data;
 }
@@ -52,6 +62,8 @@ async function updateSource(userId, profileId, sourceId, updates) {
 
     return newData;
   });
+
+  delete data["profileId"];
 
   return data;
 }

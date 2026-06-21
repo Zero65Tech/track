@@ -17,6 +17,12 @@ async function getEntries(req, res) {
     new mongoose.Types.ObjectId(req.params.profileId),
     req.query,
   );
+
+  for (let entry of entries) {
+    entry.id = entry._id.toString();
+    delete entry["_id"];
+  }
+
   sendData(res, { entries });
 }
 
@@ -31,6 +37,12 @@ async function getBookEntries(req, res) {
     fromDate,
     toDate,
   );
+
+  for (let entry of entries) {
+    entry.id = entry._id.toString();
+    delete entry["_id"];
+  }
+
   sendData(res, { entries });
 }
 
@@ -45,6 +57,12 @@ async function getHeadEntries(req, res) {
     fromDate,
     toDate,
   );
+
+  for (let entry of entries) {
+    entry.id = entry._id.toString();
+    delete entry["_id"];
+  }
+
   sendData(res, { entries });
 }
 
@@ -59,6 +77,12 @@ async function getTagEntries(req, res) {
     fromDate,
     toDate,
   );
+
+  for (let entry of entries) {
+    entry.id = entry._id.toString();
+    delete entry["_id"];
+  }
+
   sendData(res, { entries });
 }
 
@@ -73,6 +97,12 @@ async function getSourceEntries(req, res) {
     fromDate,
     toDate,
   );
+
+  for (let entry of entries) {
+    entry.id = entry._id.toString();
+    delete entry["_id"];
+  }
+
   sendData(res, { entries });
 }
 
@@ -86,6 +116,9 @@ async function createEntry(req, res) {
     new mongoose.Types.ObjectId(req.params.profileId),
     { _src: DataSource.BACKEND_SERVICE_V5_5, ...data },
   );
+
+  entry.id = entry._id.toString();
+  delete entry["_id"];
 
   const profile = await _getCachedProfile(req.params.profileId);
   const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
@@ -109,6 +142,9 @@ async function updateEntry(req, res) {
     req.params.entryId,
     data,
   );
+
+  entry.id = entry._id.toString();
+  delete entry["_id"];
 
   const profile = await _getCachedProfile(req.params.profileId);
   const userIds = [profile.owner, ...profile.editors, ...profile.viewers];

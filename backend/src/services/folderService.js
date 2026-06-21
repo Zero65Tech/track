@@ -4,12 +4,20 @@ import FolderModel from "../models/Folder.js";
 
 import {
   _logCreateAudit,
-  _logUpdateAudit,
   _logDeleteAudit,
+  _logUpdateAudit,
 } from "./auditLogService.js";
 
 async function getFolders(profileId) {
-  return await FolderModel.find({ profileId }).sort({ sortOrder: 1 }).lean();
+  const dataArr = await FolderModel.find({ profileId })
+    .sort({ sortOrder: 1 })
+    .lean();
+
+  for (let data of dataArr) {
+    delete data["profileId"];
+  }
+
+  return dataArr;
 }
 
 async function createFolder(userId, profileId, data) {
@@ -25,6 +33,8 @@ async function createFolder(userId, profileId, data) {
 
     return data;
   });
+
+  delete data["profileId"];
 
   return data;
 }
@@ -52,6 +62,8 @@ async function updateFolder(userId, profileId, folderId, updates) {
 
     return newData;
   });
+
+  delete data["profileId"];
 
   return data;
 }

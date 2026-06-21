@@ -15,7 +15,6 @@ async function getSources(req, res) {
   for (let source of sources) {
     source.id = source._id.toString();
     delete source["_id"];
-    delete source["profileId"];
   }
 
   sendData(res, { sources });
@@ -34,7 +33,6 @@ async function createSource(req, res) {
 
   source.id = source._id.toString();
   delete source["_id"];
-  delete source["profileId"];
 
   sendData(res, { source }, "Source created successfully.");
 }
@@ -53,7 +51,6 @@ async function updateSource(req, res) {
 
   source.id = source._id.toString();
   delete source["_id"];
-  delete source["profileId"];
 
   sendData(res, { source }, "Source updated successfully.");
 }

@@ -4,12 +4,18 @@ import GroupModel from "../models/Group.js";
 
 import {
   _logCreateAudit,
-  _logUpdateAudit,
   _logDeleteAudit,
+  _logUpdateAudit,
 } from "./auditLogService.js";
 
 async function getGroups(profileId) {
-  return await GroupModel.find({ profileId }).lean();
+  const dataArr = await GroupModel.find({ profileId }).lean();
+
+  for (let data of dataArr) {
+    delete data["profileId"];
+  }
+
+  return dataArr;
 }
 
 async function createGroup(userId, profileId, data) {
@@ -25,6 +31,8 @@ async function createGroup(userId, profileId, data) {
 
     return data;
   });
+
+  delete data["profileId"];
 
   return data;
 }
@@ -52,6 +60,8 @@ async function updateGroup(userId, profileId, groupId, updates) {
 
     return newData;
   });
+
+  delete data["profileId"];
 
   return data;
 }

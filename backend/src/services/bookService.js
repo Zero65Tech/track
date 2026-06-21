@@ -8,7 +8,13 @@ import {
 } from "./auditLogService.js";
 
 async function getBooks(profileId) {
-  return await BookModel.find({ profileId }).sort({ sortOrder: 1 }).lean();
+  const dataArr = await BookModel.find({ profileId })
+    .sort({ sortOrder: 1 })
+    .lean();
+
+  for (let data of dataArr) delete data["profileId"];
+
+  return dataArr;
 }
 
 async function createBook(userId, profileId, data) {
@@ -25,6 +31,8 @@ async function createBook(userId, profileId, data) {
 
     return data;
   });
+
+  delete data["profileId"];
 
   return data;
 }
@@ -53,6 +61,8 @@ async function updateBook(userId, profileId, bookId, updates) {
     return newData;
   });
 
+  delete data["profileId"];
+
   return data;
 }
 
@@ -65,7 +75,7 @@ async function deleteBook(profileId, bookId, userId) {
       throw new Error(`${BookModel.modelName} not found !`);
     }
 
-    if (doc.state !== EntryFieldState.DISABLED.id) {
+    if (doc.state !== AttributeState.DISABLED.id) {
       throw new Error(
         `${BookModel.modelName} in "${doc.state}" state can not be deleted !`,
       );

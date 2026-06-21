@@ -15,7 +15,6 @@ async function getBooks(req, res) {
   for (let book of books) {
     book.id = book._id.toString();
     delete book["_id"];
-    delete book["profileId"];
   }
 
   sendData(res, { books });
@@ -34,7 +33,6 @@ async function createBook(req, res) {
 
   book.id = book._id.toString();
   delete book["_id"];
-  delete book["profileId"];
 
   sendData(res, { book }, "Book created successfully.");
 }
@@ -53,7 +51,6 @@ async function updateBook(req, res) {
 
   book.id = book._id.toString();
   delete book["_id"];
-  delete book["profileId"];
 
   sendData(res, { book }, "Book updated successfully.");
 }
