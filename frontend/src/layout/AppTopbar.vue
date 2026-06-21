@@ -1,10 +1,12 @@
 <script setup>
+import { useAddEntry } from '@/layout/composables/addEntry';
 import { useLayout } from '@/layout/composables/layout';
 import { useAuthStore } from '@/stores/auth.store';
 import { computed } from 'vue';
 import AppConfigurator from './AppConfigurator.vue';
 
 const { toggleDarkMode, isDarkTheme, toggleMenu, toggleAccountSidebar } = useLayout();
+const { openAddEntry } = useAddEntry();
 const authStore = useAuthStore();
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -43,6 +45,9 @@ const userPhotoURL = computed(() => authStore.user?.photoURL);
 
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
+                <button v-if="isAuthenticated" type="button" class="layout-topbar-action layout-topbar-action-highlight" @click="openAddEntry" title="Add Entry">
+                    <i class="pi pi-plus"></i>
+                </button>
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
                 </button>
