@@ -1,4 +1,5 @@
 <script setup>
+import { useBalanceSeries } from '@/composables/useBalanceSeries';
 import { useResponsiveDataPoints } from '@/composables/useResponsiveDataPoints';
 import { useLayout } from '@/layout/composables/layout';
 import { useAggregationStore } from '@/stores/aggregation.store';
@@ -25,33 +26,7 @@ const { widgetContainer, numDataPoints } = useResponsiveDataPoints({
     pixelsPerPoint: 8 // Enough to fit in 10 x 12 points
 });
 
-const sortedMonths = computed(() => {
-    const monthsSet = new Set();
-    props.aggregationState.data.value.forEach((item) => monthsSet.add(item.month));
-    const months = Array.from(monthsSet).sort();
-    for (let i = 0; i < months.length - 1; i++) {
-        const nextMonth = monthUtil.getNext(months[i]);
-        if (months[i + 1] !== nextMonth) {
-            months.splice(i + 1, 0, nextMonth);
-        }
-    }
-    return months;
-});
-
-const balancesByMonth = computed(() => {
-    const months = sortedMonths.value;
-
-    const amounts = {};
-    props.aggregationState.data.value.forEach((item) => {
-        amounts[item.month] = (amounts[item.month] || 0) + item.amount;
-    });
-
-    for (let i = 1; i < months.length; i++) {
-        amounts[months[i]] = amounts[months[i - 1]] + (amounts[months[i]] || 0);
-    }
-
-    return amounts;
-});
+const { sortedPeriods: sortedMonths, balancesByPeriod: balancesByMonth } = useBalanceSeries(props.aggregationState, 'month', (m) => monthUtil.getNext(m));
 
 const chartData = computed(() => {
     const months = sortedMonths.value.slice(-numDataPoints.value);
