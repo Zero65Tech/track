@@ -4,9 +4,9 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "google.geminicodeassist",
-        "anthropic.claude-code",
         "openai.chatgpt",
+        "anthropic.claude-code",
+        "google.geminicodeassist",
         "saoudrizwan.claude-dev",
         "github.vscode-pull-request-github",
         "gruntfuggly.todo-tree",

@@ -47,7 +47,10 @@
   },
   "extensions": {
     "recommendations": [
+      "openai.chatgpt",
+      "anthropic.claude-code",
       "google.geminicodeassist",
+      "saoudrizwan.claude-dev",
       "github.vscode-pull-request-github",
       "gruntfuggly.todo-tree",
       "mermaidchart.vscode-mermaid-chart",

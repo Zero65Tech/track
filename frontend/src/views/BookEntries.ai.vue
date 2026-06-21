@@ -516,7 +516,6 @@ watch([getPrimary, getSurface, isDarkTheme], () => {
                             <i :class="['pi', aggregationState.isUpdating.value || aggregationState.isLoading.value ? 'pi-spinner animate-spin' : 'pi-refresh', 'text-sm!']"></i>
                         </button>
                     </div>
-                    <div class="text-3xl font-bold" :class="balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">{{ balance >= 0 ? '+' : '-' }}{{ formatUtil.formatCurrency(Math.abs(balance)) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-x-6 gap-y-1 mt-3 text-sm text-muted-color">
                     <span v-if="debitCreditTotal !== 0"

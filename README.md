@@ -76,6 +76,8 @@
 - `entries`
   - [x] CRUD APIs
   - [x] Do **not** check if nested **docId** exists and **active**
+  - [ ] SortOrder to be calculated based to pre-defined formula
+  - [ ] State default to be defined in user settings
   - [ ] Disallow un-deleting after grace period
   - [ ] Clean-up **deleted** items after grace period
   - [ ] Allow only Read APIs for **inactive** and **disabled** Profiles
