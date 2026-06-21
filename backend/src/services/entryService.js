@@ -1,12 +1,12 @@
 import transaction from "../utils/transaction.js";
 
-import EntryModel from "../models/Entry.js";
 import { EntryType } from "@shared/enums";
+import EntryModel from "../models/Entry.js";
 
 import {
   _logCreateAudit,
-  _logUpdateAudit,
   _logDeleteAudit,
+  _logUpdateAudit,
 } from "./auditLogService.js";
 
 async function getEntries(profileId, filter, fromDate, toDate) {
@@ -141,8 +141,7 @@ async function _aggregateEntries(
 }
 
 async function createEntry(userId, profileId, data) {
-  data["profileId"] = profileId;
-  data = await transaction(async (session) => {
+  return await transaction(async (session) => {
     const [doc] = await EntryModel.create([data], { session });
 
     data = doc.toObject();
@@ -153,22 +152,15 @@ async function createEntry(userId, profileId, data) {
 
     return data;
   });
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
-
-  return data;
 }
 
 async function updateEntry(userId, profileId, entryId, updates) {
-  const data = await transaction(async (session) => {
+  return await transaction(async (session) => {
     const doc = await EntryModel.findOne({ profileId, _id: entryId }).session(
       session,
     );
-    if (!doc) {
-      throw new Error(`${EntryModel.modelName} not found !`);
-    }
+
+    if (!doc) throw new Error("Entry not found !");
 
     const oldData = doc.toObject();
 
@@ -184,12 +176,6 @@ async function updateEntry(userId, profileId, entryId, updates) {
 
     return newData;
   });
-
-  data.id = data._id.toString();
-  delete data["_id"];
-  delete data["profileId"];
-
-  return data;
 }
 
 async function deleteEntry(userId, profileId, entryId) {

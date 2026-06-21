@@ -31,5 +31,13 @@ export const entryService = {
             signal: abortControllerSignal
         });
         return apiResponse.data.data.entries;
+    },
+
+    async createEntry(profileId, entryData) {
+        await apiClient.post(`/profiles/${profileId}/entries`, entryData);
+    },
+
+    async updateEntry(profileId, entryId, entryData) {
+        await apiClient.patch(`/profiles/${profileId}/entries/${entryId}`, entryData);
     }
 };

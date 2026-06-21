@@ -1,11 +1,15 @@
+import mongoose from "mongoose";
+
 import { createEntrySchema, updateEntrySchema } from "@shared/schemas";
 import {
+  sendBadRequestError,
   sendData,
   sendSuccess,
-  sendBadRequestError,
 } from "../utils/response.js";
+
 import entryService from "../services/entryService.js";
-import mongoose from "mongoose";
+import { _getCachedProfile } from "../services/profileService.js";
+import { _sendFirebaseMessage } from "../services/userService.js";
 
 async function getEntries(req, res) {
   const entries = await entryService.getEntries(
@@ -73,35 +77,55 @@ async function getSourceEntries(req, res) {
 
 async function createEntry(req, res) {
   const { success, error, data } = createEntrySchema.safeParse(req.body);
-  if (!success) {
-    return sendBadRequestError(res, error);
-  }
+
+  if (!success) return sendBadRequestError(res, error);
 
   const entry = await entryService.createEntry(
     req.user.uid,
-    req.params.profileId,
+    new mongoose.Types.ObjectId(req.params.profileId),
     data,
   );
-  sendData(res, { entry }, "Entry created successfully.");
+
+  entry.id = entry._id.toString();
+  delete entry["_id"];
+  delete entry["profileId"];
+
+  const profile = await _getCachedProfile(req.params.profileId);
+  const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
+  const messageData = {
+    profileId: req.params.profileId,
+    trigger: JSON.stringify(entry),
+  };
+  await _sendFirebaseMessage(userIds, {}, messageData);
+
+  sendSuccess(res, "Entry created successfully.");
 }
 
 async function updateEntry(req, res) {
-  const {
-    success,
-    error,
-    data: updates,
-  } = updateEntrySchema.safeParse(req.body);
-  if (!success) {
-    return sendBadRequestError(res, error);
-  }
+  const { success, error, data } = updateEntrySchema.safeParse(req.body);
+  
+  if (!success) return sendBadRequestError(res, error);
 
   const entry = await entryService.updateEntry(
     req.user.uid,
-    req.params.profileId,
-    req.params.id,
-    updates,
+    new mongoose.Types.ObjectId(req.params.profileId),
+    req.params.entryId,
+    data,
   );
-  sendData(res, { entry }, "Entry updated successfully.");
+
+  entry.id = entry._id.toString();
+  delete entry["_id"];
+  delete entry["profileId"];
+
+  const profile = await _getCachedProfile(req.params.profileId);
+  const userIds = [profile.owner, ...profile.editors, ...profile.viewers];
+  const messageData = {
+    profileId: req.params.profileId,
+    trigger: JSON.stringify(entry),
+  };
+  await _sendFirebaseMessage(userIds, {}, messageData);
+
+  sendSuccess(res, "Entry updated successfully.");
 }
 
 async function deleteEntry(req, res) {
