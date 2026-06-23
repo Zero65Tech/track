@@ -9,11 +9,7 @@ import {
 } from "./auditLogService.js";
 
 async function getGroups(profileId) {
-  const dataArr = await GroupModel.find({ profileId }).lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
+  return await GroupModel.find({ profileId }).select("-profileId").lean();
 }
 
 async function createGroup(userId, profileId, data) {

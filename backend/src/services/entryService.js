@@ -22,14 +22,11 @@ async function getEntries(profileId, filter, fromDate, toDate) {
     }
   }
 
-  const dataArr = await EntryModel.find(query)
+  return await EntryModel.find(query)
     .sort({ date: 1 })
     .limit(1000) // Safety limit
+    .select("-profileId")
     .lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
 }
 
 async function getBookEntries(profileId, bookId, fromDate, toDate) {

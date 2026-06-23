@@ -8,13 +8,10 @@ import {
 } from "./auditLogService.js";
 
 async function getBooks(profileId) {
-  const dataArr = await BookModel.find({ profileId })
+  return await BookModel.find({ profileId })
     .sort({ sortOrder: 1 })
+    .select("-profileId")
     .lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
 }
 
 async function createBook(userId, profileId, data) {

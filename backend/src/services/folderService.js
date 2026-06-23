@@ -9,13 +9,10 @@ import {
 } from "./auditLogService.js";
 
 async function getFolders(profileId) {
-  const dataArr = await FolderModel.find({ profileId })
+  return await FolderModel.find({ profileId })
     .sort({ sortOrder: 1 })
+    .select("-profileId")
     .lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
 }
 
 async function createFolder(userId, profileId, data) {

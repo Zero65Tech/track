@@ -8,13 +8,10 @@ import {
 } from "./auditLogService.js";
 
 async function getHeads(profileId) {
-  const dataArr = await HeadModel.find({ profileId })
+  return await HeadModel.find({ profileId })
     .sort({ sortOrder: 1 })
+    .select("-profileId")
     .lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
 }
 
 async function createHead(userId, profileId, data) {

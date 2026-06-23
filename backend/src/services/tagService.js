@@ -8,13 +8,10 @@ import {
 } from "./auditLogService.js";
 
 async function getTags(profileId) {
-  const dataArr = await TagModel.find({ profileId })
+  return await TagModel.find({ profileId })
     .sort({ sortOrder: 1 })
+    .select("-profileId")
     .lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
 }
 
 async function createTag(userId, profileId, data) {

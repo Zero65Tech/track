@@ -8,13 +8,10 @@ import {
 } from "./auditLogService.js";
 
 async function getSources(profileId) {
-  const dataArr = await SourceModel.find({ profileId })
+  return await SourceModel.find({ profileId })
     .sort({ sortOrder: 1 })
+    .select("-profileId")
     .lean();
-
-  dataArr.forEach((data) => delete data["profileId"]);
-
-  return dataArr;
 }
 
 async function createSource(userId, profileId, data) {
