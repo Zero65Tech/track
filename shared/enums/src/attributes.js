@@ -7,4 +7,8 @@ export const AttributeState = Object.freeze({
     id: "disabled",
     name: "Disabled",
   }),
+  DELETED: Object.freeze({
+    id: "deleted",
+    name: "Deleted",
+  }),
 });
