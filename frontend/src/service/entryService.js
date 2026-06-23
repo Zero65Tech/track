@@ -33,6 +33,13 @@ export const entryService = {
         return apiResponse.data.data.entries;
     },
 
+    async getTodoEntries({ profileId }, abortControllerSignal) {
+        const apiResponse = await apiClient.get(`/profiles/${profileId}/todos/entries`, {
+            signal: abortControllerSignal
+        });
+        return apiResponse.data.data.entries;
+    },
+
     async createEntry(profileId, entryData) {
         await apiClient.post(`/profiles/${profileId}/entries`, entryData);
     },

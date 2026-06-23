@@ -121,6 +121,12 @@ async function getSourceEntries(profileId, sourceId, fromDate, toDate) {
   );
 }
 
+async function getTodoEntries(profileId) {
+  return await getEntries(profileId, {
+    todo: { $exists: true },
+  });
+}
+
 async function _aggregateEntries(
   profileId,
   aggregationName,
@@ -208,6 +214,7 @@ export default {
   getBookEntries,
   getTagEntries,
   getSourceEntries,
+  getTodoEntries,
   createEntry,
   updateEntry,
   deleteEntry,

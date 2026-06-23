@@ -70,6 +70,7 @@ app.get(`${API_PREFIX}/books/:bookId/entries`, entryController.getBookEntries);
 app.get(`${API_PREFIX}/heads/:headId/entries`, entryController.getHeadEntries);
 app.get(`${API_PREFIX}/tags/:tagId/entries`, entryController.getTagEntries);
 app.get(`${API_PREFIX}/sources/:sourceId/entries`, entryController.getSourceEntries); // prettier-ignore
+app.get(`${API_PREFIX}/todos/entries`, entryController.getTodoEntries);
 app.post(`${API_PREFIX}/entries`, entryController.createEntry);
 app.patch(`${API_PREFIX}/entries/:entryId`, entryController.updateEntry);
 app.delete(`${API_PREFIX}/entries/:entryId`, entryController.deleteEntry);

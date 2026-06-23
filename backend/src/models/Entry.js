@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { EntryType, EntryState, DataSource } from "@shared/enums";
+
+import { DataSource, EntryState, EntryType } from "@shared/enums";
 
 const entrySchema = new mongoose.Schema(
   {
@@ -25,7 +26,6 @@ const entrySchema = new mongoose.Schema(
         message: (props) => `${props.value} is not a valid date format !`,
       },
     },
-
     type: {
       type: String,
       enum: Object.values(EntryType).map((t) => t.id),
@@ -35,6 +35,8 @@ const entrySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+
+    // bookId, headId, tagId, sourceId, bookIdFrom, bookIdTo, sourceIdFrom, sourceIdTo will be added in the discriminators
 
     breakdown: {
       type: [
@@ -51,6 +53,15 @@ const entrySchema = new mongoose.Schema(
       required: false,
     },
 
+    todo: {
+      type: String,
+      required: false,
+    },
+
+    sortOrder: {
+      type: Number,
+      required: true,
+    },
     groupId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Group",
@@ -60,11 +71,6 @@ const entrySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Folder",
       default: null,
-    },
-
-    sortOrder: {
-      type: Number,
-      required: true,
     },
 
     state: {

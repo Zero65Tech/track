@@ -106,6 +106,19 @@ async function getSourceEntries(req, res) {
   sendData(res, { entries });
 }
 
+async function getTodoEntries(req, res) {
+  const entries = await entryService.getTodoEntries(
+    new mongoose.Types.ObjectId(req.params.profileId),
+  );
+
+  for (let entry of entries) {
+    entry.id = entry._id.toString();
+    delete entry["_id"];
+  }
+
+  sendData(res, { entries });
+}
+
 async function createEntry(req, res) {
   const { success, error, data } = createEntrySchema.safeParse(req.body);
 
@@ -172,6 +185,7 @@ export default {
   getHeadEntries,
   getTagEntries,
   getSourceEntries,
+  getTodoEntries,
   createEntry,
   updateEntry,
   deleteEntry,
