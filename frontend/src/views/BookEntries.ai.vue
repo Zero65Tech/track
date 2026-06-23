@@ -13,6 +13,7 @@ import { entryService } from '@/service/entryService';
 
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
+import { useEntryStore } from '@/stores/entry.store';
 import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';
@@ -27,6 +28,7 @@ const headStore = useHeadStore();
 const tagStore = useTagStore();
 const sourceStore = useSourceStore();
 const aggregationStore = useAggregationStore();
+const entryStore = useEntryStore();
 
 const book = computed(() => bookStore.booksMap[route.params.bookId]);
 const aggregationState = computed(() => aggregationStore.getAggregationState('amounts_for_a_book', { bookId: book.value.id }));
@@ -225,6 +227,9 @@ watch(
         error.value = null;
     }
 );
+
+// Reload entries when a new entry is created via the global dialog
+watch(() => entryStore.lastCreated, () => { loadInitial(); });
 
 function getEntryTypeName(typeId) {
     for (const key of Object.keys(EntryType)) {

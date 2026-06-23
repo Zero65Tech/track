@@ -4,6 +4,7 @@ import { useLayout } from '@/layout/composables/layout';
 import { entryService } from '@/service/entryService';
 import { useAggregationStore } from '@/stores/aggregation.store';
 import { useBookStore } from '@/stores/book.store';
+import { useEntryStore } from '@/stores/entry.store';
 import { useHeadStore } from '@/stores/head.store';
 import { useProfileStore } from '@/stores/profile.store';
 import { useSourceStore } from '@/stores/source.store';
@@ -21,6 +22,7 @@ const headStore = useHeadStore();
 const sourceStore = useSourceStore();
 const tagStore = useTagStore();
 const aggregationStore = useAggregationStore();
+const entryStore = useEntryStore();
 
 const chartAggregationName = 'amounts_for_a_head';
 const chartAggregationParams = computed(() => ({ headId: headId.value }));
@@ -202,6 +204,9 @@ watch(
         error.value = null;
     }
 );
+
+// Reload entries when a new entry is created via the global dialog
+watch(() => entryStore.lastCreated, () => { loadInitial(); });
 
 function getEntryTypeName(typeId) {
     for (const key of Object.keys(EntryType)) {
