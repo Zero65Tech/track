@@ -17,7 +17,8 @@ const staticMenu = ref([
         label: 'Home',
         items: [
             { label: 'Home', icon: 'pi pi-fw pi-home', to: '/' },
-            { label: 'Incomes', icon: 'pi pi-fw pi-arrow-up-right', to: '/incomes' }
+            { label: 'Incomes', icon: 'pi pi-fw pi-arrow-up-right', to: '/incomes' },
+            { label: 'Todos', icon: 'pi pi-fw pi-check-square', to: '/todos' }
         ]
     },
     {

@@ -19,6 +19,11 @@ const router = createRouter({
                     component: () => import('@/views/Incomes.ai.vue')
                 },
                 {
+                    path: '/todos',
+                    name: 'todos',
+                    component: () => import('@/views/Todos.vue')
+                },
+                {
                     path: '/books/:bookId',
                     name: 'bookEntries',
                     component: () => import('@/views/BookEntries.ai.vue')
