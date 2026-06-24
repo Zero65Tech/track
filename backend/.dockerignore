@@ -1,6 +1,7 @@
 backend
-!backend/package.json
-!backend/node_modules/
+!backend/.env
 !backend/.env.beta
 !backend/.env.prod
 !backend/src/
+!backend/package.json
+!backend/node_modules/
